@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "name": "mfx-apps",
+  "private": true,
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "scripts": {
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^8.3.4",
+    "@mfx0/eslint-config-react": "^1.0.0",
+    "husky": "^4.3.8",
+    "lerna": "^5.1.8"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "projects/*"
+    ]
+  }
+}
