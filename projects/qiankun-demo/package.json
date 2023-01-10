@@ -1,5 +1,5 @@
 {
-  "name": "main",
+  "name": "qiankun-demo",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -11,15 +11,11 @@
     "start": "mfx serve"
   },
   "dependencies": {
-    "@mfx0/base": "^1.0.1",
-    "@mfx0/framework": "^1.0.1",
+    "@mfx0/sdk": "^1.0.1",
     "@mfx0/material": "^1.0.1",
     "@mfx0/utils": "^1.0.1",
     "clsx": "^1.1.1",
     "gl-matrix": "^3.4.3",
-    "mobx": "^6.6.2",
-    "mobx-react-lite": "^3.4.0",
-    "qiankun": "^2.8.4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-transition-group": "^4.4.2"
@@ -27,7 +23,7 @@
   "devDependencies": {
     "@emotion/react": "^11.9.0",
     "@mfx0/cli": "^1.0.2",
-    "@mfx0/tsconfig": "^1.0.0",
+	  "@mfx0/tsconfig": "^1.0.0",
     "@types/react": "^17.0.34",
     "@types/react-dom": "^17.0.11",
     "@types/react-transition-group": "^4.4.4",

@@ -2134,6 +2134,14 @@
     "@emotion/styled" "^11.10.4"
     "@mfx0/utils" "^1.0.1"
 
+"@mfx0/sdk@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@mfx0/sdk/-/sdk-1.0.1.tgz#42faeaaa156b3479157daba8f4ec7d3257ff40f1"
+  integrity sha512-Vsps7wZ1EVGK3BLbudXMeww9YO691l/InQHPEUSxoiuBkH9ebROhWX9eUtJByLfdipnBMV6JMj6QeMWCz3ke5Q==
+  dependencies:
+    "@mfx0/base" "^1.0.1"
+    "@mfx0/utils" "^1.0.1"
+
 "@mfx0/tsconfig@^1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@mfx0/tsconfig/-/tsconfig-1.0.0.tgz#e59cd7c565ac63f43394b7b12349ff98752dad92"
