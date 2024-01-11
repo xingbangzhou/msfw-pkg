@@ -1,25 +1,28 @@
 {
-  "version": "1.0.0",
   "name": "mfx-apps",
+  "version": "1.0.0",
+  "description": "MFX apps",
+  "repository": "https://github.com/xingbangzhou/mfx-apps.git",
+  "author": "zhouxingbang <zhouxingbang92@163.com>",
+  "license": "MIT",
   "private": true,
+  "scripts": {
+    "prepare": "husky install",
+    "lint": "eslint --fix --ext .ts,.tsx ."
+  },
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
-  "scripts": {
+  "engines": {
+    "node": ">=14",
+    "pnpm": ">=7"
   },
   "devDependencies": {
-    "@commitlint/cli": "^11.0.0",
-    "@commitlint/config-conventional": "^8.3.4",
-    "@mfx0/eslint-config-react": "^1.0.0",
-    "husky": "^4.3.8",
-    "lerna": "^5.1.8"
-  },
-  "workspaces": {
-    "packages": [
-      "packages/*",
-      "projects/*"
-    ]
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "@mfx-js/eslint-config-react": "^1.1.0",
+    "husky": "^8.0.3"
   }
 }

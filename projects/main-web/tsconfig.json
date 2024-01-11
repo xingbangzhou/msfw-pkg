@@ -1,0 +1,14 @@
+{
+  "extends": "@mfx-js/tsconfig",
+  "compilerOptions": {
+    "types": ["node", "react", "@mfx-js/tsconfig"],
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"],
+      "@mfx-js/core": ["../../packages/mfx-core/src"],
+      "@mfx-js/core/*": ["../../packages/mfx-core/src/*"],
+      "@mfx-js/framework": ["../../packages/mfx-framework/src"]
+    },
+  },
+  "exclude": ["mfx-config.js"]
+}
