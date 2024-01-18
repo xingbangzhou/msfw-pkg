@@ -1,4 +1,4 @@
-@import '~assets/css/base.scss';
+@import "~assets/css/base.scss";
 
 .indexWrap {
   width: 100vw;
@@ -21,5 +21,10 @@
         center center / cover no-repeat,
       url("~assets/img/bg-sign-in.jpeg") transparent;
     background-position: center center;
+  }
+
+  &-content {
+    position: relative;
+    margin-top: 88px;
   }
 }

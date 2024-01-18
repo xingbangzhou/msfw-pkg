@@ -1,13 +1,15 @@
-import {createProgram, createShader} from 'src/utils/glFns'
-import {VAPOptions} from './types'
-import VAPCore from './VAPCore'
+import DiEngine from './Engine'
+import {createProgram, createShader, createTexture, loadImage} from './glFns'
+import {fragmenShaderCode, vertextShaderCode} from './shaders'
+import {DiOptions} from './types'
+import AvatarJPG from 'src/assets/img/avatar.jpg'
 
-export default class VAPRender extends VAPCore {
-  constructor(opts: VAPOptions) {
+export default class DiRender extends DiEngine {
+  constructor(opts: DiOptions) {
     super(opts)
 
     if (this.useFrameCallback) {
-      this.animId = this.video?.['requestVideoFrameCallback'](this.drawFrame.bind(this))
+      this.frameAnimId = this.video?.['requestVideoFrameCallback'](this.drawFrame.bind(this))
     }
 
     this.init()
@@ -19,6 +21,8 @@ export default class VAPRender extends VAPCore {
   private textures?: WebGLTexture[]
 
   clear() {
+    super.clear()
+
     const {gl, canvas} = this
 
     if (this.textures && this.textures.length) {
@@ -28,6 +32,36 @@ export default class VAPRender extends VAPCore {
     }
 
     canvas.parentNode && canvas.parentNode.removeChild(canvas)
+  }
+
+  protected onLoaded() {
+    super.onLoaded()
+
+    const {gl, canvas, video} = this
+    if (!gl || !canvas || !video) return
+
+    canvas.width = Math.floor(video.videoWidth * 0.5)
+    canvas.height = video.videoHeight
+    gl.viewport(0, 0, canvas.width, canvas.height)
+  }
+
+  protected drawFrame(_?: unknown, info?: any) {
+    const {gl, video} = this
+    if (!gl || !video) {
+      super.drawFrame(_, info)
+      return
+    }
+    gl.clear(gl.COLOR_BUFFER_BIT)
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video)
+    gl.activeTexture(gl.TEXTURE0)
+    this.textures?.[0] && gl.bindTexture(gl.TEXTURE_2D, this.textures[0])
+
+    {
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    }
+
+    super.drawFrame(_, info)
   }
 
   private init() {
@@ -44,82 +78,41 @@ export default class VAPRender extends VAPCore {
     this.container.appendChild(this.canvas)
   }
 
-  protected onLoadedData() {
-    const {gl, canvas, video} = this
-    if (!gl || !canvas || !video) return
-
-    canvas.width = Math.floor(video.videoWidth * 0.5)
-    canvas.height = video.videoHeight
-    gl.viewport(0, 0, canvas.width, canvas.height)
-  }
-
   private initWebGL() {
     const {canvas} = this
     const gl = (this.gl = canvas.getContext('webgl') || undefined)
     if (!gl) {
-      console.error("[VideoRender] getContext('webgl')", 'null')
+      console.error("[DiRender] getContext('webgl')", 'null')
       return
     }
-    // Initial Setting
-    this.initSetting()
-    // Initial Program
-    this.initProgram()
 
-    // Initial Buffers
-    this.initBuffer()
+    // 基本设置
+    gl.disable(gl.BLEND)
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-    // Initial Textures
-    this.initTexture()
+    gl.viewport(0, 0, canvas.width, canvas.height)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+
+    this.createProgram()
+    this.createBuffer()
+    this.bindTexture()
   }
 
   private createVertexShader() {
     const {gl} = this
     if (!gl) return undefined
 
-    return createShader(
-      gl,
-      gl.VERTEX_SHADER,
-      `
-      attribute vec2 a_position; // 接受顶点坐标
-      attribute vec2 a_texCoord; // 接受纹理坐标
-      varying vec2 v_texCoord; // 传递纹理坐标给片元着色器
-
-      void main(void) {
-        gl_Position = vec4(a_position, 0.0, 1.0); // 设置坐标
-        v_texCoord = a_texCoord; // 设置纹理坐标
-      }
-      `,
-    )
+    return createShader(gl, gl.VERTEX_SHADER, vertextShaderCode)
   }
 
   private createFragmentShader() {
     const {gl} = this
     if (!gl) return undefined
 
-    const fragmentSharder = `
-        precision lowp float;
-        varying vec2 v_texCoord;
-        uniform sampler2D u_image_video;
-
-        void main(void) {
-          gl_FragColor = vec4(texture2D(u_image_video, v_texCoord).rgb, texture2D(u_image_video, v_texCoord+vec2(0.5, 0)).r);
-        }
-        `
-    return createShader(gl, gl.FRAGMENT_SHADER, fragmentSharder)
+    return createShader(gl, gl.FRAGMENT_SHADER, fragmenShaderCode)
   }
 
-  private initSetting() {
-    const {gl, canvas} = this
-    if (!gl || !canvas) return
-
-    gl.disable(gl.BLEND)
-    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-    gl.viewport(0, 0, canvas.width, canvas.height)
-    gl.clear(gl.COLOR_BUFFER_BIT)
-  }
-
-  private initProgram() {
+  private createProgram() {
     const {gl, canvas} = this
     if (!gl || !canvas) return
 
@@ -128,11 +121,11 @@ export default class VAPRender extends VAPCore {
     this.program = createProgram(gl, vertexShader, fragmentShader)
   }
 
-  private initBuffer() {
+  private createBuffer() {
     const {gl, program} = this
     if (!gl || !program) return
 
-    // Position Buffer
+    // Video Position Buffer
     const positionVertice = new Float32Array([-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
     const positionBuffer = gl.createBuffer()
     const aPosition = gl.getAttribLocation(program, 'a_position')
@@ -141,7 +134,7 @@ export default class VAPRender extends VAPCore {
     gl.enableVertexAttribArray(aPosition)
     gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0)
 
-    // Texture Buffer
+    // Video Texture Buffer
     const textureBuffer = gl.createBuffer()
     const textureVertice = new Float32Array([0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0])
     const aTexCoord = gl.getAttribLocation(program, 'a_texCoord')
@@ -151,7 +144,7 @@ export default class VAPRender extends VAPCore {
     gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 0, 0)
   }
 
-  private initTexture() {
+  private bindTexture() {
     const {gl} = this
     if (!gl) return
 
@@ -167,18 +160,13 @@ export default class VAPRender extends VAPCore {
     this.textures = [texture]
 
     gl.bindTexture(gl.TEXTURE_2D, texture)
-  }
 
-  protected drawFrame(_?: unknown, info?: any) {
-    const {gl, video} = this
-    if (!gl || !video) {
-      super.drawFrame(_, info)
-      return
-    }
-    gl.clear(gl.COLOR_BUFFER_BIT)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video)
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-
-    super.drawFrame(_, info)
+    // Image Texture
+    loadImage(AvatarJPG).then(image => {
+      const imageTexture = createTexture(gl, 1, image)
+      if (imageTexture) {
+        this.textures?.push(imageTexture)
+      }
+    })
   }
 }

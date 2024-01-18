@@ -10,12 +10,14 @@ const Index = memo(function Index() {
     <div className="indexWrap">
       <TitleBar />
       <div className="indexWrap-bg" />
-      <Router basename="/">
-        <Routes>
-          <Route path="/" element={<App />}></Route>
-          <Route path="/login" element={<Login />}></Route>
-        </Routes>
-      </Router>
+      <div className="indexWrap-content">
+        <Router basename="/">
+          <Routes>
+            <Route path="/" element={<App />}></Route>
+            <Route path="/login" element={<Login />}></Route>
+          </Routes>
+        </Router>
+      </div>
     </div>
   )
 })
