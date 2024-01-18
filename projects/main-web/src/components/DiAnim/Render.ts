@@ -18,7 +18,7 @@ export default class DiRender extends DiEngine {
   private canvas!: HTMLCanvasElement
   private gl?: WebGLRenderingContext
   private program?: WebGLProgram
-  private textures?: WebGLTexture[]
+  private textures: WebGLTexture[] = []
 
   clear() {
     super.clear()
@@ -53,10 +53,11 @@ export default class DiRender extends DiEngine {
     }
     gl.clear(gl.COLOR_BUFFER_BIT)
 
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video)
-    gl.activeTexture(gl.TEXTURE0)
-    this.textures?.[0] && gl.bindTexture(gl.TEXTURE_2D, this.textures[0])
+    this.drawVideo()
 
+    this.drawImage()
+
+    // GPU开始绘制
     {
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     }
@@ -94,8 +95,8 @@ export default class DiRender extends DiEngine {
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     this.createProgram()
-    this.createBuffer()
-    this.bindTexture()
+
+    this.createTexture()
   }
 
   private createVertexShader() {
@@ -121,30 +122,7 @@ export default class DiRender extends DiEngine {
     this.program = createProgram(gl, vertexShader, fragmentShader)
   }
 
-  private createBuffer() {
-    const {gl, program} = this
-    if (!gl || !program) return
-
-    // Video Position Buffer
-    const positionVertice = new Float32Array([-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
-    const positionBuffer = gl.createBuffer()
-    const aPosition = gl.getAttribLocation(program, 'a_position')
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, positionVertice, gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(aPosition)
-    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0)
-
-    // Video Texture Buffer
-    const textureBuffer = gl.createBuffer()
-    const textureVertice = new Float32Array([0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0])
-    const aTexCoord = gl.getAttribLocation(program, 'a_texCoord')
-    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, textureVertice, gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(aTexCoord)
-    gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 0, 0)
-  }
-
-  private bindTexture() {
+  private createTexture() {
     const {gl} = this
     if (!gl) return
 
@@ -169,4 +147,36 @@ export default class DiRender extends DiEngine {
       }
     })
   }
+
+  // 绘制视频
+  private drawVideo() {
+    const {gl, program} = this
+    if (!gl || !program) return
+
+    // Position Buffer
+    const positionVertice = new Float32Array([-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
+    const positionBuffer = gl.createBuffer()
+    const aPosition = gl.getAttribLocation(program, 'a_position')
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, positionVertice, gl.STATIC_DRAW)
+    gl.enableVertexAttribArray(aPosition)
+    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0)
+
+    // Texture Buffer
+    const textureBuffer = gl.createBuffer()
+    const textureVertice = new Float32Array([0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0])
+    const aTexCoord = gl.getAttribLocation(program, 'a_texCoord')
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, textureVertice, gl.STATIC_DRAW)
+    gl.enableVertexAttribArray(aTexCoord)
+    gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 0, 0)
+
+    // 绘制纹理
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, this.textures[0])
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video!)
+  }
+
+  // 绘制图片
+  private drawImage() {}
 }

@@ -3,7 +3,7 @@ import {uniformUrl} from 'src/utils/urlFns'
 import {loadMicroApp, MicroApp} from 'qiankun'
 import {CSSProperties, memo, useEffect, useMemo, useRef} from 'react'
 
-interface KunqViewProps {
+interface KunViewProps {
   mxFw: MxFramework
   name?: string
   url?: string
@@ -12,7 +12,7 @@ interface KunqViewProps {
   [key: string]: any
 }
 
-const KunqView = memo(function KunqView(props: KunqViewProps) {
+const KunView = memo(function KunView(props: KunViewProps) {
   const {mxFw, name, url, className, style, ...other} = props
   const rootRef = useRef<HTMLDivElement>(null)
   const microApp = useRef<MicroApp>()
@@ -58,4 +58,4 @@ const KunqView = memo(function KunqView(props: KunqViewProps) {
   return <div ref={rootRef} className={className} style={style} {...other} />
 })
 
-export default KunqView
+export default KunView
