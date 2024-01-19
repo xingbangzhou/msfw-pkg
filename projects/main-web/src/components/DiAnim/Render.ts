@@ -1,74 +1,112 @@
-import DiEngine from './Engine'
-import {createProgram, createShader, createTexture, loadImage} from './glFns'
+import {createProgram, createShader} from './glutils'
+import ImageMold from './molds/ImageMold'
+import VideoMold from './molds/VideoMold'
 import {fragmenShaderCode, vertextShaderCode} from './shaders'
 import {DiOptions} from './types'
 import AvatarJPG from 'src/assets/img/avatar.jpg'
 
-export default class DiRender extends DiEngine {
+export default class DiRender {
   constructor(opts: DiOptions) {
-    super(opts)
+    this.opts = opts
+    this.container = opts.container
+    this.fps = opts.fps || 30
+
+    this.requestAnim = this.requestAnimFunc()
+
+    this.videoMold = new VideoMold({url: opts.video, texIndex: 0})
+    this.imageMold = new ImageMold({url: AvatarJPG, texIndex: 0})
+    this.subVideoMold = new VideoMold({
+      url: 'http://lxcode.bs2cdn.yy.com/22c4c9e0-6319-4fea-b8a7-9d64d04e7e96.mp4',
+      texIndex: 0,
+      positons: [-0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5],
+    })
 
     if (this.useFrameCallback) {
-      this.frameAnimId = this.video?.['requestVideoFrameCallback'](this.drawFrame.bind(this))
+      this.frameAnimId = this.video?.['requestVideoFrameCallback'](this.render)
     }
 
     this.init()
   }
 
+  opts: DiOptions
+  fps: number
+  container: HTMLElement
+
+  requestAnim: (cb: () => void) => number
+  frameAnimId?: any
+  useFrameCallback?: boolean
+
+  private videoMold: VideoMold
+  private imageMold: ImageMold
+  private subVideoMold: VideoMold
+
+  private _playing?: boolean
+
   private canvas!: HTMLCanvasElement
   private gl?: WebGLRenderingContext
   private program?: WebGLProgram
-  private textures: WebGLTexture[] = []
 
   clear() {
-    super.clear()
+    this.cancelRequestAnimation()
 
     const {gl, canvas} = this
 
-    if (this.textures && this.textures.length) {
-      for (let i = 0; i < this.textures.length; i++) {
-        gl?.deleteTexture(this.textures[i])
-      }
+    if (gl) {
+      this.videoMold.clear(gl)
     }
 
     canvas.parentNode && canvas.parentNode.removeChild(canvas)
   }
 
-  protected onLoaded() {
-    super.onLoaded()
-
-    const {gl, canvas, video} = this
-    if (!gl || !canvas || !video) return
-
-    canvas.width = Math.floor(video.videoWidth * 0.5)
-    canvas.height = video.videoHeight
-    gl.viewport(0, 0, canvas.width, canvas.height)
+  play() {
+    this.videoMold.play()
+    this.subVideoMold.play()
   }
 
-  protected drawFrame(_?: unknown, info?: any) {
-    const {gl, video} = this
-    if (!gl || !video) {
-      super.drawFrame(_, info)
-      return
-    }
+  protected render = (_?: unknown, info?: any) => {
+    const {gl, program} = this
+    if (!gl || !program) return
+
     gl.clear(gl.COLOR_BUFFER_BIT)
 
-    this.drawVideo()
+    this.videoMold.render(gl, program)
+    this.imageMold.render(gl, program)
+    this.subVideoMold.render(gl, program)
 
-    this.drawImage()
-
-    // GPU开始绘制
-    {
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    if (this.useFrameCallback) {
+      this.frameAnimId = this.video?.['requestVideoFrameCallback'](this.render)
+    } else {
+      this.frameAnimId = this.requestAnim(this.render)
     }
-
-    super.drawFrame(_, info)
   }
 
   private init() {
     this.createCanvas()
     this.initWebGL()
-    this.play()
+    this.initMolds()
+
+    // Video Event
+    this.video?.addEventListener('loadeddata', () => {
+      const {gl, canvas, video} = this
+      if (!gl || !canvas || !video) return
+
+      canvas.width = Math.floor(video.videoWidth * 0.5)
+      canvas.height = video.videoHeight
+      gl.viewport(0, 0, canvas.width, canvas.height)
+    })
+    this.video?.addEventListener('playing', () => {
+      if (!this._playing) {
+        this._playing = true
+
+        if (!this.useFrameCallback) {
+          this.render(null, null)
+        }
+      }
+    })
+  }
+
+  private get video() {
+    return this.videoMold?.video
   }
 
   private createCanvas() {
@@ -88,95 +126,48 @@ export default class DiRender extends DiEngine {
     }
 
     // 基本设置
-    gl.disable(gl.BLEND)
+    gl.enable(gl.BLEND)
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
     gl.viewport(0, 0, canvas.width, canvas.height)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     this.createProgram()
-
-    this.createTexture()
-  }
-
-  private createVertexShader() {
-    const {gl} = this
-    if (!gl) return undefined
-
-    return createShader(gl, gl.VERTEX_SHADER, vertextShaderCode)
-  }
-
-  private createFragmentShader() {
-    const {gl} = this
-    if (!gl) return undefined
-
-    return createShader(gl, gl.FRAGMENT_SHADER, fragmenShaderCode)
   }
 
   private createProgram() {
     const {gl, canvas} = this
     if (!gl || !canvas) return
 
-    const vertexShader = this.createVertexShader() as WebGLShader
-    const fragmentShader = this.createFragmentShader() as WebGLShader
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertextShaderCode) as WebGLShader
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmenShaderCode) as WebGLShader
     this.program = createProgram(gl, vertexShader, fragmentShader)
   }
 
-  private createTexture() {
-    const {gl} = this
-    if (!gl) return
-
-    const texture = gl.createTexture() as WebGLTexture
-
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-    // 对纹理图像进行y轴反转，因为WebGL纹理坐标系统的t轴（分为t轴和s轴）的方向和图片的坐标系统Y轴方向相反。因此将Y轴进行反转。
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
-    // 配置纹理参数
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    this.textures = [texture]
-
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-
-    // Image Texture
-    loadImage(AvatarJPG).then(image => {
-      const imageTexture = createTexture(gl, 1, image)
-      if (imageTexture) {
-        this.textures?.push(imageTexture)
-      }
-    })
-  }
-
-  // 绘制视频
-  private drawVideo() {
+  private initMolds() {
     const {gl, program} = this
     if (!gl || !program) return
 
-    // Position Buffer
-    const positionVertice = new Float32Array([-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
-    const positionBuffer = gl.createBuffer()
-    const aPosition = gl.getAttribLocation(program, 'a_position')
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, positionVertice, gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(aPosition)
-    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0)
-
-    // Texture Buffer
-    const textureBuffer = gl.createBuffer()
-    const textureVertice = new Float32Array([0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0])
-    const aTexCoord = gl.getAttribLocation(program, 'a_texCoord')
-    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, textureVertice, gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(aTexCoord)
-    gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, false, 0, 0)
-
-    // 绘制纹理
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, this.textures[0])
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video!)
+    this.videoMold.init(gl, program)
+    this.imageMold.init(gl, program)
+    this.subVideoMold.init(gl, program)
   }
 
-  // 绘制图片
-  private drawImage() {}
+  private requestAnimFunc() {
+    const self = this
+    return function (cb: () => void) {
+      return setTimeout(cb, 1000 / self.fps)
+    }
+  }
+
+  private cancelRequestAnimation() {
+    if (!this.frameAnimId) return
+    if (this.useFrameCallback) {
+      try {
+        this.video?.['cancelVideoFrameCallback'](this.frameAnimId)
+      } catch (e) {}
+    } else {
+      clearTimeout(this.frameAnimId)
+    }
+  }
 }

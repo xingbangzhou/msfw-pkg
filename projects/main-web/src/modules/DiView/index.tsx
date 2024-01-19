@@ -14,9 +14,11 @@ const DiView = memo(function DiView() {
   )
 
   return (
-    <DrapArea className={styles.diView} onDrapped={onDrapped}>
-      <DiAnim className={styles.diAnim} handlerRef={handlerRef} />
-    </DrapArea>
+    <div className={styles.diViewWrap}>
+      <DrapArea className={styles.diView} onDrapped={onDrapped}>
+        <DiAnim className={styles.diAnim} handlerRef={handlerRef} />
+      </DrapArea>
+    </div>
   )
 })
 
