@@ -1,19 +1,19 @@
-import {loadImage} from '../glutils'
-import DiBaseMold from './BaseMold'
+import {loadImage} from '../../glutils'
+import DiModel from './DiModel'
 
-interface ImageMoldProps {
+interface ImageModelProps {
   url: string
   texIndex: number
 }
 
-export default class ImageMold extends DiBaseMold {
-  constructor(props: ImageMoldProps) {
+export default class ImageModel extends DiModel {
+  constructor(props: ImageModelProps) {
     super()
 
     this.props = props
   }
 
-  private props: ImageMoldProps
+  private props: ImageModelProps
   private image?: HTMLImageElement
   private texture!: WebGLTexture
 

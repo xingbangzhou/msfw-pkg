@@ -1,4 +1,4 @@
-export default abstract class DiBaseMold {
+export default abstract class DiModel {
   constructor() {}
 
   abstract init(gl: WebGLRenderingContext, program: WebGLProgram): Promise<void>

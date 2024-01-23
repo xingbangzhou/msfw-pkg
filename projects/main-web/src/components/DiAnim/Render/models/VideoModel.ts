@@ -1,20 +1,21 @@
-import DiBaseMold from './BaseMold'
+import DiBaseMold from './DiModel'
 
-interface VideoMoldProps {
+interface VideoModelProps {
   url: string
-  texIndex: number
+  mute?: number
+  loop?: boolean
   positons?: number[]
 }
 
-export default class VideoMold extends DiBaseMold {
-  constructor(props: VideoMoldProps) {
+export default class VideoModel extends DiBaseMold {
+  constructor(props: VideoModelProps) {
     super()
 
     this.props = props
     this.load()
   }
 
-  private props: VideoMoldProps
+  private props: VideoModelProps
 
   video?: HTMLVideoElement
 
@@ -31,9 +32,6 @@ export default class VideoMold extends DiBaseMold {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
-    // const u_imageLocation = gl.getUniformLocation(program, `u_image${this.props.texIndex}`)
-    // gl.uniform1i(u_imageLocation, this.props.texIndex)
   }
 
   render(gl: WebGLRenderingContext, program: WebGLProgram) {
@@ -79,8 +77,11 @@ export default class VideoMold extends DiBaseMold {
     prom?.catch(() => {
       if (!this.video) return
 
-      this.video.muted = true
-      this.video.volume = 0
+      if (!this.props.mute) {
+        this.video.muted = true
+        this.video.volume = 0
+      }
+
       this.video.play().catch(err => {
         console.error(err)
       })
@@ -95,11 +96,16 @@ export default class VideoMold extends DiBaseMold {
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
 
-    video.muted = true
-    video.volume = 0
+    if (!this.props.mute) {
+      this.video.muted = true
+      this.video.volume = 0
+    } else {
+      this.video.muted = true
+      this.video.volume = this.props.mute
+    }
 
     video.style.display = 'none'
-    video.loop = true
+    video.loop = this.props.loop || false
 
     video.src = this.props.url
     document.body.appendChild(this.video)
