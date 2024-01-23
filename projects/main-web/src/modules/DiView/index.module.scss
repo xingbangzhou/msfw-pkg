@@ -20,4 +20,14 @@
       }
     }
   }
+
+  .controls {
+   position: absolute;   
+   left: 620px;
+   top: 20px;
+
+   .playBox {
+    height: 32px;
+   }
+  }
 }

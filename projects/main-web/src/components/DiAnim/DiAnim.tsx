@@ -5,6 +5,7 @@ import DiRender from './Render'
 
 export interface DiAnimHandler {
   play(opts: Omit<DiOptions, 'container'>): void
+  pause(): void
   clear(): void
 }
 
@@ -28,6 +29,9 @@ const DiAnim = memo(function DiAnim(props: DiAnimProps) {
         renderRef.current = new DiRender(Object.assign(opts, {container: rootRef.current}))
         renderRef.current.play()
       }
+    },
+    pause: () => {
+      renderRef.current?.pause()
     },
     clear: () => {
       renderRef.current?.clear()

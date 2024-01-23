@@ -1,9 +1,23 @@
-import {loadImage} from '../../glutils'
 import DiModel from './DiModel'
 
 interface ImageModelProps {
   url: string
   texIndex: number
+}
+
+function loadImage(url: string) {
+  return new Promise<HTMLImageElement>(resolve => {
+    const image = new Image()
+    image.src = url
+    image.crossOrigin = 'Anonymous'
+    image.addEventListener(
+      'load',
+      () => {
+        resolve(image)
+      },
+      false,
+    )
+  })
 }
 
 export default class ImageModel extends DiModel {
@@ -22,16 +36,12 @@ export default class ImageModel extends DiModel {
 
     const texture = (this.texture = gl.createTexture() as WebGLTexture)
 
-    // gl.activeTexture(gl.TEXTURE0 + this.props.texIndex)
     gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
-    // const u_imageLocation = gl.getUniformLocation(program, `u_image${this.props.texIndex}`)
-    // gl.uniform1i(u_imageLocation, this.props.texIndex)
   }
 
   render(gl: WebGLRenderingContext, program: WebGLProgram) {

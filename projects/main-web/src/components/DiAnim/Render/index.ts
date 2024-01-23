@@ -38,6 +38,12 @@ export default class DiRender {
   private gl: WebGLRenderingContext | null = null
   private program: WebGLProgram | null = null
 
+  play() {
+    this._vmodel.play()
+  }
+
+  pause() {}
+
   clear() {
     this.cancelRequestAnimation()
 
@@ -52,10 +58,6 @@ export default class DiRender {
     this.canvas = null
 
     this._playing = false
-  }
-
-  play() {
-    this._vmodel.play()
   }
 
   protected get video() {
