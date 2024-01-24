@@ -1,6 +1,6 @@
 export enum ShaderType {
-  Vertex = 0,
-  Fragment,
+  Vertex = 'vertex',
+  Fragment = 'fragment',
 }
 
 export function createProgram(gl: WebGLRenderingContext, shaders: Record<ShaderType, string>) {
@@ -11,11 +11,11 @@ export function createProgram(gl: WebGLRenderingContext, shaders: Record<ShaderT
   }
 
   for (const type in shaders) {
-    const source = shaders[type]
-    const shader = gl.createShader(+type === ShaderType.Vertex ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER)
+    const source = shaders[type as ShaderType]
+    const shader = gl.createShader(type === ShaderType.Vertex ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER)
     if (!shader) {
       console.error(
-        `An error occurred createShader[${+type === ShaderType.Vertex ? 'Vertex' : 'Fragment'}]: return null`,
+        `An error occurred createShader[${type === ShaderType.Vertex ? 'Vertex' : 'Fragment'}]: return null`,
       )
       continue
     }

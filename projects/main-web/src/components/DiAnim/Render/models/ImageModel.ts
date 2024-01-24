@@ -1,8 +1,8 @@
+import {activeTexImage2D, createTexture, setVertexBufferInfo} from '../../utils/textures'
 import DiModel from './DiModel'
 
 interface ImageModelProps {
   url: string
-  texIndex: number
 }
 
 function loadImage(url: string) {
@@ -29,52 +29,34 @@ export default class ImageModel extends DiModel {
 
   private props: ImageModelProps
   private image?: HTMLImageElement
-  private texture!: WebGLTexture
+  private _texture: WebGLTexture | null = null
 
   async init(gl: WebGLRenderingContext, program: WebGLProgram) {
     this.image = await loadImage(this.props.url)
 
-    const texture = (this.texture = gl.createTexture() as WebGLTexture)
-
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    this._texture = createTexture(gl)
   }
 
   render(gl: WebGLRenderingContext, program: WebGLProgram) {
-    // Position Vertex
-    const positionVertice = new Float32Array([-0.25, 0.5, 0.25, 0.5, -0.25, -0.0, 0.25, -0.0])
-    const positionBuffer = gl.createBuffer()
-    const aPositionLocation = gl.getAttribLocation(program, 'a_position')
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, positionVertice, gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(aPositionLocation)
-    gl.vertexAttribPointer(aPositionLocation, 2, gl.FLOAT, false, 0, 0)
+    if (!this.image) return
 
-    // Texture Vertex
-    const textureBuffer = gl.createBuffer()
-    const textureVertice = new Float32Array([0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0])
-    const aTexcoordLocation = gl.getAttribLocation(program, 'a_texcoord')
-    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, textureVertice, gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(aTexcoordLocation)
-    gl.vertexAttribPointer(aTexcoordLocation, 2, gl.FLOAT, false, 0, 0)
+    activeTexImage2D(gl, this._texture, this.image)
 
-    const uTexmodeLocation = gl.getUniformLocation(program, 'u_moldType')
-    gl.uniform1i(uTexmodeLocation, 1)
-
-    gl.activeTexture(gl.TEXTURE0 + this.props.texIndex)
-    gl.bindTexture(gl.TEXTURE_2D, this.texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image!)
-    gl.generateMipmap(gl.TEXTURE_2D)
+    setVertexBufferInfo(gl, program, {
+      position: {
+        data: [-0.25, 0.5, 0.25, 0.5, -0.25, -0.0, 0.25, -0.0],
+      },
+      texcoord: {
+        data: [0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0],
+      },
+      fragType: 1,
+    })
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
   }
 
   clear(gl: WebGLRenderingContext) {
-    gl.deleteTexture(this.texture)
+    gl.deleteTexture(this._texture)
+    this._texture = null
   }
 }

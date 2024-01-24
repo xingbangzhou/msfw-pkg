@@ -1,3 +1,4 @@
+import {activeTexImage2D, createTexture, setVertexBufferInfo} from '../../utils/textures'
 import DiBaseMold from './DiModel'
 
 interface VideoModelProps {
@@ -15,58 +16,37 @@ export default class VideoModel extends DiBaseMold {
     this.load()
   }
 
-  private props: VideoModelProps
-
   video?: HTMLVideoElement
 
-  private texture!: WebGLTexture
+  private props: VideoModelProps
+
+  private _texture: WebGLTexture | null = null
 
   async init(gl: WebGLRenderingContext, program: WebGLProgram) {
-    const texture = (this.texture = gl.createTexture() as WebGLTexture)
-
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-    // 对纹理图像进行y轴反转，因为WebGL纹理坐标系统的t轴（分为t轴和s轴）的方向和图片的坐标系统Y轴方向相反。因此将Y轴进行反转。
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
-    // 配置纹理参数
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    this._texture = createTexture(gl)
   }
 
   render(gl: WebGLRenderingContext, program: WebGLProgram) {
-    // Position Vertex
-    const positionVertice = new Float32Array(this.props.positons || [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0])
-    const positionBuffer = gl.createBuffer()
-    const aPositionLocation = gl.getAttribLocation(program, 'a_position')
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, positionVertice, gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(aPositionLocation)
-    gl.vertexAttribPointer(aPositionLocation, 2, gl.FLOAT, false, 0, 0)
+    if (!this.video) return
 
-    // Texture Vertex
-    const textureBuffer = gl.createBuffer()
-    const textureVertice = new Float32Array([0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0])
-    const aTexcoordLocation = gl.getAttribLocation(program, 'a_texcoord')
-    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, textureVertice, gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(aTexcoordLocation)
-    gl.vertexAttribPointer(aTexcoordLocation, 2, gl.FLOAT, false, 0, 0)
+    activeTexImage2D(gl, this._texture, this.video)
 
-    const uTexmodeLocation = gl.getUniformLocation(program, 'u_moldType')
-    gl.uniform1i(uTexmodeLocation, 0)
-
-    // 绘制
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, this.texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video!)
-    gl.generateMipmap(gl.TEXTURE_2D)
+    setVertexBufferInfo(gl, program, {
+      position: {
+        data: this.props.positons || [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0],
+      },
+      texcoord: {
+        data: [0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0],
+      },
+      fragType: 0,
+    })
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
   }
 
   clear(gl: WebGLRenderingContext) {
-    gl.deleteTexture(this.texture)
+    gl.deleteTexture(this._texture)
+    this._texture = null
 
     this.video?.parentNode && this.video.parentNode.removeChild(this.video)
     this.video = undefined
@@ -83,7 +63,7 @@ export default class VideoModel extends DiBaseMold {
       }
 
       this.video.play().catch(err => {
-        console.error(err)
+        console.error('VideoModel, error: ', err)
       })
     })
   }

@@ -19,7 +19,6 @@ export default class DiRender {
     if (this.useFrameCallback) {
       this.frameAnimId = this.video?.['requestVideoFrameCallback'](this.render)
     }
-
     this.init()
   }
 
@@ -27,7 +26,7 @@ export default class DiRender {
   fps: number
   container: HTMLElement
 
-  requestAnim: (cb: () => void) => number
+  requestAnim: (cb: () => void) => any
   frameAnimId?: any
   useFrameCallback?: boolean
 
@@ -116,14 +115,13 @@ export default class DiRender {
 
   private initModels() {
     // 测试
-    this._models = [new ImageModel({url: AvatarJPG, texIndex: 0})]
+    this._models = [new ImageModel({url: AvatarJPG})]
     // 模型加载初始化
     const {gl, program} = this
     if (!gl || !program) return
 
     // Init Video Model
     this._vmodel.init(gl, program)
-    // Video Model Events
     this.video?.addEventListener('loadeddata', this.onLoadedData)
     this.video?.addEventListener('playing', this.onPlaying)
 
@@ -133,10 +131,9 @@ export default class DiRender {
     })
   }
 
-  private requestAnimFunc() {
-    const self = this
-    return function (cb: () => void) {
-      return setTimeout(cb, 1000 / self.fps)
+  private requestAnimFunc = () => {
+    return (cb: () => void) => {
+      return setTimeout(cb, 1000 / this.fps)
     }
   }
 

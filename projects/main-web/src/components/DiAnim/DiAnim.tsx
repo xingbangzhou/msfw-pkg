@@ -1,4 +1,4 @@
-import {HTMLAttributes, Ref, memo, useEffect, useImperativeHandle, useRef} from 'react'
+import React, {HTMLAttributes, Ref, memo, useEffect, useImperativeHandle, useRef} from 'react'
 import {DiOptions} from './types'
 import {useForkRef} from '@mui/material/utils'
 import DiRender from './Render'

@@ -1,13 +1,13 @@
 import {memo} from 'react'
 import './index.scss'
-import Button from '@mui/material/Button'
+import {Box} from '@mui/system'
+import {Typography} from '@mui/material'
 
 const TitleBar = memo(function TitleBar() {
   return (
-    <div className="titleBarWrap">
-      <p className="title">Mfx Web</p>
-      <Button color="primary">Menu</Button>
-    </div>
+    <Box className="titleBarWrap">
+      <Typography className="title">DIANIM</Typography>
+    </Box>
   )
 })
 
