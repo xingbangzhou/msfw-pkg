@@ -38,4 +38,6 @@ export enum DiPlayState {
 
 export interface DiFrameInfo {
   frame: number
+  width: number
+  height: number
 }

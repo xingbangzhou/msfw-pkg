@@ -18,31 +18,32 @@ export default class VideoModel extends DiBaseMold {
     this.texture = createTexture(gl)
   }
 
+  private frameBuffer?: WebGLFramebuffer
+
   render(gl: DiGLRenderingContext, frameInfo: DiFrameInfo) {
     if (!this.video || !gl.program) return
 
+    let bReFirst = false
     if (frameInfo.frame === this.layerInfo.startFrame) {
       this.restart()
-      if (this.currentTime) return
+      if (this.currentTime) bReFirst = true
     }
 
-    this.render0(gl, frameInfo)
-  }
-
-  clear(gl?: WebGLRenderingContext) {
-    gl?.deleteTexture(this.texture)
-    this.texture = null
-
-    this.video?.parentNode && this.video.parentNode.removeChild(this.video)
-    this.video = undefined
-  }
-
-  private render0(gl: DiGLRenderingContext, frameInfo: DiFrameInfo) {
-    if (!this.video) return
-
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, this.texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video)
+    if (!bReFirst) {
+      gl.activeTexture(gl.TEXTURE0)
+      gl.bindTexture(gl.TEXTURE_2D, this.texture)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video)
+      // 保存首帧
+      if (this.currentTime === 0) {
+        const fbo = (this.frameBuffer = gl.createFramebuffer() as WebGLFramebuffer)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo)
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+        gl.viewport(0, 0, frameInfo.width, frameInfo.height)
+      }
+    } else if (this.frameBuffer) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer)
+    }
 
     setVertexBufferInfo(gl, {
       position: {
@@ -55,7 +56,44 @@ export default class VideoModel extends DiBaseMold {
     })
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
+
+  clear(gl?: WebGLRenderingContext) {
+    gl?.deleteTexture(this.texture)
+    this.texture = null
+
+    this.video?.parentNode && this.video.parentNode.removeChild(this.video)
+    this.video = undefined
+  }
+
+  // private render0(gl: DiGLRenderingContext, frameInfo: DiFrameInfo) {
+  //   if (!this.video) return
+
+  //   gl.activeTexture(gl.TEXTURE0)
+  //   gl.bindTexture(gl.TEXTURE_2D, this.texture)
+  //   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video)
+
+  //   if (this.currentTime === 0) {
+  //     const fbo = (this.frameBuffer = gl.createFramebuffer() as WebGLFramebuffer)
+  //     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo)
+  //     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0)
+  //     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+  //   }
+
+  //   setVertexBufferInfo(gl, {
+  //     position: {
+  //       data: [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0],
+  //     },
+  //     texcoord: {
+  //       data: [0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0],
+  //     },
+  //     fragType: 0,
+  //   })
+
+  //   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+  // }
 
   private load() {
     const video = (this.video = document.createElement('video'))

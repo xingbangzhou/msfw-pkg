@@ -10,7 +10,7 @@ const DiView = memo(function DiView() {
   useEffect(() => {
     handlerRef.current?.play({
       width: 500,
-      height: 500,
+      height: 600,
       frames: 60,
       fps: 12,
       layers: [

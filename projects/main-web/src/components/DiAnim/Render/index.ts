@@ -61,7 +61,7 @@ export default class DiRender {
       this.frameIndex = 0
     }
 
-    const frameInfo = {frame: this.frameIndex}
+    const frameInfo = {frame: this.frameIndex, width: this.opts.width, height: this.opts.height}
     for (let i = 0; i < this.models.length; i++) {
       const model = this.models[i]
       if (this.frameIndex >= model.layerInfo.startFrame && this.frameIndex <= model.layerInfo.endFrame) {
