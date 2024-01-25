@@ -1,9 +1,15 @@
+import {DiFrameInfo, DiGLRenderingContext, DiLayerInfo} from '../types'
+
 export default abstract class DiModel {
-  constructor() {}
+  constructor(layerInfo: DiLayerInfo) {
+    this.layerInfo = layerInfo
+  }
 
-  abstract init(gl: WebGLRenderingContext, program: WebGLProgram): Promise<void>
+  readonly layerInfo: DiLayerInfo
 
-  abstract render(gl: WebGLRenderingContext, program: WebGLProgram): void
+  abstract init(gl: DiGLRenderingContext): Promise<void>
 
-  abstract clear(gl: WebGLRenderingContext): void
+  abstract render(gl: DiGLRenderingContext, frameInfo: DiFrameInfo): void
+
+  abstract clear(gl?: WebGLRenderingContext): void
 }

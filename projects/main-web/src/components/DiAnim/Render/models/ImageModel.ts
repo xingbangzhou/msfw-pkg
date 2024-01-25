@@ -1,9 +1,6 @@
-import {activeTexImage2D, createTexture, setVertexBufferInfo} from '../../utils/textures'
+import {DiGLRenderingContext, DiLayerInfo} from '../types'
+import {createTexture, setVertexBufferInfo} from '../utils/textures'
 import DiModel from './DiModel'
-
-interface ImageModelProps {
-  url: string
-}
 
 function loadImage(url: string) {
   return new Promise<HTMLImageElement>(resolve => {
@@ -21,28 +18,28 @@ function loadImage(url: string) {
 }
 
 export default class ImageModel extends DiModel {
-  constructor(props: ImageModelProps) {
-    super()
-
-    this.props = props
+  constructor(layerInfo: DiLayerInfo) {
+    super(layerInfo)
   }
 
-  private props: ImageModelProps
   private image?: HTMLImageElement
-  private _texture: WebGLTexture | null = null
+  private texture: WebGLTexture | null = null
 
-  async init(gl: WebGLRenderingContext, program: WebGLProgram) {
-    this.image = await loadImage(this.props.url)
+  async init(gl: DiGLRenderingContext) {
+    this.image = await loadImage(this.layerInfo.value)
 
-    this._texture = createTexture(gl)
+    this.texture = createTexture(gl)
+
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.image)
   }
 
-  render(gl: WebGLRenderingContext, program: WebGLProgram) {
+  render(gl: DiGLRenderingContext) {
     if (!this.image) return
 
-    activeTexImage2D(gl, this._texture, this.image)
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, this.texture)
 
-    setVertexBufferInfo(gl, program, {
+    setVertexBufferInfo(gl, {
       position: {
         data: [-0.25, 0.5, 0.25, 0.5, -0.25, -0.0, 0.25, -0.0],
       },
@@ -55,8 +52,8 @@ export default class ImageModel extends DiModel {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
   }
 
-  clear(gl: WebGLRenderingContext) {
-    gl.deleteTexture(this._texture)
-    this._texture = null
+  clear(gl?: WebGLRenderingContext) {
+    gl?.deleteTexture(this.texture)
+    this.texture = null
   }
 }

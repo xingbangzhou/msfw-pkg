@@ -1,11 +1,10 @@
 import React, {HTMLAttributes, Ref, memo, useEffect, useImperativeHandle, useRef} from 'react'
-import {DiOptions} from './types'
+import {DiRenderOptions} from './Render/types'
 import {useForkRef} from '@mui/material/utils'
 import DiRender from './Render'
 
 export interface DiAnimHandler {
-  play(opts: Omit<DiOptions, 'container'>): void
-  pause(): void
+  play(opts: DiRenderOptions): void
   clear(): void
 }
 
@@ -21,17 +20,14 @@ const DiAnim = memo(function DiAnim(props: DiAnimProps) {
   const forkRef = useForkRef(rootRef, rootRefProp)
 
   useImperativeHandle(handlerRef, () => ({
-    play: (opts: Omit<DiOptions, 'container'>) => {
+    play: (opts: DiRenderOptions) => {
       if (renderRef.current) renderRef.current.clear()
       if (!rootRef.current) {
         console.error('[DiAnim]: play', 'container is null')
       } else {
-        renderRef.current = new DiRender(Object.assign(opts, {container: rootRef.current}))
+        renderRef.current = new DiRender(rootRef.current, opts)
         renderRef.current.play()
       }
-    },
-    pause: () => {
-      renderRef.current?.pause()
     },
     clear: () => {
       renderRef.current?.clear()

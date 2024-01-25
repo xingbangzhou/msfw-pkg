@@ -7,7 +7,7 @@ export function createProgram(gl: WebGLRenderingContext, shaders: Record<ShaderT
   const program = gl.createProgram()
   if (!program) {
     console.error('An error occurred createProgram: return null')
-    return null
+    return undefined
   }
 
   for (const type in shaders) {

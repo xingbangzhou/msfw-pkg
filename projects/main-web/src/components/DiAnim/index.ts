@@ -1,3 +1,3 @@
 export {default} from './DiAnim'
-export * from './types'
+export * from './Render/types'
 export * from './DiAnim'
