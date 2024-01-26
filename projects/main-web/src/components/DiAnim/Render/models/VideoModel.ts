@@ -11,40 +11,53 @@ export default class VideoModel extends DiBaseMold {
 
   private video?: HTMLVideoElement
   private texture: WebGLTexture | null = null
-  private duration = 0
+  private texture0: WebGLTexture | null = null
   private currentTime = 0
+  private played = false
 
   async init(gl: DiGLRenderingContext) {
     this.texture = createTexture(gl)
   }
 
-  private frameBuffer?: WebGLFramebuffer
-
   render(gl: DiGLRenderingContext, frameInfo: DiFrameInfo) {
-    if (!this.video || !gl.program) return
+    if (!this.video) return
 
-    let bReFirst = false
-    if (frameInfo.frame === this.layerInfo.startFrame) {
+    let texture = this.texture
+    let noNeedTexImage = false
+
+    if (!this.played) {
       this.restart()
-      if (this.currentTime) bReFirst = true
-    }
-
-    if (!bReFirst) {
-      gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, this.texture)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video)
-      // 保存首帧
-      if (this.currentTime === 0) {
-        const fbo = (this.frameBuffer = gl.createFramebuffer() as WebGLFramebuffer)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo)
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-        gl.viewport(0, 0, frameInfo.width, frameInfo.height)
+      if (!this.texture0) {
+        this.texture0 = gl.createTexture()
+      } else {
+        noNeedTexImage = true
       }
-    } else if (this.frameBuffer) {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer)
+      texture = this.texture0
+    } else if (frameInfo.frame >= this.layerInfo.endFrame) {
+      this.stop()
     }
 
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+
+    if (!noNeedTexImage) {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video)
+    }
+
+    this.draw(gl, frameInfo)
+  }
+
+  clear(gl?: WebGLRenderingContext) {
+    gl?.deleteTexture(this.texture)
+    gl?.deleteTexture(this.texture0)
+    this.texture = null
+    this.texture0 = null
+
+    this.video?.parentNode && this.video.parentNode.removeChild(this.video)
+    this.video = undefined
+  }
+
+  private draw(gl: DiGLRenderingContext, frameInfo: DiFrameInfo) {
     setVertexBufferInfo(gl, {
       position: {
         data: [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0],
@@ -56,44 +69,7 @@ export default class VideoModel extends DiBaseMold {
     })
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
-
-  clear(gl?: WebGLRenderingContext) {
-    gl?.deleteTexture(this.texture)
-    this.texture = null
-
-    this.video?.parentNode && this.video.parentNode.removeChild(this.video)
-    this.video = undefined
-  }
-
-  // private render0(gl: DiGLRenderingContext, frameInfo: DiFrameInfo) {
-  //   if (!this.video) return
-
-  //   gl.activeTexture(gl.TEXTURE0)
-  //   gl.bindTexture(gl.TEXTURE_2D, this.texture)
-  //   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video)
-
-  //   if (this.currentTime === 0) {
-  //     const fbo = (this.frameBuffer = gl.createFramebuffer() as WebGLFramebuffer)
-  //     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo)
-  //     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0)
-  //     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-  //   }
-
-  //   setVertexBufferInfo(gl, {
-  //     position: {
-  //       data: [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0],
-  //     },
-  //     texcoord: {
-  //       data: [0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0],
-  //     },
-  //     fragType: 0,
-  //   })
-
-  //   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-  // }
 
   private load() {
     const video = (this.video = document.createElement('video'))
@@ -130,18 +106,23 @@ export default class VideoModel extends DiBaseMold {
   private restart() {
     if (!this.video) return
 
-    this.video.currentTime = this.duration
+    this.video.currentTime = 0
     const prom = this.video?.play()
     prom?.catch(() => {
       this.video?.play().catch(error => {
         console.error('VideoModel, error: ', this.layerInfo.id, error)
       })
     })
+    this.played = true
+  }
+
+  private stop() {
+    this.video?.pause()
+    this.played = false
   }
 
   private onLoadedData = () => {
     console.log('[Video]: loadeddata', this.layerInfo.id)
-    this.duration = this.video?.duration || 0
   }
 
   private onTimeUpdate = () => {

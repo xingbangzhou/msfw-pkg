@@ -1,6 +1,6 @@
 export enum DiModelType {
-  MP4 = 0,
-  IMAGE = 1,
+  MP4 = 'mp4',
+  IMAGE = 'image',
 }
 
 export interface DiLayerInfo {

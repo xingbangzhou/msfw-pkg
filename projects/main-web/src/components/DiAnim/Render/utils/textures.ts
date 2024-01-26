@@ -15,13 +15,6 @@ export function createTexture(gl: WebGLRenderingContext) {
   return texture
 }
 
-// export function activeTexImage2D(gl: WebGLRenderingContext, texture: WebGLTexture | null, source: TexImageSource) {
-//   gl.activeTexture(gl.TEXTURE0)
-//   gl.bindTexture(gl.TEXTURE_2D, texture)
-//   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, source)
-//   gl.generateMipmap(gl.TEXTURE_2D)
-// }
-
 export interface VertexBufferInfo {
   position: {
     numComponents?: number // Default: 2
