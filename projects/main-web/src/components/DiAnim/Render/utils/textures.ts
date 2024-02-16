@@ -6,7 +6,7 @@ export function createTexture(gl: WebGLRenderingContext) {
 
   gl.bindTexture(gl.TEXTURE_2D, texture)
   // 对纹理图像进行y轴反转，因为WebGL纹理坐标系统的t轴（分为t轴和s轴）的方向和图片的坐标系统Y轴方向相反。因此将Y轴进行反转。
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+  // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
   // 配置纹理参数
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
@@ -15,23 +15,39 @@ export function createTexture(gl: WebGLRenderingContext) {
   return texture
 }
 
+export interface AttribInfo {
+  numComponents?: number
+  size?: number
+  type?: number
+  normalize?: boolean
+  offset?: number
+  stride?: number
+  buffer?: WebGLBuffer
+  drawType?: number
+}
+
+export interface BufferInfo {
+  numElements: number
+  elementType?: number
+  indices: WebGLBuffer
+}
+
 export interface VertexBufferInfo {
   position: {
     numComponents?: number // Default: 2
     data: number[]
   }
-  texcoord: {
+  texcoord?: {
     numComponents?: number // Default: 2
     data: number[]
   }
-  fragType: number
 }
 
 export function setVertexBufferInfo(gl: DiGLRenderingContext, bufferInfo: VertexBufferInfo) {
-  const {program, aPositionLocation, aTexcoordLocation, uFragTypeLocation} = gl
+  const {program, aPositionLocation, aTexcoordLocation} = gl
   if (!program) return
 
-  const {position, texcoord, fragType} = bufferInfo
+  const {position, texcoord} = bufferInfo
 
   // Position
   const positionVertice = new Float32Array(position.data)
@@ -41,14 +57,12 @@ export function setVertexBufferInfo(gl: DiGLRenderingContext, bufferInfo: Vertex
   gl.enableVertexAttribArray(aPositionLocation)
   gl.vertexAttribPointer(aPositionLocation, position.numComponents || 2, gl.FLOAT, false, 0, 0)
 
-  // Texcoord
-  const textureBuffer = gl.createBuffer()
-  const textureVertice = new Float32Array(texcoord.data)
-  gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer)
-  gl.bufferData(gl.ARRAY_BUFFER, textureVertice, gl.STATIC_DRAW)
-  gl.enableVertexAttribArray(aTexcoordLocation)
-  gl.vertexAttribPointer(aTexcoordLocation, texcoord.numComponents || 2, gl.FLOAT, false, 0, 0)
-
-  // FragType
-  uFragTypeLocation && gl.uniform1i(uFragTypeLocation, fragType)
+  if (texcoord) {
+    const textureBuffer = gl.createBuffer()
+    const textureVertice = new Float32Array(texcoord.data)
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, textureVertice, gl.STATIC_DRAW)
+    gl.enableVertexAttribArray(aTexcoordLocation)
+    gl.vertexAttribPointer(aTexcoordLocation, texcoord.numComponents || 2, gl.FLOAT, false, 0, 0)
+  }
 }

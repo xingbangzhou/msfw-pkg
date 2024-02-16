@@ -1,4 +1,5 @@
 import {DiFrameInfo, DiGLRenderingContext, DiLayerInfo} from '../types'
+import {ortho, scale, scaling, translate} from '../utils/m4'
 import {createTexture, setVertexBufferInfo} from '../utils/textures'
 import DiBaseMold from './DiModel'
 
@@ -37,14 +38,91 @@ export default class VideoModel extends DiBaseMold {
       this.stop()
     }
 
+    // Vertex
+    // setVertexBufferInfo(gl, {
+    //   position: {
+    //     data: [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0],
+    //   },
+    //   texcoord: {
+    //     data: [0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0],
+    //   },
+    // })
+
+    const drawInfo = {
+      x: 0 * gl.canvas.width,
+      y: 0 * gl.canvas.height,
+      xScale: 1.0,
+      yScale: 1.0,
+      offX: 0,
+      offY: 0,
+      rotation: 0 * Math.PI,
+      width: 1,
+      height: 1,
+      textureInfo: {
+        width: this.video.videoWidth * 0.5,
+        height: this.video.videoHeight,
+      },
+    }
+
+    const dstX = drawInfo.x
+    const dstY = drawInfo.y
+    const dstWidth = drawInfo.textureInfo.width * drawInfo.xScale
+    const dstHeight = drawInfo.textureInfo.height * drawInfo.yScale
+
+    const srcX = drawInfo.textureInfo.width * drawInfo.offX
+    const srcY = drawInfo.textureInfo.height * drawInfo.offY
+    const srcWidth = drawInfo.textureInfo.width * drawInfo.width
+    const srcHeight = drawInfo.textureInfo.height * drawInfo.height
+    const texWidth = drawInfo.textureInfo.width
+    const texHeight = drawInfo.textureInfo.height
+    const rotation = drawInfo.rotation
+
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
+
+    setVertexBufferInfo(gl, {
+      position: {
+        data: [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1],
+      },
+      texcoord: {
+        data: [0, 0, 0, 0.5, 0.5, 0, 0.5, 0, 0, 0.5, 0.5, 0.5],
+      },
+    })
 
     if (!noNeedTexImage) {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.video)
     }
 
-    this.draw(gl, frameInfo)
+    gl.uFragTypeLocation && gl.uniform1i(gl.uFragTypeLocation, 0)
+
+    let matrix = ortho(0, gl.canvas.width, gl.canvas.height, 0)
+
+    // this matrix will translate our quad to dstX, dstY
+    // matrix = translate(matrix, dstX, dstY, 0)
+
+    // this matrix will scale our 1 unit quad
+    // from 1 unit to texWidth, texHeight units
+    matrix = scale(matrix, dstWidth, dstHeight, 1)
+
+    // Set the matrix.
+    gl.uMatrixLocation && gl.uniformMatrix4fv(gl.uMatrixLocation, false, matrix)
+
+    let texMatrix = scaling(1 / texWidth, 1 / texHeight, 1)
+
+    // We need to pick a place to rotate around
+    // We'll move to the middle, rotate, then move back
+    // texMatrix = translate(texMatrix, texWidth * 0.5, texHeight * 0.5, 0)
+    // texMatrix = zRotate(texMatrix, rotation)
+    texMatrix = translate(texMatrix, texWidth * -0.5, texHeight * -0.5, 0)
+
+    // // because were in pixel space
+    // // the scale and translation are now in pixels
+    // texMatrix = translate(texMatrix, srcX, srcY, 0)
+    texMatrix = scale(texMatrix, srcWidth, srcHeight, 1)
+
+    gl.uTexMatrixLocation && gl.uniformMatrix4fv(gl.uTexMatrixLocation, false, texMatrix)
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6)
   }
 
   clear(gl?: WebGLRenderingContext) {
@@ -55,20 +133,6 @@ export default class VideoModel extends DiBaseMold {
 
     this.video?.parentNode && this.video.parentNode.removeChild(this.video)
     this.video = undefined
-  }
-
-  private draw(gl: DiGLRenderingContext, frameInfo: DiFrameInfo) {
-    setVertexBufferInfo(gl, {
-      position: {
-        data: [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0],
-      },
-      texcoord: {
-        data: [0.0, 1.0, 0.5, 1.0, 0.0, 0.0, 0.5, 0.0],
-      },
-      fragType: 0,
-    })
-
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
   }
 
   private load() {

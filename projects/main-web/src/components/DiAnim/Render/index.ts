@@ -1,10 +1,10 @@
 import ImageModel from './models/ImageModel'
 import VideoModel from './models/VideoModel'
 import {fragmenShaderSrc, vertexShaderSrc} from './shaders'
-import AvatarJPG from 'src/assets/img/avatar.jpg'
 import {ShaderType, createProgram} from './utils/programs'
 import DiModel from './models/DiModel'
-import {DiRenderOptions, DiModelType, DiGLRenderingContext, DiFrameInfo, DiPlayState} from './types'
+import {DiRenderOptions, DiModelType, DiGLRenderingContext, DiPlayState} from './types'
+import RectangleModel from './models/RectangleModel'
 
 export default class DiRender {
   constructor(container: HTMLElement, opts: DiRenderOptions) {
@@ -100,6 +100,19 @@ export default class DiRender {
     gl.viewport(0, 0, canvas.width, canvas.height)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
+    // const program = (gl.program = createProgram(gl, {
+    //   [ShaderType.Vertex]: vertexShaderSrc,
+    //   [ShaderType.Fragment]: fragmenShaderSrc,
+    // }))
+    // if (program) {
+    //   // 设置参数
+    //   gl.aPositionLocation = gl.getAttribLocation(program, 'a_position')
+    //   gl.aTexcoordLocation = gl.getAttribLocation(program, 'a_texcoord')
+    //   gl.uMatrixLocation = gl.getUniformLocation(program, 'u_matrix')
+    //   gl.uTexMatrixLocation = gl.getUniformLocation(program, 'u_texMatrix')
+    //   gl.uFragTypeLocation = gl.getUniformLocation(program, 'u_fragType')
+    // }
+    // Test
     const program = (gl.program = createProgram(gl, {
       [ShaderType.Vertex]: vertexShaderSrc,
       [ShaderType.Fragment]: fragmenShaderSrc,
@@ -107,8 +120,7 @@ export default class DiRender {
     if (program) {
       // 设置参数
       gl.aPositionLocation = gl.getAttribLocation(program, 'a_position')
-      gl.aTexcoordLocation = gl.getAttribLocation(program, 'a_texcoord')
-      gl.uFragTypeLocation = gl.getUniformLocation(program, 'u_fragType') || undefined
+      gl.uMatrixLocation = gl.getUniformLocation(program, 'u_matrix')
     }
   }
 
@@ -123,6 +135,20 @@ export default class DiRender {
         this.models.push(new ImageModel(layer))
       }
     })
+
+    // Test
+    // this.models.push(
+    //   new RectangleModel({
+    //     id: '测试',
+    //     type: DiModelType.IMAGE,
+    //     value: 'https://rhinosystem.bs2dl.yy.com/cont170601677162111file',
+    //     position: [0, 0],
+    //     width: 320,
+    //     height: 320,
+    //     startFrame: 0,
+    //     endFrame: 60,
+    //   }),
+    // )
 
     if (this.gl) {
       for (let i = 0; i < this.models.length; i++) {

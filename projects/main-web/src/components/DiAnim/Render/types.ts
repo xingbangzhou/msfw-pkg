@@ -9,7 +9,7 @@ export interface DiLayerInfo {
   value: string // MP4: url; IMAGE: url
   width: number
   height: number
-  position: [number, number] // [x, y]
+  position: number[] // [x, y]
   startFrame: number
   endFrame: number
   // MP4
@@ -28,7 +28,9 @@ export type DiGLRenderingContext = WebGLRenderingContext & {
   program?: WebGLProgram
   aPositionLocation: number
   aTexcoordLocation: number
-  uFragTypeLocation?: WebGLUniformLocation
+  uMatrixLocation: WebGLUniformLocation | null
+  uTexMatrixLocation: WebGLUniformLocation | null
+  uFragTypeLocation: WebGLUniformLocation | null
 }
 
 export enum DiPlayState {
