@@ -1,11 +1,11 @@
 import {DiFrameInfo, DiGLRenderingContext, DiLayerInfo} from '../types'
 
-export default abstract class DiModel {
-  constructor(layerInfo: DiLayerInfo) {
-    this.layerInfo = layerInfo
+export default abstract class DiLayer {
+  constructor(info: DiLayerInfo) {
+    this.info = info
   }
 
-  readonly layerInfo: DiLayerInfo
+  readonly info: DiLayerInfo
 
   abstract init(gl: DiGLRenderingContext): Promise<void>
 

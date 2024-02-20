@@ -1,36 +1,57 @@
-export enum DiModelType {
-  MP4 = 'mp4',
-  IMAGE = 'image',
-}
-
-export interface DiLayerInfo {
-  id: string
-  type: DiModelType
-  value: string // MP4: url; IMAGE: url
-  width: number
-  height: number
-  position: number[] // [x, y]
-  startFrame: number
-  endFrame: number
-  // MP4
-  mute?: number
-}
-
-export interface DiRenderOptions {
-  width: number
-  height: number
-  fps?: number
-  frames: number
-  layers: DiLayerInfo[]
-}
-
 export type DiGLRenderingContext = WebGLRenderingContext & {
   program?: WebGLProgram
   aPositionLocation: number
   aTexcoordLocation: number
-  uMatrixLocation: WebGLUniformLocation | null
-  uTexMatrixLocation: WebGLUniformLocation | null
-  uFragTypeLocation: WebGLUniformLocation | null
+  uMatrixLocation: WebGLUniformLocation
+  uTexMatrixLocation: WebGLUniformLocation
+  uLayerTypeLocation: WebGLUniformLocation
+}
+
+export interface DiLayerTransform {
+  anchorPoint: {
+    inFrame: number
+    value: number[]
+  }[]
+
+  position: {
+    inFrame: number
+    value: number[]
+  }[]
+
+  scale: {
+    inFrame: number
+    value: number[]
+  }[]
+
+  opacity: {
+    inFrame: number
+    value: number
+  }[]
+
+  rotation?: {
+    inFrame: number
+    value: number
+  }[]
+}
+
+export enum DiLayerType {
+  Image = 'image',
+  MP4x = 'mp4x', // 透明mp4
+}
+
+export interface DiLayerInfo {
+  type: string
+  name: string
+  content: string
+  transform: DiLayerTransform
+}
+
+export interface DiRenderInfo {
+  width: number
+  height: number
+  frameRate: number
+  duration: number
+  layers: DiLayerInfo[]
 }
 
 export enum DiPlayState {
@@ -39,7 +60,8 @@ export enum DiPlayState {
 }
 
 export interface DiFrameInfo {
-  frame: number
+  frameId: number
   width: number
   height: number
+  isEnd?: boolean
 }

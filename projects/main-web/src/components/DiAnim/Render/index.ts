@@ -1,16 +1,15 @@
-import ImageModel from './models/ImageModel'
-import VideoModel from './models/VideoModel'
 import {fragmenShaderSrc, vertexShaderSrc} from './shaders'
-import {ShaderType, createProgram} from './utils/programs'
-import DiModel from './models/DiModel'
-import {DiRenderOptions, DiModelType, DiGLRenderingContext, DiPlayState} from './types'
-import RectangleModel from './models/RectangleModel'
+import {createProgram, resizeCanvasToDisplaySize} from './utils/glutils'
+import DiLayer from './layers/DiLayer'
+import {DiRenderInfo, DiGLRenderingContext, DiPlayState} from './types'
+import {createLayer} from './layers/createLayer'
 
 export default class DiRender {
-  constructor(container: HTMLElement, opts: DiRenderOptions) {
+  constructor(container: HTMLElement, info: DiRenderInfo) {
     this.container = container
-    opts.fps = this.fps = opts.fps || 30
-    this.opts = opts
+    info.frameRate = this.frameRate = info.frameRate || 30
+    this.info = info
+    this.frames = Math.ceil(info.duration / info.frameRate)
 
     this.requestAnim = this.requestAnimFunc()
 
@@ -18,8 +17,9 @@ export default class DiRender {
   }
 
   protected container: HTMLElement
-  protected fps: number
-  protected opts: DiRenderOptions
+  protected frameRate: number
+  protected frames: number
+  protected info: DiRenderInfo
 
   protected frameAnimId: any
   protected requestAnim: (cb: () => void) => any
@@ -29,7 +29,7 @@ export default class DiRender {
   private canvas?: HTMLCanvasElement
   private gl?: DiGLRenderingContext
 
-  protected models: DiModel[] = []
+  protected layers: DiLayer[] = []
 
   play() {
     if (this.playState === DiPlayState.None) {
@@ -42,7 +42,7 @@ export default class DiRender {
 
     const {gl, canvas} = this
 
-    this.models.forEach(model => model.clear(gl))
+    this.layers.forEach(layer => layer.clear(gl))
 
     canvas?.parentNode && canvas.parentNode.removeChild(canvas)
     this.canvas = undefined
@@ -57,16 +57,14 @@ export default class DiRender {
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     this.frameIndex++
-    if (this.frameIndex === this.opts.frames) {
+    if (this.frameIndex === this.frames) {
       this.frameIndex = 0
     }
 
-    const frameInfo = {frame: this.frameIndex, width: this.opts.width, height: this.opts.height}
-    for (let i = 0; i < this.models.length; i++) {
-      const model = this.models[i]
-      if (this.frameIndex >= model.layerInfo.startFrame && this.frameIndex <= model.layerInfo.endFrame) {
-        model.render(gl, frameInfo)
-      }
+    const frameInfo = {frameId: this.frameIndex, width: this.info.width, height: this.info.height}
+    for (let i = 0; i < this.layers.length; i++) {
+      const layer = this.layers[i]
+      layer.render(gl, frameInfo)
     }
 
     this.frameAnimId = this.requestAnim(this.render)
@@ -74,8 +72,8 @@ export default class DiRender {
 
   private init() {
     const canvas = (this.canvas = document.createElement('canvas'))
-    canvas.width = this.opts.width
-    canvas.height = this.opts.height
+    canvas.width = this.info.width
+    canvas.height = this.info.height
     this.container.appendChild(canvas)
 
     this.gl = canvas.getContext('webgl') as DiGLRenderingContext
@@ -86,7 +84,7 @@ export default class DiRender {
     }
 
     this.initWebGL()
-    this.loadModel()
+    this.loadLayer()
   }
 
   private initWebGL() {
@@ -97,69 +95,42 @@ export default class DiRender {
     gl.enable(gl.BLEND)
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+    resizeCanvasToDisplaySize(canvas)
     gl.viewport(0, 0, canvas.width, canvas.height)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
-    // const program = (gl.program = createProgram(gl, {
-    //   [ShaderType.Vertex]: vertexShaderSrc,
-    //   [ShaderType.Fragment]: fragmenShaderSrc,
-    // }))
-    // if (program) {
-    //   // 设置参数
-    //   gl.aPositionLocation = gl.getAttribLocation(program, 'a_position')
-    //   gl.aTexcoordLocation = gl.getAttribLocation(program, 'a_texcoord')
-    //   gl.uMatrixLocation = gl.getUniformLocation(program, 'u_matrix')
-    //   gl.uTexMatrixLocation = gl.getUniformLocation(program, 'u_texMatrix')
-    //   gl.uFragTypeLocation = gl.getUniformLocation(program, 'u_fragType')
-    // }
-    // Test
-    const program = (gl.program = createProgram(gl, {
-      [ShaderType.Vertex]: vertexShaderSrc,
-      [ShaderType.Fragment]: fragmenShaderSrc,
-    }))
+    const program = (gl.program = createProgram(gl, vertexShaderSrc, fragmenShaderSrc))
     if (program) {
       // 设置参数
       gl.aPositionLocation = gl.getAttribLocation(program, 'a_position')
-      gl.uMatrixLocation = gl.getUniformLocation(program, 'u_matrix')
+      gl.aTexcoordLocation = gl.getAttribLocation(program, 'a_texcoord')
+      gl.uMatrixLocation = gl.getUniformLocation(program, 'u_matrix') as WebGLUniformLocation
+      gl.uTexMatrixLocation = gl.getUniformLocation(program, 'u_texMatrix') as WebGLUniformLocation
+      gl.uLayerTypeLocation = gl.getUniformLocation(program, 'u_layerType') as WebGLUniformLocation
     }
   }
 
-  private loadModel() {
-    this.models = []
+  private loadLayer() {
+    this.layers = []
 
     // 初始化layers
-    this.opts.layers.forEach(layer => {
-      if (layer.type === DiModelType.MP4) {
-        this.models.push(new VideoModel(layer))
-      } else if (layer.type === DiModelType.IMAGE) {
-        this.models.push(new ImageModel(layer))
+    this.info.layers.forEach(el => {
+      const layer = createLayer(el)
+      if (layer) {
+        this.layers.push(layer)
       }
     })
 
-    // Test
-    // this.models.push(
-    //   new RectangleModel({
-    //     id: '测试',
-    //     type: DiModelType.IMAGE,
-    //     value: 'https://rhinosystem.bs2dl.yy.com/cont170601677162111file',
-    //     position: [0, 0],
-    //     width: 320,
-    //     height: 320,
-    //     startFrame: 0,
-    //     endFrame: 60,
-    //   }),
-    // )
-
     if (this.gl) {
-      for (let i = 0; i < this.models.length; i++) {
-        this.models[i].init(this.gl)
+      for (let i = 0; i < this.layers.length; i++) {
+        this.layers[i].init(this.gl)
       }
     }
   }
 
   private requestAnimFunc = () => {
     return (cb: () => void) => {
-      return setTimeout(cb, 1000 / this.fps)
+      return setTimeout(cb, 1000 / this.frameRate)
     }
   }
 
