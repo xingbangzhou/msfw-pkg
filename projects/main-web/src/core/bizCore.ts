@@ -1,10 +1,6 @@
 import {MxFrameworkLauncher} from '@mfx-js/framework'
 
 class BizCore extends MxFrameworkLauncher {
-  constructor() {
-    super()
-  }
-
   private _inited = false
 
   init() {

@@ -1,10 +1,10 @@
 import React, {HTMLAttributes, Ref, memo, useEffect, useImperativeHandle, useRef} from 'react'
-import {DiRenderOptions} from './Render/types'
+import {DiPlayProps} from './Player/types'
 import {useForkRef} from '@mui/material/utils'
-import DiRender from './Render'
+import DiPlayer from './Player'
 
 export interface DiAnimHandler {
-  play(opts: DiRenderOptions): void
+  play(props: DiPlayProps): void
   clear(): void
 }
 
@@ -15,28 +15,28 @@ type DiAnimProps = {
 
 const DiAnim = memo(function DiAnim(props: DiAnimProps) {
   const {handlerRef, rootRef: rootRefProp, ...other} = props
-  const renderRef = useRef<DiRender>()
+  const playerRef = useRef<DiPlayer>()
   const rootRef = useRef<HTMLDivElement>(null)
   const forkRef = useForkRef(rootRef, rootRefProp)
 
   useImperativeHandle(handlerRef, () => ({
-    play: (opts: DiRenderOptions) => {
-      if (renderRef.current) renderRef.current.clear()
+    play: (opts: DiPlayProps) => {
+      if (playerRef.current) playerRef.current.clear()
       if (!rootRef.current) {
         console.error('[DiAnim]: play', 'container is null')
       } else {
-        renderRef.current = new DiRender(rootRef.current, opts)
-        renderRef.current.play()
+        playerRef.current = new DiPlayer(rootRef.current, opts)
+        playerRef.current.play()
       }
     },
     clear: () => {
-      renderRef.current?.clear()
+      playerRef.current?.clear()
     },
   }))
 
   useEffect(() => {
     return () => {
-      renderRef.current?.clear()
+      playerRef.current?.clear()
     }
   }, [])
 
