@@ -4,7 +4,6 @@ import {DiWebGLRenderingContext} from '../utils/types'
 import DiTransform3D from './Transform3D'
 
 export const VertexShader = `
-  precision highp float;
   attribute vec4 a_position;  // 接受顶点坐标
   attribute vec2 a_texcoord;  // 接受纹理坐标
 
@@ -22,13 +21,17 @@ export const VertexShader = `
 
 export const FragmenShader = `
   precision mediump float;
-
+  
   varying vec2 v_texcoord;
 
   uniform sampler2D u_texture;
 
   void main(void) {
-    gl_FragColor = vec4(texture2D(u_texture, v_texcoord).rgb, 1.0);
+    vec4 texColor = texture2D(u_texture, v_texcoord);
+    if(texColor.a < 0.1)
+        discard;
+
+    gl_FragColor = texColor;
   }
 `
 

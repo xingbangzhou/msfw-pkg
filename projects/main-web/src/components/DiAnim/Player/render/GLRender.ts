@@ -5,6 +5,25 @@ import {createProgram, resizeCanvasToDisplaySize} from '../utils/glutils'
 import * as m4 from '../utils/m4'
 import {DiWebGLRenderingContext} from '../utils/types'
 
+function makeCameraMatrix(width: number, height: number) {
+  // 透视矩阵
+  const fieldOfViewRadians = m4.degToRad(90)
+  const aspect = width / height
+  const zNear = 1
+  const zFar = 2000
+  const projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar)
+  // 相机坐标矩阵
+  const cameraPosition = [0, 0, height * 0.5 + 1]
+  const target = [0, 0, 0]
+  const up = [0, 1, 0]
+  const cameraMatrix = m4.lookAt(cameraPosition, target, up)
+  // 当前视图矩阵
+  const viewMatrix = m4.inverse(cameraMatrix)
+  const viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix)
+
+  return viewProjectionMatrix
+}
+
 export default class DiGLRender {
   private container?: HTMLElement
   private canvas?: HTMLCanvasElement
@@ -41,21 +60,7 @@ export default class DiGLRender {
 
     resizeCanvasToDisplaySize(this.canvas)
 
-    // 透视矩阵
-    const fieldOfViewRadians = m4.degToRad(90)
-    const aspect = width / height
-    const zNear = 1
-    const zFar = 2000
-    const projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar)
-    // 相机坐标矩阵
-    const cameraPosition = [0, 0, height * 0.5 + 1]
-    const target = [0, 0, 0]
-    const up = [0, 1, 0]
-    const cameraMatrix = m4.lookAt(cameraPosition, target, up)
-
-    // 当前视图矩阵
-    const viewMatrix = m4.inverse(cameraMatrix)
-    this.viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix)
+    this.viewProjectionMatrix = makeCameraMatrix(width, height)
 
     this.loadLayers(layerPropss)
   }
@@ -65,9 +70,10 @@ export default class DiGLRender {
     if (!gl) return
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.enable(gl.BLEND)
     gl.enable(gl.CULL_FACE)
-    gl.enable(gl.DEPTH_TEST)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
     this.layers?.forEach(layer => {
       layer.render(gl, this.viewProjectionMatrix, frameInfo)

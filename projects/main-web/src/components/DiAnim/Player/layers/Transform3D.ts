@@ -96,7 +96,7 @@ export default class DiTransform3D {
     const z = value[2] || 0
 
     // return [x, y, z] as number[]
-    return [-frameInfo.width * 0.5 + x, -y + frameInfo.height * 0.5, z] as number[]
+    return [-frameInfo.width * 0.5 + x, -y + frameInfo.height * 0.5, -z] as number[]
   }
 
   getScale(frameInfo: DiFrameInfo) {

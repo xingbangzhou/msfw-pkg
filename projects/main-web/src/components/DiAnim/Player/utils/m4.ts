@@ -156,6 +156,30 @@ export function multiply(a: MatType, b: MatType, dst?: MatType) {
   return dst
 }
 
+// 创建平移矩阵
+export function translation(tx: number, ty: number, tz: number, dst?: MatType) {
+  dst = dst || new Mat(16)
+
+  dst[0] = 1
+  dst[1] = 0
+  dst[2] = 0
+  dst[3] = 0
+  dst[4] = 0
+  dst[5] = 1
+  dst[6] = 0
+  dst[7] = 0
+  dst[8] = 0
+  dst[9] = 0
+  dst[10] = 1
+  dst[11] = 0
+  dst[12] = tx
+  dst[13] = ty
+  dst[14] = tz
+  dst[15] = 1
+
+  return dst
+}
+
 // 平移
 export function translate(m: MatType, tx: number, ty: number, tz: number, dst?: MatType) {
   // This is the optimized version of
@@ -198,30 +222,6 @@ export function translate(m: MatType, tx: number, ty: number, tz: number, dst?: 
   dst[13] = m01 * tx + m11 * ty + m21 * tz + m31
   dst[14] = m02 * tx + m12 * ty + m22 * tz + m32
   dst[15] = m03 * tx + m13 * ty + m23 * tz + m33
-
-  return dst
-}
-
-// 创建平移矩阵
-export function translation(tx: number, ty: number, tz: number, dst?: MatType) {
-  dst = dst || new Mat(16)
-
-  dst[0] = 1
-  dst[1] = 0
-  dst[2] = 0
-  dst[3] = 0
-  dst[4] = 0
-  dst[5] = 1
-  dst[6] = 0
-  dst[7] = 0
-  dst[8] = 0
-  dst[9] = 0
-  dst[10] = 1
-  dst[11] = 0
-  dst[12] = tx
-  dst[13] = ty
-  dst[14] = tz
-  dst[15] = 1
 
   return dst
 }
