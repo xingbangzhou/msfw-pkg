@@ -2,7 +2,7 @@ import DiLayer, {FragmenShader, VertexShader} from '../layers/Layer'
 import {makeLayer} from '../layers/makes'
 import {DiFrameInfo, DiLayerProps} from '../types'
 import {createProgram, resizeCanvasToDisplaySize} from '../utils/glutils'
-import {degToRad, identity, inverse, lookAt, multiply, perspective} from '../utils/m4'
+import * as m4 from '../utils/m4'
 import {DiWebGLRenderingContext} from '../utils/types'
 
 export default class DiGLRender {
@@ -10,7 +10,7 @@ export default class DiGLRender {
   private canvas?: HTMLCanvasElement
   private gl?: DiWebGLRenderingContext
 
-  private viewProjectionMatrix = identity()
+  private viewProjectionMatrix = m4.identity()
   private layers?: DiLayer[]
 
   setContainer(container: HTMLElement) {
@@ -42,20 +42,20 @@ export default class DiGLRender {
     resizeCanvasToDisplaySize(this.canvas)
 
     // 透视矩阵
-    const fieldOfViewRadians = degToRad(90)
+    const fieldOfViewRadians = m4.degToRad(90)
     const aspect = width / height
     const zNear = 1
     const zFar = 2000
-    const projectionMatrix = perspective(fieldOfViewRadians, aspect, zNear, zFar)
+    const projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar)
     // 相机坐标矩阵
     const cameraPosition = [0, 0, height * 0.5 + 1]
     const target = [0, 0, 0]
     const up = [0, 1, 0]
-    const cameraMatrix = lookAt(cameraPosition, target, up)
+    const cameraMatrix = m4.lookAt(cameraPosition, target, up)
 
     // 当前视图矩阵
-    const viewMatrix = inverse(cameraMatrix)
-    this.viewProjectionMatrix = multiply(projectionMatrix, viewMatrix)
+    const viewMatrix = m4.inverse(cameraMatrix)
+    this.viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix)
 
     this.loadLayers(layerPropss)
   }

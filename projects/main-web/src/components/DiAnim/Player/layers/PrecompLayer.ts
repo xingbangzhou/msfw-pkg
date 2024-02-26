@@ -1,4 +1,5 @@
 import {DiFrameInfo} from '../types'
+import * as m4 from '../utils/m4'
 import {DiWebGLRenderingContext} from '../utils/types'
 import DiLayer from './Layer'
 import {makeLayer} from './makes'
@@ -25,7 +26,16 @@ export default class PrecompLayer extends DiLayer {
     }
   }
 
-  render(gl: DiWebGLRenderingContext, parentMatrix: Float32Array, frameInfo: DiFrameInfo) {}
+  render(gl: DiWebGLRenderingContext, parentMatrix: Float32Array, frameInfo: DiFrameInfo) {
+    const localMatrix = this.getLocalMatrix(frameInfo)
+    if (!localMatrix) return
+
+    const viewMatrix = m4.multiply(parentMatrix, localMatrix)
+
+    this.layers?.forEach(layer => {
+      layer.render(gl, viewMatrix, frameInfo)
+    })
+  }
 
   clear(gl?: WebGLRenderingContext | undefined) {
     this.layers?.forEach(layer => layer.clear(gl))

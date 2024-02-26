@@ -1,6 +1,7 @@
 import {DiFrameInfo, DiLayerProps} from '../types'
-import {MatType} from '../utils/m4'
+import * as m4 from '../utils/m4'
 import {DiWebGLRenderingContext} from '../utils/types'
+import DiTransform3D from './Transform3D'
 
 export const VertexShader = `
   precision highp float;
@@ -34,13 +35,39 @@ export const FragmenShader = `
 export default abstract class DiLayer {
   constructor(props: DiLayerProps) {
     this.props = props
+    this.transform3D = new DiTransform3D(props.transform)
   }
 
   protected props: DiLayerProps
+  protected transform3D: DiTransform3D
 
   abstract init(gl: DiWebGLRenderingContext): Promise<void>
 
-  abstract render(gl: DiWebGLRenderingContext, parentMatrix: MatType, frameInfo: DiFrameInfo): void
+  abstract render(gl: DiWebGLRenderingContext, parentMatrix: m4.MatType, frameInfo: DiFrameInfo): void
 
   abstract clear(gl?: WebGLRenderingContext): void
+
+  protected getLocalMatrix(frameInfo: DiFrameInfo) {
+    const anchorPoint = this.transform3D.getAnchorPoint(frameInfo)
+    const position = this.transform3D.getPosition(frameInfo)
+    const scale = this.transform3D.getScale(frameInfo)
+    const rotation = this.transform3D.getRotation(frameInfo)
+
+    if (!anchorPoint || !position) return null
+
+    let localMatrix = m4.translation(position[0], position[1], position[2])
+
+    if (rotation) {
+      localMatrix = m4.xRotate(localMatrix, m4.degToRad(rotation[0]))
+      localMatrix = m4.yRotate(localMatrix, m4.degToRad(rotation[1]))
+      localMatrix = m4.zRotate(localMatrix, m4.degToRad(rotation[2]))
+      const moveOrighMatrix = m4.translation(-anchorPoint[0], anchorPoint[1], 0)
+      localMatrix = m4.multiply(localMatrix, moveOrighMatrix)
+    }
+    if (scale) {
+      localMatrix = m4.scale(localMatrix, (scale[0] || 100) * 0.01, (scale[1] || 100) * 0.01, (scale[2] || 100) * 0.01)
+    }
+
+    return localMatrix
+  }
 }
