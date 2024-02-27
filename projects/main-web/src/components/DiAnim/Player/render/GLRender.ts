@@ -1,21 +1,21 @@
 import DiLayer, {FragmenShader, VertexShader} from '../layers/Layer'
 import {makeLayer} from '../layers/makes'
 import {DiFrameInfo, DiLayerProps} from '../types'
-import {createProgram, resizeCanvasToDisplaySize} from '../utils/glutils'
+import {degToRad} from '../utils'
+import {DiWebGLRenderingContext, createProgram, resizeCanvasToDisplaySize} from '../utils/glapi'
 import * as m4 from '../utils/m4'
-import {DiWebGLRenderingContext} from '../utils/types'
 
 function makeCameraMatrix(width: number, height: number) {
   // 透视矩阵
-  const fieldOfViewRadians = m4.degToRad(90)
+  const fieldOfViewRadians = degToRad(90)
   const aspect = width / height
   const zNear = 1
   const zFar = 2000
   const projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar)
   // 相机坐标矩阵
-  const cameraPosition = [0, 0, height * 0.5 + 1]
-  const target = [0, 0, 0]
-  const up = [0, 1, 0]
+  const cameraPosition: m4.Vec3 = [0, 0, height * 0.5 + 1]
+  const target: m4.Vec3 = [0, 0, 0]
+  const up: m4.Vec3 = [0, 1, 0]
   const cameraMatrix = m4.lookAt(cameraPosition, target, up)
   // 当前视图矩阵
   const viewMatrix = m4.inverse(cameraMatrix)
@@ -48,7 +48,9 @@ export default class DiGLRender {
       canvas.width = width
       canvas.height = height
 
-      this.gl = canvas.getContext('webgl') as DiWebGLRenderingContext
+      this.gl = canvas.getContext('webgl', {
+        premultipliedAlpha: true, // 请求非预乘阿尔法通道
+      }) as DiWebGLRenderingContext
       this.container?.appendChild(this.canvas)
 
       this.initGL()
@@ -70,10 +72,6 @@ export default class DiGLRender {
     if (!gl) return
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-    gl.clear(gl.COLOR_BUFFER_BIT)
-    gl.enable(gl.BLEND)
-    gl.enable(gl.CULL_FACE)
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
     this.layers?.forEach(layer => {
       layer.render(gl, this.viewProjectionMatrix, frameInfo)
@@ -94,6 +92,10 @@ export default class DiGLRender {
     const {gl, canvas} = this
     if (!gl || !canvas) return
 
+    gl.enable(gl.BLEND)
+    // gl.enable(gl.DEPTH_TEST)
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+
     const program = (gl.program = createProgram(gl, VertexShader, FragmenShader))
     if (program) {
       // 设置参数
@@ -112,7 +114,7 @@ export default class DiGLRender {
     this.layers = []
 
     // 初始化layers
-    for (let i = 0, l = layerPropss.length; i < l; i++) {
+    for (let i = layerPropss.length - 1; i >= 0; i--) {
       const layer = makeLayer(layerPropss[i])
       if (layer) {
         this.layers.push(layer)

@@ -1,6 +1,5 @@
 import {DiFrameInfo, DiLayerProps} from '../types'
-import {DiWebGLRenderingContext} from '../utils/types'
-import {createTexture} from '../utils/glutils'
+import {DiWebGLRenderingContext, createTexture} from '../utils/glapi'
 import DiLayer from './Layer'
 import * as m4 from '../utils/m4'
 import {drawRect} from '../utils/primitives'
@@ -26,7 +25,7 @@ export default class VideoLayer extends DiLayer {
     this.texture = createTexture(gl)
   }
 
-  render(gl: DiWebGLRenderingContext, parentMatrix: m4.MatType, frameInfo: DiFrameInfo) {
+  render(gl: DiWebGLRenderingContext, parentMatrix: m4.Mat4, frameInfo: DiFrameInfo) {
     if (!this.video) return
 
     let texture = this.texture
@@ -61,7 +60,7 @@ export default class VideoLayer extends DiLayer {
 
     const texWidth = this.video.videoWidth
     const texHeight = this.video.videoHeight
-    drawRect(gl, 0, 0, texWidth, texHeight)
+    drawRect(gl, texWidth, texHeight)
   }
 
   clear(gl?: WebGLRenderingContext) {

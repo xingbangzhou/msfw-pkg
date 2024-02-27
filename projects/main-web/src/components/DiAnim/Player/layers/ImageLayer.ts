@@ -1,7 +1,6 @@
 import DiLayer from './Layer'
 import {DiFrameInfo} from '../types'
-import {DiWebGLRenderingContext} from '../utils/types'
-import {createTexture, setArribInfo} from '../utils/glutils'
+import {DiWebGLRenderingContext, createTexture} from '../utils/glapi'
 import * as m4 from '../utils/m4'
 import {drawRect} from '../utils/primitives'
 
@@ -35,7 +34,7 @@ export default class ImageLayer extends DiLayer {
     const image = await loadImage(this.url)
     const texture = createTexture(gl)
     if (texture) {
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
       this.textureInfo = {
         texture,
         width: image.width,
@@ -44,7 +43,7 @@ export default class ImageLayer extends DiLayer {
     }
   }
 
-  render(gl: DiWebGLRenderingContext, parentMatrix: m4.MatType, frameInfo: DiFrameInfo) {
+  render(gl: DiWebGLRenderingContext, parentMatrix: m4.Mat4, frameInfo: DiFrameInfo) {
     const {textureInfo} = this
     if (!textureInfo) return
 
@@ -60,7 +59,7 @@ export default class ImageLayer extends DiLayer {
 
     const texWidth = textureInfo.width
     const texHeight = textureInfo.height
-    drawRect(gl, 0, 0, texWidth, texHeight)
+    drawRect(gl, texWidth, texHeight)
   }
 
   clear(gl?: WebGLRenderingContext) {

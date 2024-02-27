@@ -1,7 +1,6 @@
-import {setArribInfo} from './glutils'
-import {DiWebGLRenderingContext} from './types'
+import {DiWebGLRenderingContext, setArribInfo} from './glapi'
 
-export function drawRect(gl: DiWebGLRenderingContext, x: number, y: number, w: number, h: number) {
+export function drawRect(gl: DiWebGLRenderingContext, w: number, h: number) {
   const x1 = 0
   const x2 = w
   const y1 = -h

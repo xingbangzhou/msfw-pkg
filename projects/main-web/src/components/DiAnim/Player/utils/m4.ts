@@ -1,13 +1,17 @@
-export type MatType = Float32Array
-export const Mat = Float32Array
+// prettier-ignore
+export type Mat4 =
+| [number, number, number, number,
+  number, number, number, number,
+  number, number, number, number,
+  number, number, number, number]
+| Float32Array
 
-export function degToRad(d: number) {
-  return (d * Math.PI) / 180
-}
+// prettier-ignore
+export type Vec3 = [number, number, number] | Float32Array
 
 // 创建默认矩阵
-export function identity(dst?: MatType) {
-  dst = dst || new Mat(16)
+export function identity(dst?: Mat4) {
+  dst = dst || new Float32Array(16)
 
   dst[0 * 4 + 0] = 1
   dst[0 * 4 + 1] = 0
@@ -29,56 +33,9 @@ export function identity(dst?: MatType) {
   return dst
 }
 
-export function makeZToWMatrix(fudgeFactor: number) {
-  const dst = new Mat(16)
-
-  dst[0] = 1
-  dst[1] = 0
-  dst[2] = 0
-  dst[3] = 0
-  dst[4] = 0
-  dst[5] = 1
-  dst[6] = 0
-  dst[7] = 0
-  dst[8] = 0
-  dst[9] = 0
-  dst[10] = 1
-  dst[11] = fudgeFactor
-  dst[12] = 0
-  dst[13] = 0
-  dst[14] = 0
-  dst[15] = 1
-
-  return dst
-}
-
-export function projection(width: number, height: number, depth: number) {
-  // Note: This matrix flips the Y axis so 0 is at the top.
-  const dst = new Mat(16)
-
-  dst[0] = 2 / width
-  dst[1] = 0
-  dst[2] = 0
-  dst[3] = 0
-  dst[4] = 0
-  dst[5] = -2 / height
-  dst[6] = 0
-  dst[7] = 0
-  dst[8] = 0
-  dst[9] = 0
-  dst[10] = 2 / depth
-  dst[11] = 0
-  dst[12] = -1
-  dst[13] = 1
-  dst[14] = 0
-  dst[15] = 1
-
-  return dst
-}
-
 // 透视投影 fieldOfViewInRadians: 0~360
-export function perspective(fieldOfViewInRadians: number, aspect: number, near: number, far: number, dst?: MatType) {
-  dst = dst || new Mat(16)
+export function perspective(fieldOfViewInRadians: number, aspect: number, near: number, far: number, dst?: Mat4) {
+  dst = dst || new Float32Array(16)
   const f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians)
   const rangeInv = 1.0 / (near - far)
 
@@ -103,8 +60,8 @@ export function perspective(fieldOfViewInRadians: number, aspect: number, near: 
 }
 
 // 矩阵相乘
-export function multiply(a: MatType, b: MatType, dst?: MatType) {
-  dst = dst || new Mat(16)
+export function multiply(a: Mat4, b: Mat4, dst?: Mat4) {
+  dst = dst || new Float32Array(16)
   const b00 = b[0 * 4 + 0]
   const b01 = b[0 * 4 + 1]
   const b02 = b[0 * 4 + 2]
@@ -157,8 +114,8 @@ export function multiply(a: MatType, b: MatType, dst?: MatType) {
 }
 
 // 创建平移矩阵
-export function translation(tx: number, ty: number, tz: number, dst?: MatType) {
-  dst = dst || new Mat(16)
+export function translation(tx: number, ty: number, tz: number, dst?: Mat4) {
+  dst = dst || new Float32Array(16)
 
   dst[0] = 1
   dst[1] = 0
@@ -181,10 +138,10 @@ export function translation(tx: number, ty: number, tz: number, dst?: MatType) {
 }
 
 // 平移
-export function translate(m: MatType, tx: number, ty: number, tz: number, dst?: MatType) {
+export function translate(m: Mat4, tx: number, ty: number, tz: number, dst?: Mat4) {
   // This is the optimized version of
   // return multiply(m, translation(tx, ty, tz), dst);
-  dst = dst || new Mat(16)
+  dst = dst || new Float32Array(16)
 
   const m00 = m[0]
   const m01 = m[1]
@@ -227,10 +184,10 @@ export function translate(m: MatType, tx: number, ty: number, tz: number, dst?: 
 }
 
 // X轴旋转
-export function xRotate(m: MatType, angleInRadians: number, dst?: MatType) {
+export function xRotate(m: Mat4, angleInRadians: number, dst?: Mat4) {
   // this is the optimized version of
   // return multiply(m, xRotation(angleInRadians), dst);
-  dst = dst || new Mat(16)
+  dst = dst || new Float32Array(16)
 
   const m10 = m[4]
   const m11 = m[5]
@@ -267,10 +224,10 @@ export function xRotate(m: MatType, angleInRadians: number, dst?: MatType) {
 }
 
 // Y轴旋转
-export function yRotate(m: MatType, angleInRadians: number, dst?: MatType) {
+export function yRotate(m: Mat4, angleInRadians: number, dst?: Mat4) {
   // this is the optimized version of
   // return multiply(m, yRotation(angleInRadians), dst);
-  dst = dst || new Mat(16)
+  dst = dst || new Float32Array(16)
 
   const m00 = m[0 * 4 + 0]
   const m01 = m[0 * 4 + 1]
@@ -307,10 +264,10 @@ export function yRotate(m: MatType, angleInRadians: number, dst?: MatType) {
 }
 
 // Z轴旋转
-export function zRotate(m: MatType, angleInRadians: number, dst?: MatType) {
+export function zRotate(m: Mat4, angleInRadians: number, dst?: Mat4) {
   // This is the optimized version of
   // return multiply(m, zRotation(angleInRadians), dst);
-  dst = dst || new Mat(16)
+  dst = dst || new Float32Array(16)
 
   const m00 = m[0 * 4 + 0]
   const m01 = m[0 * 4 + 1]
@@ -347,10 +304,10 @@ export function zRotate(m: MatType, angleInRadians: number, dst?: MatType) {
 }
 
 // 缩放
-export function scale(m: MatType, sx: number, sy: number, sz: number, dst?: MatType) {
+export function scale(m: Mat4, sx: number, sy: number, sz: number, dst?: Mat4) {
   // This is the optimized version of
   // return multiply(m, scaling(sx, sy, sz), dst);
-  dst = dst || new Mat(16)
+  dst = dst || new Float32Array(16)
 
   dst[0] = sx * m[0 * 4 + 0]
   dst[1] = sx * m[0 * 4 + 1]
@@ -375,11 +332,8 @@ export function scale(m: MatType, sx: number, sy: number, sz: number, dst?: MatT
   return dst
 }
 
-// 相机坐标
-type Vec3 = [number, number, number] | number[]
-
 function normalize(v: Vec3, dst?: Vec3) {
-  dst = (dst || new Float32Array(3)) as Vec3
+  dst = dst || new Float32Array(3)
   const length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
   // make sure we don't divide by 0.
   if (length > 0.00001) {
@@ -391,7 +345,7 @@ function normalize(v: Vec3, dst?: Vec3) {
 }
 
 function subtractVectors(a: Vec3, b: Vec3, dst?: Vec3) {
-  dst = (dst || new Float32Array(3)) as Vec3
+  dst = dst || new Float32Array(3)
   dst[0] = a[0] - b[0]
   dst[1] = a[1] - b[1]
   dst[2] = a[2] - b[2]
@@ -399,15 +353,15 @@ function subtractVectors(a: Vec3, b: Vec3, dst?: Vec3) {
 }
 
 function cross(a: Vec3, b: Vec3, dst?: Vec3) {
-  dst = (dst || new Float32Array(3)) as Vec3
+  dst = dst || new Float32Array(3)
   dst[0] = a[1] * b[2] - a[2] * b[1]
   dst[1] = a[2] * b[0] - a[0] * b[2]
   dst[2] = a[0] * b[1] - a[1] * b[0]
   return dst
 }
 
-export function lookAt(cameraPosition: Vec3, target: Vec3, up: Vec3, dst?: MatType) {
-  dst = dst || new Mat(16)
+export function lookAt(cameraPosition: Vec3, target: Vec3, up: Vec3, dst?: Mat4) {
+  dst = dst || new Float32Array(16)
   const zAxis = normalize(subtractVectors(cameraPosition, target))
   const xAxis = normalize(cross(up, zAxis))
   const yAxis = normalize(cross(zAxis, xAxis))
@@ -433,8 +387,8 @@ export function lookAt(cameraPosition: Vec3, target: Vec3, up: Vec3, dst?: MatTy
 }
 
 // 反转
-export function inverse(m: MatType, dst?: MatType) {
-  dst = dst || new Mat(16)
+export function inverse(m: Mat4, dst?: Mat4) {
+  dst = dst || new Float32Array(16)
   const m00 = m[0 * 4 + 0]
   const m01 = m[0 * 4 + 1]
   const m02 = m[0 * 4 + 2]
@@ -503,10 +457,10 @@ export function inverse(m: MatType, dst?: MatType) {
   return dst
 }
 
-export function axisRotate(m: MatType, axis: Vec3, angleInRadians: number, dst?: MatType) {
+export function axisRotate(m: Mat4, axis: Vec3, angleInRadians: number, dst?: Mat4) {
   // This is the optimized version of
   // return multiply(m, axisRotation(axis, angleInRadians), dst);
-  dst = dst || new Mat(16)
+  dst = dst || new Float32Array(16)
 
   let x = axis[0]
   let y = axis[1]

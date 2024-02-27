@@ -1,6 +1,6 @@
 import {DiFrameInfo} from '../types'
 import * as m4 from '../utils/m4'
-import {DiWebGLRenderingContext} from '../utils/types'
+import {DiWebGLRenderingContext} from '../utils/glapi'
 import DiLayer from './Layer'
 import {makeLayer} from './makes'
 
