@@ -1,11 +1,11 @@
 import React, {memo} from 'react'
-import DiView from 'src/modules/DiView'
+import AnimView from 'src/modules/AnimView'
 import styles from './index.module.scss'
 
 const MainView = memo(function MainView() {
   return (
     <div className={styles.mainView}>
-      <DiView />
+      <AnimView />
     </div>
   )
 })
