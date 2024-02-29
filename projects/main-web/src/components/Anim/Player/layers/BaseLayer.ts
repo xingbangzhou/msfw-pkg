@@ -59,7 +59,8 @@ export default abstract class BaseLayer {
     if (!anchorPoint || !position) return null
 
     const [x, y, z] = position
-    let localMatrix = m4.translation(-width * 0.5 + x, -y + height * 0.5, -z)
+    let localMatrix = m4.translation(x, -y, -z)
+    // let localMatrix = m4.translation(-width * 0.5 + x, -y + height * 0.5, -z)
 
     if (rotation) {
       localMatrix = m4.xRotate(localMatrix, degToRad(rotation[0]))

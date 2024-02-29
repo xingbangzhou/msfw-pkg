@@ -15,8 +15,8 @@ function makeWorldMatrix(width: number, height: number) {
 
   // 相机坐标矩阵
   const zFlat = (height / Math.tan(fieldOfViewRadians * 0.5)) * 0.5
-  const cameraPosition: m4.Vec3 = [0, 0, zFlat]
-  const target: m4.Vec3 = [0, 0, 0]
+  const cameraPosition: m4.Vec3 = [width * 0.5, -height * 0.5, zFlat]
+  const target: m4.Vec3 = [width * 0.5, -height * 0.5, 0]
   const up: m4.Vec3 = [0, 1, 0]
   const cameraMatrix = m4.lookAt(cameraPosition, target, up)
   // 当前视图矩阵
