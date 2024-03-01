@@ -1,3 +1,5 @@
+import {degToRad} from './algorithms'
+
 // prettier-ignore
 export type Mat4 =
 | [number, number, number, number,
@@ -545,4 +547,26 @@ export function axisRotate(m: Mat4, axis: Vec3, angleInRadians: number, dst?: Ma
   }
 
   return dst
+}
+
+// 世界坐标系 (摄像机+透视矩阵)
+export function worldProjection(width: number, height: number, fieldOfViewDeg = 40) {
+  // 透视矩阵
+  const fieldOfViewRadians = degToRad(40)
+  const aspect = width / height
+  const zNear = 1
+  const zFar = 20000
+  const projectionMatrix = perspective(fieldOfViewRadians, aspect, zNear, zFar)
+
+  // 相机坐标矩阵
+  const zFlat = (height / Math.tan(fieldOfViewRadians * 0.5)) * 0.5
+  const cameraPosition: Vec3 = [width * 0.5, -height * 0.5, zFlat]
+  const target: Vec3 = [width * 0.5, -height * 0.5, 0]
+  const up: Vec3 = [0, 1, 0]
+  const cameraMatrix = lookAt(cameraPosition, target, up)
+  // 当前视图矩阵
+  const viewMatrix = inverse(cameraMatrix)
+  const viewProjectionMatrix = multiply(projectionMatrix, viewMatrix)
+
+  return viewProjectionMatrix
 }

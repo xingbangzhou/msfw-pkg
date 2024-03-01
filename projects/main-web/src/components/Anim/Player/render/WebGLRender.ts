@@ -1,30 +1,8 @@
 import BaseLayer, {FragmenShader, VertexShader} from '../layers/BaseLayer'
 import {newLayer} from '../layers/factories'
 import {FrameInfo, LayerProps} from '../types'
-import {degToRad} from '../base'
 import {ThisWebGLContext, createProgram, resizeCanvasToDisplaySize} from '../base/glapi'
 import * as m4 from '../base/m4'
-
-function makeWorldMatrix(width: number, height: number) {
-  // 透视矩阵
-  const fieldOfViewRadians = degToRad(45)
-  const aspect = width / height
-  const zNear = 1
-  const zFar = 20000
-  const projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar)
-
-  // 相机坐标矩阵
-  const zFlat = (height / Math.tan(fieldOfViewRadians * 0.5)) * 0.5
-  const cameraPosition: m4.Vec3 = [width * 0.5, -height * 0.5, zFlat]
-  const target: m4.Vec3 = [width * 0.5, -height * 0.5, 0]
-  const up: m4.Vec3 = [0, 1, 0]
-  const cameraMatrix = m4.lookAt(cameraPosition, target, up)
-  // 当前视图矩阵
-  const viewMatrix = m4.inverse(cameraMatrix)
-  const viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix)
-
-  return viewProjectionMatrix
-}
 
 export default class WebGLRender {
   private container?: HTMLElement
@@ -64,7 +42,7 @@ export default class WebGLRender {
 
     resizeCanvasToDisplaySize(this.canvas)
 
-    this.viewProjectionMatrix = makeWorldMatrix(width, height)
+    this.viewProjectionMatrix = m4.worldProjection(width, height)
 
     this.loadLayers(layerPropss)
   }

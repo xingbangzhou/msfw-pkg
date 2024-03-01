@@ -9,6 +9,8 @@ export const mocks: PlayProps = {
     {
       type: 'precomposition',
       name: 'vector',
+      width: 600,
+      height: 400,
       transform: {
         anchorPoint: [
           {
@@ -23,7 +25,7 @@ export const mocks: PlayProps = {
           },
           {
             inFrame: 30,
-            value: [700, 571, 0],
+            value: [700, 571, 1000],
           },
         ],
         scale: [
@@ -38,10 +40,20 @@ export const mocks: PlayProps = {
             value: 100,
           },
         ],
+        rotationY: [
+          {
+            inFrame: 0,
+            value: 0,
+          },
+        ],
         rotationZ: [
           {
             inFrame: 0,
             value: 0,
+          },
+          {
+            inFrame: 30,
+            value: 90,
           },
         ],
       },
@@ -93,6 +105,51 @@ export const mocks: PlayProps = {
         },
       ],
     },
+    // {
+    //   type: 'image',
+    //   content: 'http://localhost:5002/avatar.png',
+    //   name: 'avatar.png',
+    //   transform: {
+    //     anchorPoint: [
+    //       {
+    //         inFrame: 0,
+    //         value: [128, 128, 0],
+    //       },
+    //     ],
+    //     position: [
+    //       {
+    //         inFrame: 0,
+    //         value: [462, 450, 0],
+    //       },
+    //       {
+    //         inFrame: 30,
+    //         value: [426, 660, 0],
+    //       },
+    //     ],
+    //     scale: [
+    //       {
+    //         inFrame: 0,
+    //         value: [100, 100, 100],
+    //       },
+    //     ],
+    //     opacity: [
+    //       {
+    //         inFrame: 0,
+    //         value: 100,
+    //       },
+    //     ],
+    //     rotationZ: [
+    //       {
+    //         inFrame: 0,
+    //         value: 0,
+    //       },
+    //       {
+    //         inFrame: 30,
+    //         value: 360,
+    //       },
+    //     ],
+    //   },
+    // },
     {
       type: 'video',
       name: '6_bmp',
@@ -144,7 +201,7 @@ export const mocks: PlayProps = {
         position: [
           {
             inFrame: 0,
-            value: [272.978724406932, 678.224075197804, -51.3980988590675],
+            value: [275, 678, 510],
           },
           // {
           //   inFrame: 100,
@@ -172,13 +229,13 @@ export const mocks: PlayProps = {
         rotationY: [
           {
             inFrame: 0,
-            value: -46.6296703424972,
+            value: 46.6296703424972,
           },
         ],
         rotationZ: [
           {
             inFrame: 0,
-            value: -350.789429689493,
+            value: 350.789429689493,
           },
         ],
       },

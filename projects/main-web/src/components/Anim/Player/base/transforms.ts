@@ -80,7 +80,7 @@ export class Transform3D {
   getAnchorPoint(frameId: number) {
     if (!this.anchorPoint) return null
 
-    const value = this.anchorPoint.getValue(frameId)
+    const value = this.anchorPoint.getValue(frameId) as number[] | null
     if (!value) return null
 
     return [value[0] || 0, value[1] || 0, value[2] || 0] as Vec3
@@ -89,7 +89,7 @@ export class Transform3D {
   getPosition(frameId: number) {
     if (!this.position) return null
 
-    const value = this.position.getValue(frameId)
+    const value = this.position.getValue(frameId) as number[] | null
     if (!value) return null
 
     const x = value[0] || 0

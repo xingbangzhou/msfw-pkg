@@ -60,12 +60,11 @@ export default abstract class BaseLayer {
 
     const [x, y, z] = position
     let localMatrix = m4.translation(x, -y, -z)
-    // let localMatrix = m4.translation(-width * 0.5 + x, -y + height * 0.5, -z)
 
     if (rotation) {
       localMatrix = m4.xRotate(localMatrix, degToRad(rotation[0]))
-      localMatrix = m4.yRotate(localMatrix, degToRad(rotation[1]))
-      localMatrix = m4.zRotate(localMatrix, degToRad(rotation[2]))
+      localMatrix = m4.yRotate(localMatrix, degToRad(360 - rotation[1]))
+      localMatrix = m4.zRotate(localMatrix, degToRad(360 - rotation[2]))
     }
     if (scale) {
       localMatrix = m4.scale(localMatrix, (scale[0] || 100) * 0.01, (scale[1] || 100) * 0.01, (scale[2] || 100) * 0.01)
