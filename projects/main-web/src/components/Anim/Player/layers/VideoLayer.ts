@@ -2,7 +2,7 @@ import {FrameInfo, LayerProps} from '../types'
 import {ThisWebGLContext, createTexture} from '../base/glapi'
 import BaseLayer from './BaseLayer'
 import * as m4 from '../base/m4'
-import {drawRect} from '../base/primitives'
+import {drawTexRect} from '../base/primitives'
 
 export default class VideoLayer extends BaseLayer {
   constructor(props: LayerProps) {
@@ -60,7 +60,7 @@ export default class VideoLayer extends BaseLayer {
 
     const texWidth = this.video.videoWidth
     const texHeight = this.video.videoHeight
-    drawRect(gl, texWidth, texHeight)
+    drawTexRect(gl, texWidth, texHeight)
   }
 
   clear(gl?: WebGLRenderingContext) {
@@ -124,7 +124,7 @@ export default class VideoLayer extends BaseLayer {
 
   private onTimeUpdate = () => {
     this.currentTime = this.video?.currentTime || 0
-    console.log('[Video]: timeupdate', this.currentTime, this.url)
+    // console.log('[Video]: timeupdate', this.currentTime, this.url)
   }
 
   private onPlaying = () => {

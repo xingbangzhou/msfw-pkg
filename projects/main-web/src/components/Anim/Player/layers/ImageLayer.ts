@@ -2,7 +2,7 @@ import BaseLayer from './BaseLayer'
 import {FrameInfo} from '../types'
 import {ThisWebGLContext, createTexture} from '../base/glapi'
 import * as m4 from '../base/m4'
-import {drawRect} from '../base/primitives'
+import {drawTexRect} from '../base/primitives'
 
 function loadImage(url: string) {
   return new Promise<HTMLImageElement>(resolve => {
@@ -59,7 +59,7 @@ export default class ImageLayer extends BaseLayer {
 
     const texWidth = textureInfo.width
     const texHeight = textureInfo.height
-    drawRect(gl, texWidth, texHeight)
+    drawTexRect(gl, texWidth, texHeight)
   }
 
   clear(gl?: WebGLRenderingContext) {

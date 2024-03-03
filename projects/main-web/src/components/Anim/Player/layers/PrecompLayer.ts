@@ -1,9 +1,9 @@
 import {FrameInfo} from '../types'
 import * as m4 from '../base/m4'
-import {ThisWebGLContext, createTexture} from '../base/glapi'
+import {ThisWebGLContext} from '../base/glapi'
 import BaseLayer from './BaseLayer'
 import {newLayer} from './factories'
-import {drawRect} from '../base'
+import {drawLineRect} from '../base/primitives'
 
 export default class PrecompLayer extends BaseLayer {
   private layers?: BaseLayer[]
@@ -33,27 +33,11 @@ export default class PrecompLayer extends BaseLayer {
 
     const viewMatrix = m4.multiply(parentMatrix, localMatrix)
 
-    // Draw
-    // const texture = createTexture(gl)
-    // if (texture) {
-    //   gl.activeTexture(gl.TEXTURE0)
-    //   gl.bindTexture(gl.TEXTURE_2D, texture)
-    //   gl.texImage2D(
-    //     gl.TEXTURE_2D,
-    //     0,
-    //     gl.LUMINANCE,
-    //     3,
-    //     2,
-    //     0,
-    //     gl.LUMINANCE,
-    //     gl.UNSIGNED_BYTE,
-    //     new Uint8Array([128, 64, 128, 125, 192, 0]),
-    //   )
+    // 绘制线框
+    gl.uniformMatrix4fv(gl.uniforms.matrix, false, viewMatrix)
+    drawLineRect(gl, this.props.width || frameInfo.width, this.props.height || frameInfo.height)
 
-    //   gl.uniformMatrix4fv(gl.uniforms.matrix, false, viewMatrix)
-
-    //   drawRect(gl, frameInfo.width, frameInfo.height)
-    // }
+    console.log(m4.strMat4(viewMatrix))
 
     this.layers?.forEach(layer => {
       layer.render(gl, viewMatrix, frameInfo)

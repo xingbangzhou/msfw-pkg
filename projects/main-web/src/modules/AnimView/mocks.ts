@@ -9,8 +9,6 @@ export const mocks: PlayProps = {
     {
       type: 'precomposition',
       name: 'vector',
-      width: 600,
-      height: 400,
       transform: {
         anchorPoint: [
           {
