@@ -2,7 +2,7 @@ import {FrameInfo, LayerProps} from '../types'
 import {ThisWebGLContext, createTexture} from '../base/glapi'
 import BaseLayer from './BaseLayer'
 import * as m4 from '../base/m4'
-import {drawTexRect} from '../base/primitives'
+import {drawTexRectangle} from '../base/primitives'
 
 export default class VideoLayer extends BaseLayer {
   constructor(props: LayerProps) {
@@ -21,11 +21,11 @@ export default class VideoLayer extends BaseLayer {
     return this.props.content || ''
   }
 
-  async init(gl: ThisWebGLContext) {
+  protected async onInit(gl: ThisWebGLContext) {
     this.texture = createTexture(gl)
   }
 
-  render(gl: ThisWebGLContext, parentMatrix: m4.Mat4, frameInfo: FrameInfo) {
+  protected onDraw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     if (!this.video) return
 
     let texture = this.texture
@@ -44,11 +44,6 @@ export default class VideoLayer extends BaseLayer {
       this.stop()
     }
 
-    const localMatrix = this.getLocalMatrix(frameInfo)
-    if (!localMatrix) return
-
-    const matrix = m4.multiply(parentMatrix, localMatrix)
-
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
     gl.activeTexture(gl.TEXTURE0)
@@ -60,10 +55,10 @@ export default class VideoLayer extends BaseLayer {
 
     const texWidth = this.video.videoWidth
     const texHeight = this.video.videoHeight
-    drawTexRect(gl, texWidth, texHeight)
+    drawTexRectangle(gl, texWidth, texHeight)
   }
 
-  clear(gl?: WebGLRenderingContext) {
+  protected onDestroy(gl?: ThisWebGLContext | undefined): void {
     gl?.deleteTexture(this.texture)
     gl?.deleteTexture(this.texture0)
     this.texture = null

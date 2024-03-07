@@ -3,12 +3,12 @@ import * as m4 from '../base/m4'
 import {ThisWebGLContext} from '../base/glapi'
 import BaseLayer from './BaseLayer'
 import {newLayer} from './factories'
-import {drawLineRect} from '../base/primitives'
+import {drawLineRectangle} from '../base/primitives'
 
 export default class PrecompLayer extends BaseLayer {
   private layers?: BaseLayer[]
 
-  async init(gl: ThisWebGLContext) {
+  protected async onInit(gl: ThisWebGLContext) {
     this.layers = []
 
     // 初始化layers
@@ -23,29 +23,23 @@ export default class PrecompLayer extends BaseLayer {
     }
 
     for (let i = 0; i < this.layers.length; i++) {
-      this.layers[i].init(gl)
+      await this.layers[i].init(gl)
     }
   }
 
-  render(gl: ThisWebGLContext, parentMatrix: Float32Array, frameInfo: FrameInfo) {
-    const localMatrix = this.getLocalMatrix(frameInfo)
-    if (!localMatrix) return
+  protected onDraw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
+    // Test: 绘制线框
+    gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
+    drawLineRectangle(gl, this.props.width || frameInfo.width, this.props.height || frameInfo.height)
 
-    const viewMatrix = m4.multiply(parentMatrix, localMatrix)
-
-    // 绘制线框
-    gl.uniformMatrix4fv(gl.uniforms.matrix, false, viewMatrix)
-    drawLineRect(gl, this.props.width || frameInfo.width, this.props.height || frameInfo.height)
-
-    console.log(m4.strMat4(viewMatrix))
-
+    // 绘制子图层
     this.layers?.forEach(layer => {
-      layer.render(gl, viewMatrix, frameInfo)
+      layer.render(gl, matrix, frameInfo)
     })
   }
 
-  clear(gl?: WebGLRenderingContext | undefined) {
-    this.layers?.forEach(layer => layer.clear(gl))
+  protected onDestroy(gl?: ThisWebGLContext | undefined) {
+    this.layers?.forEach(layer => layer.destroy(gl))
     this.layers = undefined
   }
 }

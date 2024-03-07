@@ -53,6 +53,7 @@ export interface LayerProps {
   layers?: LayerProps[]
   width?: number
   height?: number
+  maskLayer?: LayerProps
 }
 
 export interface PlayProps {

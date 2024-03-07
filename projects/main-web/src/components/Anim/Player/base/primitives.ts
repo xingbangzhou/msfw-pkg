@@ -14,7 +14,7 @@ export function setRectangle(gl: ThisWebGLContext, x: number, y: number, w: numb
 }
 
 // 绘制纹理矩形
-export function drawTexRect(gl: ThisWebGLContext, w: number, h: number) {
+export function drawTexRectangle(gl: ThisWebGLContext, w: number, h: number) {
   setRectangle(gl, 0, 0, w, h)
 
   const tx1 = 0
@@ -31,7 +31,7 @@ export function drawTexRect(gl: ThisWebGLContext, w: number, h: number) {
 }
 
 // 绘制矩形框
-export function drawLineRect(gl: ThisWebGLContext, w: number, h: number) {
+export function drawLineRectangle(gl: ThisWebGLContext, w: number, h: number) {
   const x1 = 0
   const y1 = 0
   const x2 = w
@@ -53,7 +53,7 @@ export function drawLineRect(gl: ThisWebGLContext, w: number, h: number) {
   const border = 0
   const srcFormat = gl.RGBA
   const srcType = gl.UNSIGNED_BYTE
-  const pixel = new Uint8Array([0, 0, 255, 255]) // opaque blue
+  const pixel = new Uint8Array([255, 0, 0, 255]) // opaque red
   gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, srcFormat, srcType, pixel)
 
   const tx1 = 0

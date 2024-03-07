@@ -30,6 +30,7 @@ export default class WebGLRender {
 
       this.gl = canvas.getContext('webgl', {
         premultipliedAlpha: true, // 请求非预乘阿尔法通道
+        stencil: true, // 开启模板测试
       }) as ThisWebGLContext
       this.container?.appendChild(this.canvas)
 
@@ -61,7 +62,7 @@ export default class WebGLRender {
   clear() {
     const {gl, canvas} = this
 
-    this.layers?.forEach(layer => layer.clear(gl))
+    this.layers?.forEach(layer => layer.destroy(gl))
     this.layers = undefined
 
     canvas?.parentNode && canvas.parentNode.removeChild(canvas)
@@ -73,6 +74,7 @@ export default class WebGLRender {
     if (!gl || !canvas) return
 
     gl.enable(gl.BLEND)
+    // gl.enable(gl.STENCIL_TEST)
     // gl.enable(gl.DEPTH_TEST)
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 

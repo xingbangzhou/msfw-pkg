@@ -103,51 +103,6 @@ export const mocks: PlayProps = {
         },
       ],
     },
-    // {
-    //   type: 'image',
-    //   content: 'http://localhost:5002/avatar.png',
-    //   name: 'avatar.png',
-    //   transform: {
-    //     anchorPoint: [
-    //       {
-    //         inFrame: 0,
-    //         value: [128, 128, 0],
-    //       },
-    //     ],
-    //     position: [
-    //       {
-    //         inFrame: 0,
-    //         value: [462, 450, 0],
-    //       },
-    //       {
-    //         inFrame: 30,
-    //         value: [426, 660, 0],
-    //       },
-    //     ],
-    //     scale: [
-    //       {
-    //         inFrame: 0,
-    //         value: [100, 100, 100],
-    //       },
-    //     ],
-    //     opacity: [
-    //       {
-    //         inFrame: 0,
-    //         value: 100,
-    //       },
-    //     ],
-    //     rotationZ: [
-    //       {
-    //         inFrame: 0,
-    //         value: 0,
-    //       },
-    //       {
-    //         inFrame: 30,
-    //         value: 360,
-    //       },
-    //     ],
-    //   },
-    // },
     {
       type: 'video',
       name: '6_bmp',
@@ -201,10 +156,6 @@ export const mocks: PlayProps = {
             inFrame: 0,
             value: [275, 678, 510],
           },
-          // {
-          //   inFrame: 100,
-          //   value: [272.978724406932, 1000.224075197804, -51.3980988590675],
-          // },
         ],
         scale: [
           {
@@ -236,6 +187,55 @@ export const mocks: PlayProps = {
             value: 350.789429689493,
           },
         ],
+      },
+      maskLayer: {
+        type: 'image',
+        content: 'http://localhost:5002/mask.png',
+        name: 'testpic',
+        transform: {
+          anchorPoint: [
+            {
+              inFrame: 0,
+              value: [128, 128, 0],
+            },
+          ],
+          position: [
+            {
+              inFrame: 0,
+              value: [128, 128, 0],
+            },
+          ],
+          scale: [
+            {
+              inFrame: 0,
+              value: [50, 50, 100],
+            },
+          ],
+          opacity: [
+            {
+              inFrame: 0,
+              value: 100,
+            },
+          ],
+          // rotationX: [
+          //   {
+          //     inFrame: 0,
+          //     value: 329.169929224771,
+          //   },
+          // ],
+          // rotationY: [
+          //   {
+          //     inFrame: 0,
+          //     value: 46.6296703424972,
+          //   },
+          // ],
+          // rotationZ: [
+          //   {
+          //     inFrame: 0,
+          //     value: 350.789429689493,
+          //   },
+          // ],
+        },
       },
     },
     {
