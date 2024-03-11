@@ -1,7 +1,8 @@
-import BaseLayer, {FragmenShader, VertexShader} from '../layers/BaseLayer'
+import BaseLayer from '../layers/BaseLayer'
 import {newLayer} from '../layers/factories'
 import {FrameInfo, LayerProps} from '../types'
 import {ThisWebGLContext, createProgram, resizeCanvasToDisplaySize} from '../base/glapi'
+import {FragmentShader, VertexShader} from '../layers/shaders'
 import * as m4 from '../base/m4'
 
 export default class WebGLRender {
@@ -28,13 +29,34 @@ export default class WebGLRender {
       canvas.width = width
       canvas.height = height
 
-      this.gl = canvas.getContext('webgl', {
-        premultipliedAlpha: true, // 请求非预乘阿尔法通道
-        stencil: true, // 开启模板测试
-      }) as ThisWebGLContext
+      const gl = (this.gl = canvas.getContext('webgl', {
+        premultipliedAlpha: false, // 请求非预乘阿尔法通道
+      }) as ThisWebGLContext)
       this.container?.appendChild(this.canvas)
 
-      this.initGL()
+      // 初始化webgl
+      gl.enable(gl.BLEND)
+      gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+
+      const program = (gl.program = createProgram(gl, VertexShader, FragmentShader))
+      if (program) {
+        // 设置参数
+        gl.attribs = {
+          position: gl.getAttribLocation(program, 'a_position'),
+          texcoord: gl.getAttribLocation(program, 'a_texcoord'),
+        }
+        gl.uniforms = {
+          matrix: gl.getUniformLocation(program, 'u_matrix') as WebGLUniformLocation,
+          texMatrix: gl.getUniformLocation(program, 'u_texMatrix') as WebGLUniformLocation,
+          test: gl.getUniformLocation(program, 'u_test') as WebGLUniformLocation,
+        }
+
+        // 纹理位置
+        const uTextureLocation = gl.getUniformLocation(program, 'u_texture')
+        const uTexture1Location = gl.getUniformLocation(program, 'u_texture1')
+        gl.uniform1i(uTextureLocation, 0)
+        gl.uniform1i(uTexture1Location, 1)
+      }
     }
 
     if (!this.gl) {
@@ -67,29 +89,6 @@ export default class WebGLRender {
 
     canvas?.parentNode && canvas.parentNode.removeChild(canvas)
     this.canvas = undefined
-  }
-
-  private initGL() {
-    const {gl, canvas} = this
-    if (!gl || !canvas) return
-
-    gl.enable(gl.BLEND)
-    // gl.enable(gl.STENCIL_TEST)
-    // gl.enable(gl.DEPTH_TEST)
-    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-
-    const program = (gl.program = createProgram(gl, VertexShader, FragmenShader))
-    if (program) {
-      // 设置参数
-      gl.attribs = {
-        position: gl.getAttribLocation(program, 'a_position'),
-        texcoord: gl.getAttribLocation(program, 'a_texcoord'),
-      }
-      gl.uniforms = {
-        matrix: gl.getUniformLocation(program, 'u_matrix') as WebGLUniformLocation,
-        texMatrix: gl.getUniformLocation(program, 'u_texMatrix') as WebGLUniformLocation,
-      }
-    }
   }
 
   private loadLayers(layerPropss: LayerProps[]) {

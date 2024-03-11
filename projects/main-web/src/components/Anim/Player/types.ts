@@ -1,7 +1,7 @@
 export enum LayerType {
   Image = 'image',
   Video = 'video',
-  Precomposition = 'precomposition',
+  PreComposition = 'precomposition',
 }
 
 export enum PlayState {

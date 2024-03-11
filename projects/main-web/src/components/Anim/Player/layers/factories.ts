@@ -1,6 +1,6 @@
 import {LayerProps, LayerType} from '../types'
 import ImageLayer from './ImageLayer'
-import PrecompLayer from './PrecompLayer'
+import PreComposeLayer from './PreComposeLayer'
 import VideoLayer from './VideoLayer'
 
 export function newLayer(props: LayerProps) {
@@ -12,8 +12,8 @@ export function newLayer(props: LayerProps) {
   if (type === LayerType.Image) {
     return new ImageLayer(props)
   }
-  if (type === LayerType.Precomposition) {
-    return new PrecompLayer(props)
+  if (type === LayerType.PreComposition) {
+    return new PreComposeLayer(props)
   }
 
   return undefined

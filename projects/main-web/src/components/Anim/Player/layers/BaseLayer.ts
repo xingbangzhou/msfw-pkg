@@ -3,38 +3,6 @@ import {ThisWebGLContext, degToRad, drawTexRectangle} from '../base'
 import * as m4 from '../base/m4'
 import {Transform3D} from '../base/transforms'
 
-export const VertexShader = `
-  attribute vec4 a_position;  // 接受顶点坐标
-  attribute vec2 a_texcoord;  // 接受纹理坐标
-
-  uniform mat4 u_matrix;  // 顶点矩阵
-  uniform mat4 u_texMatrix; // 纹理矩阵
-
-  varying vec2 v_texcoord;
-
-  void main() {
-    gl_Position = u_matrix * a_position;
-
-    v_texcoord = a_texcoord;
-  }
-`
-
-export const FragmenShader = `
-  precision mediump float;
-  
-  varying vec2 v_texcoord;
-
-  uniform sampler2D u_texture;
-
-  void main(void) {
-    vec4 texColor = texture2D(u_texture, v_texcoord);
-    // if(texColor.a < 0.1)
-    //     discard;
-
-    gl_FragColor = texColor;
-  }
-`
-
 export default abstract class BaseLayer {
   constructor(props: LayerProps) {
     this.props = props
@@ -62,16 +30,16 @@ export default abstract class BaseLayer {
 
     matrix = m4.multiply(parentMatrix, matrix)
 
-    // 遮罩绘制
+    // 遮罩
     let maskOpened = false
     if (this.maskLayer) {
       maskOpened = true
-      gl.enable(gl.STENCIL_TEST)
 
-      gl.stencilFunc(gl.ALWAYS, 1, 0xff)
-      gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE)
+      // gl.enable(gl.STENCIL_TEST)
+      // gl.stencilFunc(gl.ALWAYS, 1, 0xff)
+      // gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE)
 
-      this.maskLayer.render(gl, matrix, frameInfo)
+      // this.maskLayer.render(gl, matrix, frameInfo)
 
       // 测试----------
       // gl.activeTexture(gl.TEXTURE0)
@@ -97,16 +65,16 @@ export default abstract class BaseLayer {
       // drawTexRectangle(gl, 400, 400)
 
       // 重新设置模版测试，等于1的模版才通过
-      gl.stencilFunc(gl.EQUAL, 1, 0xff)
+      // gl.stencilFunc(gl.EQUAL, 1, 0xff)
       // 通过后不采取所有操作，保持原值
-      gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP)
+      // gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP)
     }
 
     // 绘制真正图元
     this.onDraw(gl, matrix, frameInfo)
 
     if (maskOpened) {
-      gl.disable(gl.STENCIL_TEST)
+      // gl.disable(gl.STENCIL_TEST)
     }
   }
 

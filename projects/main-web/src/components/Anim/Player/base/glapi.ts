@@ -7,6 +7,7 @@ export type ThisWebGLContext = WebGLRenderingContext & {
   uniforms: {
     matrix: WebGLUniformLocation
     texMatrix: WebGLUniformLocation
+    test: WebGLUniformLocation
   }
 }
 
@@ -68,9 +69,10 @@ export function createTexture(gl: WebGLRenderingContext) {
   // 对纹理图像进行y轴反转，因为WebGL纹理坐标系统的t轴（分为t轴和s轴）的方向和图片的坐标系统Y轴方向相反。因此将Y轴进行反转。
   // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
   // 配置纹理参数
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
   return texture
 }
