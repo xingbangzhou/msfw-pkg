@@ -20,19 +20,17 @@ export const FragmentShader = `
   varying vec2 v_texcoord;
   
   uniform sampler2D u_texture;
-  uniform sampler2D u_texture1;
+  uniform sampler2D u_maskTexture;
 
-  uniform int u_test;
+  uniform int u_enableMask;
   
   void main(void) {
     vec4 texColor = texture2D(u_texture, v_texcoord);
-    if (u_test == 1) {
-        vec4 texColor1 = texture2D(u_texture1, v_texcoord);
-  
-        gl_FragColor = vec4(texColor.rgb, texColor.a * texColor1.a);
+    if (u_enableMask == 1) {
+      vec4 maskColor = texture2D(u_maskTexture, vec2(v_texcoord.x, 1.0 - v_texcoord.y));
+      gl_FragColor = vec4(texColor.rgb, texColor.a * maskColor.a);
     } else {
-        gl_FragColor = texColor;
+      gl_FragColor = texColor;
     }
-    // gl_FragColor = texColor;
   }
 `

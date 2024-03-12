@@ -14,13 +14,13 @@ export function setRectangle(gl: ThisWebGLContext, x: number, y: number, w: numb
 }
 
 // 绘制纹理矩形
-export function drawTexRectangle(gl: ThisWebGLContext, w: number, h: number) {
+export function drawTexRectangle(gl: ThisWebGLContext, w: number, h: number, flipY?: boolean) {
   setRectangle(gl, 0, 0, w, h)
 
   const tx1 = 0
-  const ty1 = 0
+  const ty1 = flipY ? 1 : 0
   const tx2 = 1
-  const ty2 = 1
+  const ty2 = flipY ? 0 : 1
   setArribInfo(gl, gl.attribs.texcoord, {
     data: [tx1, ty1, tx2, ty1, tx1, ty2, tx1, ty2, tx2, ty1, tx2, ty2],
   })

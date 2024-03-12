@@ -1,14 +1,11 @@
-import {FrameInfo, LayerProps} from '../types'
-import {ThisWebGLContext, createTexture} from '../base/glapi'
-import BaseLayer from './BaseLayer'
-import * as m4 from '../base/m4'
-import {drawTexRectangle} from '../base/primitives'
+import {ThisWebGLContext, createTexture, drawTexRectangle, m4} from '../base'
+import {FrameInfo} from '../types'
+import AbstractDrawer from './AbstractDrawer'
+import Layer from './Layer'
 
-export default class VideoLayer extends BaseLayer {
-  constructor(props: LayerProps) {
-    super(props)
-
-    this.load()
+export default class VideoDrawer extends AbstractDrawer {
+  constructor(layerRef: Layer) {
+    super(layerRef)
   }
 
   private video?: HTMLVideoElement
@@ -18,14 +15,16 @@ export default class VideoLayer extends BaseLayer {
   private played = false
 
   get url() {
-    return this.props.content || ''
+    return this.layerRef.props.content || ''
   }
 
-  protected async onInit(gl: ThisWebGLContext) {
+  async init(gl: ThisWebGLContext) {
     this.texture = createTexture(gl)
+
+    this.load()
   }
 
-  protected onDraw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
+  draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     if (!this.video) return
 
     let texture = this.texture
@@ -40,25 +39,24 @@ export default class VideoLayer extends BaseLayer {
       }
       texture = this.texture0
     }
-    if (frameInfo.isEnd) {
+    if (frameInfo.frames === frameInfo.frameId + 1) {
       this.stop()
     }
 
-    gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
-
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
-
     if (!noNeedTexImage) {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video)
     }
 
-    const texWidth = this.video.videoWidth
-    const texHeight = this.video.videoHeight
-    drawTexRectangle(gl, texWidth, texHeight)
+    gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
+
+    const width = this.layerRef.width || this.video.videoWidth
+    const height = this.layerRef.height || this.video.videoHeight
+    drawTexRectangle(gl, width, height)
   }
 
-  protected onDestroy(gl?: ThisWebGLContext | undefined): void {
+  destroy(gl?: ThisWebGLContext | undefined) {
     gl?.deleteTexture(this.texture)
     gl?.deleteTexture(this.texture0)
     this.texture = null
@@ -119,7 +117,6 @@ export default class VideoLayer extends BaseLayer {
 
   private onTimeUpdate = () => {
     this.currentTime = this.video?.currentTime || 0
-    // console.log('[Video]: timeupdate', this.currentTime, this.url)
   }
 
   private onPlaying = () => {

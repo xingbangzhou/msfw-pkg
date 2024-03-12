@@ -40,7 +40,12 @@ export default class Player {
     if (this.frameIndex === this.parser.frames) {
       this.frameIndex = 0
     }
-    const frameInfo = {frameId: this.frameIndex, width: this.parser.width, height: this.parser.height}
+    const frameInfo = {
+      frames: this.parser.frames,
+      frameId: this.frameIndex,
+      width: this.parser.width,
+      height: this.parser.height,
+    }
 
     this.ctxRender.render(frameInfo)
 

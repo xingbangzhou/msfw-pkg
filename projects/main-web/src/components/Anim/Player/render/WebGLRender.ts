@@ -1,9 +1,8 @@
-import BaseLayer from '../layers/BaseLayer'
-import {newLayer} from '../layers/factories'
 import {FrameInfo, LayerProps} from '../types'
 import {ThisWebGLContext, createProgram, resizeCanvasToDisplaySize} from '../base/glapi'
 import {FragmentShader, VertexShader} from '../layers/shaders'
 import * as m4 from '../base/m4'
+import Layer from '../layers/Layer'
 
 export default class WebGLRender {
   private container?: HTMLElement
@@ -11,7 +10,7 @@ export default class WebGLRender {
   private gl?: ThisWebGLContext
 
   private viewProjectionMatrix = m4.identity()
-  private layers?: BaseLayer[]
+  private rootLayers?: Layer[]
 
   setContainer(container: HTMLElement) {
     if (this.container === container) return
@@ -30,7 +29,7 @@ export default class WebGLRender {
       canvas.height = height
 
       const gl = (this.gl = canvas.getContext('webgl', {
-        premultipliedAlpha: false, // 请求非预乘阿尔法通道
+        premultipliedAlpha: true, // 请求非预乘阿尔法通道
       }) as ThisWebGLContext)
       this.container?.appendChild(this.canvas)
 
@@ -48,14 +47,14 @@ export default class WebGLRender {
         gl.uniforms = {
           matrix: gl.getUniformLocation(program, 'u_matrix') as WebGLUniformLocation,
           texMatrix: gl.getUniformLocation(program, 'u_texMatrix') as WebGLUniformLocation,
-          test: gl.getUniformLocation(program, 'u_test') as WebGLUniformLocation,
+          enableMask: gl.getUniformLocation(program, 'u_enableMask') as WebGLUniformLocation,
         }
 
         // 纹理位置
         const uTextureLocation = gl.getUniformLocation(program, 'u_texture')
-        const uTexture1Location = gl.getUniformLocation(program, 'u_texture1')
+        const uMaskTextureLocation = gl.getUniformLocation(program, 'u_maskTexture')
         gl.uniform1i(uTextureLocation, 0)
-        gl.uniform1i(uTexture1Location, 1)
+        gl.uniform1i(uMaskTextureLocation, 1)
       }
     }
 
@@ -67,7 +66,7 @@ export default class WebGLRender {
 
     this.viewProjectionMatrix = m4.worldProjection(width, height)
 
-    this.loadLayers(layerPropss)
+    this.initLayers(this.gl, layerPropss)
   }
 
   render(frameInfo: FrameInfo) {
@@ -76,7 +75,7 @@ export default class WebGLRender {
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
 
-    this.layers?.forEach(layer => {
+    this.rootLayers?.forEach(layer => {
       layer.render(gl, this.viewProjectionMatrix, frameInfo)
     })
   }
@@ -84,28 +83,20 @@ export default class WebGLRender {
   clear() {
     const {gl, canvas} = this
 
-    this.layers?.forEach(layer => layer.destroy(gl))
-    this.layers = undefined
+    this.rootLayers?.forEach(layer => layer.destroy(gl))
+    this.rootLayers = undefined
 
     canvas?.parentNode && canvas.parentNode.removeChild(canvas)
     this.canvas = undefined
   }
 
-  private loadLayers(layerPropss: LayerProps[]) {
-    this.layers = []
+  private async initLayers(gl: ThisWebGLContext, layerPropss: LayerProps[]) {
+    this.rootLayers = []
 
-    // 初始化layers
     for (let i = layerPropss.length - 1; i >= 0; i--) {
-      const layer = newLayer(layerPropss[i])
-      if (layer) {
-        this.layers.push(layer)
-      }
-    }
-
-    if (this.gl) {
-      for (let i = 0; i < this.layers.length; i++) {
-        this.layers[i].init(this.gl)
-      }
+      const layer = new Layer(layerPropss[i])
+      await layer.init(gl)
+      this.rootLayers.push(layer)
     }
   }
 }

@@ -10,15 +10,17 @@ export enum PlayState {
 }
 
 export interface FrameInfo {
+  frames: number
   frameId: number
   width: number
   height: number
-  isEnd?: boolean
 }
 
 export interface LayerProps {
   type: string
   name: string
+  width: number
+  height: number
   content?: string
   transform: {
     anchorPoint: {
@@ -51,8 +53,6 @@ export interface LayerProps {
     }[]
   }
   layers?: LayerProps[]
-  width?: number
-  height?: number
   maskLayer?: LayerProps
 }
 
