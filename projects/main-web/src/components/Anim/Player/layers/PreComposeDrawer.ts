@@ -21,14 +21,14 @@ export default class PreComposeDrawer extends AbstractDrawer {
     }
   }
 
-  draw(gl: ThisWebGLContext, matrix: Mat4, frameInfo: FrameInfo) {
+  draw(gl: ThisWebGLContext, matrix: Mat4, frameInfo: FrameInfo, parentFramebuffer: WebGLFramebuffer | null = null) {
     if (!this.subLayers?.length) return
 
     const viewWidth = this.layerRef.width
     const viewHeight = this.layerRef.height
     // Test: 绘制线框
-    gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
-    drawLineRectangle(gl, this.layerRef.width || frameInfo.width, this.layerRef.height || frameInfo.height)
+    // gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
+    // drawLineRectangle(gl, this.layerRef.width || frameInfo.width, this.layerRef.height || frameInfo.height)
 
     // 合并绘制纹理
     const framebuffer = this._framebuffer || (gl.createFramebuffer() as WebGLFramebuffer & {texture: WebGLTexture})
@@ -46,7 +46,7 @@ export default class PreComposeDrawer extends AbstractDrawer {
       console.log('Frame buffer object is incomplete: ' + status.toString())
     }
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
     gl.bindTexture(gl.TEXTURE_2D, null)
 
     // 绘制合并子图层
@@ -62,8 +62,13 @@ export default class PreComposeDrawer extends AbstractDrawer {
     })
 
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
+    gl.viewport(
+      0,
+      0,
+      parentFramebuffer ? frameInfo.width : gl.canvas.width,
+      parentFramebuffer ? frameInfo.height : gl.canvas.height,
+    )
 
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)

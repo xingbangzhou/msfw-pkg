@@ -23,12 +23,14 @@ export const FragmentShader = `
   uniform sampler2D u_maskTexture;
 
   uniform int u_enableMask;
+  uniform float u_opacity;
   
   void main(void) {
     vec4 texColor = texture2D(u_texture, v_texcoord);
     if (u_enableMask == 1) {
-      vec4 maskColor = texture2D(u_maskTexture, vec2(v_texcoord.x, 1.0 - v_texcoord.y));
-      gl_FragColor = vec4(texColor.rgb, texColor.a * maskColor.a);
+      vec4 maskColor = texture2D(u_maskTexture, vec2(v_texcoord.x, v_texcoord.y));
+      float light = maskColor.r * 0.3 + maskColor.g * 0.6 + maskColor.b * 0.1;
+      gl_FragColor = vec4(texColor.rgb, texColor.a * light * u_opacity);
     } else {
       gl_FragColor = texColor;
     }

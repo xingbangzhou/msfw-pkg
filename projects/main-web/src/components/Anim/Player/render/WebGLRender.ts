@@ -48,6 +48,7 @@ export default class WebGLRender {
           matrix: gl.getUniformLocation(program, 'u_matrix') as WebGLUniformLocation,
           texMatrix: gl.getUniformLocation(program, 'u_texMatrix') as WebGLUniformLocation,
           enableMask: gl.getUniformLocation(program, 'u_enableMask') as WebGLUniformLocation,
+          opacity: gl.getUniformLocation(program, 'u_opacity') as WebGLUniformLocation,
         }
 
         // 纹理位置

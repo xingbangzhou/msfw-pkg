@@ -11,7 +11,12 @@ export default abstract class AbstractDrawer {
 
   abstract init(gl: ThisWebGLContext): Promise<void>
 
-  abstract draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo): void
+  abstract draw(
+    gl: ThisWebGLContext,
+    matrix: m4.Mat4,
+    frameInfo: FrameInfo,
+    parentFramebuffer: WebGLFramebuffer | null,
+  ): void
 
   abstract destroy(gl?: ThisWebGLContext): void
 }

@@ -110,4 +110,8 @@ export class Transform3D {
 
     return [x, y, z] as Vec3
   }
+
+  getOpacity(frameId: number) {
+    return ((this.opacity?.getValue(frameId) ?? 100) as number) * 0.01
+  }
 }

@@ -18,9 +18,12 @@ export interface FrameInfo {
 
 export interface LayerProps {
   type: string
-  name: string
   width: number
   height: number
+  inFrame: number
+  outFrame: number
+  id?: number
+  name?: string
   content?: string
   transform: {
     anchorPoint: {
@@ -53,7 +56,7 @@ export interface LayerProps {
     }[]
   }
   layers?: LayerProps[]
-  maskLayer?: LayerProps
+  trackMatteLayer?: LayerProps
 }
 
 export interface PlayProps {
