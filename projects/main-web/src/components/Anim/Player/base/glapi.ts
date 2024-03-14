@@ -12,6 +12,8 @@ export type ThisWebGLContext = WebGLRenderingContext & {
   }
 }
 
+export type Framebuffer = WebGLFramebuffer & {texture: WebGLTexture}
+
 export function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement, multiplier?: number) {
   multiplier = multiplier || 1
   const width = (canvas.clientWidth * multiplier) | 0
@@ -103,4 +105,32 @@ export function setArribInfo(gl: WebGLRenderingContext, attribId: number, info: 
     info.stride || 0,
     info.offset || 0,
   )
+}
+
+export function createFramebuffer(gl: WebGLRenderingContext, width: number, height: number): Framebuffer | null {
+  const framebuffer = gl.createFramebuffer() as Framebuffer | null
+  if (!framebuffer) return null
+  const texture = createTexture(gl)
+  if (!texture) {
+    gl.deleteFramebuffer(framebuffer)
+    return null
+  }
+  framebuffer.texture = texture
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+  gl.bindTexture(gl.TEXTURE_2D, null)
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
+
+  const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+  if (gl.FRAMEBUFFER_COMPLETE !== status) {
+    console.log('Framebuffer object is incomplete: ', status)
+    gl.deleteFramebuffer(framebuffer)
+    gl.deleteTexture(texture)
+    return null
+  }
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+  return framebuffer
 }

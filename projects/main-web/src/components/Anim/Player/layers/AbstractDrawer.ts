@@ -16,7 +16,7 @@ export default abstract class AbstractDrawer {
     matrix: m4.Mat4,
     frameInfo: FrameInfo,
     parentFramebuffer: WebGLFramebuffer | null,
-  ): void
+  ): Promise<void>
 
   abstract destroy(gl?: ThisWebGLContext): void
 }

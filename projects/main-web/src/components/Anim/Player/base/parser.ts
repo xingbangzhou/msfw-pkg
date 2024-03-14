@@ -3,23 +3,24 @@ import {PlayProps} from '../types'
 export default class Parser {
   constructor(props: PlayProps) {
     props.frameRate = this.frameRate = props.frameRate || 30
-    this.props = props
-    this.frames = Math.ceil((props.duration * 1000) / props.frameRate)
+    this._props = props
+    this.frames = props.duration * props.frameRate
   }
 
-  private props: PlayProps
+  private _props: PlayProps
+
   readonly frameRate: number
   readonly frames: number
 
   get width() {
-    return this.props.width
+    return this._props.width
   }
 
   get height() {
-    return this.props.height
+    return this._props.height
   }
 
   get rootLayers() {
-    return this.props.layers
+    return this._props.layers
   }
 }

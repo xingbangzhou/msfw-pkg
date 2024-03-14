@@ -70,15 +70,18 @@ export default class WebGLRender {
     this.initLayers(this.gl, layerPropss)
   }
 
-  render(frameInfo: FrameInfo) {
+  async render(frameInfo: FrameInfo) {
     const gl = this.gl
     if (!gl) return
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-
-    this.rootLayers?.forEach(layer => {
-      layer.render(gl, this.viewProjectionMatrix, frameInfo)
-    })
+    const rootLayers = this.rootLayers
+    if (rootLayers) {
+      for (let i = 0, l = rootLayers?.length || 0; i < l; i++) {
+        const layer = rootLayers?.[i]
+        await layer.render(gl, this.viewProjectionMatrix, frameInfo)
+      }
+    }
   }
 
   clear() {

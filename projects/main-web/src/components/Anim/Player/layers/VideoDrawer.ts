@@ -24,7 +24,7 @@ export default class VideoDrawer extends AbstractDrawer {
     this.load()
   }
 
-  draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
+  async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     if (!this.video) return
 
     let texture = this.texture
@@ -100,7 +100,7 @@ export default class VideoDrawer extends AbstractDrawer {
     const prom = this.video?.play()
     prom?.catch(() => {
       this.video?.play().catch(error => {
-        console.error('catch error: ', this.url, error)
+        console.error('play, error: ', error, this.url)
       })
     })
     this.played = true
@@ -111,17 +111,13 @@ export default class VideoDrawer extends AbstractDrawer {
     this.played = false
   }
 
-  private onLoadedData = () => {
-    console.log('[Video]: loadeddata', this.url)
-  }
+  private onLoadedData = () => {}
 
   private onTimeUpdate = () => {
     this.currentTime = this.video?.currentTime || 0
   }
 
-  private onPlaying = () => {
-    console.log('[Video]: playing', this.url)
-  }
+  private onPlaying = () => {}
 
   private onPause = () => {
     console.log('[Video]: pause', this.url)

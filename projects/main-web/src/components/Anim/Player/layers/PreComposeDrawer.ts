@@ -1,90 +1,84 @@
-import {ThisWebGLContext, createTexture, drawLineRectangle, drawTexRectangle} from '../base'
-import {Mat4} from '../base/m4'
+import {Framebuffer, ThisWebGLContext, createFramebuffer, createTexture, drawTexRectangle} from '../base'
+import {m4} from '../base'
 import {FrameInfo} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 import Layer from './Layer'
 
 export default class PreComposeDrawer extends AbstractDrawer {
-  private subLayers?: Layer[]
-  private _framebuffer?: WebGLFramebuffer & {texture: WebGLTexture}
+  private _subLayers?: Layer[]
+  private _framebuffer: Framebuffer | null = null
+  private _projectionMatrix: m4.Mat4 = m4.identity()
 
   async init(gl: ThisWebGLContext) {
-    this.subLayers = []
+    const width = this.layerRef.width
+    const height = this.layerRef.height
+    this._framebuffer = createFramebuffer(gl, width, height)
+    this._projectionMatrix = m4.worldProjection(width, height)
 
+    // 初始化子图层
+    this._subLayers = []
     const layerPropss = this.layerRef.props.layers
     if (layerPropss) {
       for (let i = 0, l = layerPropss.length; i < l; i++) {
         const layer = new Layer(layerPropss[i])
         await layer.init(gl)
-        this.subLayers.push(layer)
+        this._subLayers.push(layer)
       }
     }
   }
 
-  draw(gl: ThisWebGLContext, matrix: Mat4, frameInfo: FrameInfo, parentFramebuffer: WebGLFramebuffer | null = null) {
-    if (!this.subLayers?.length) return
+  async draw(
+    gl: ThisWebGLContext,
+    matrix: m4.Mat4,
+    parentFrameInfo: FrameInfo,
+    parentFramebuffer: WebGLFramebuffer | null = null,
+  ) {
+    const framebuffer = this._framebuffer
+    const subLayers = this._subLayers
+    if (!framebuffer || !subLayers || !subLayers.length) return
 
-    const viewWidth = this.layerRef.width
-    const viewHeight = this.layerRef.height
-    // Test: 绘制线框
-    // gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
-    // drawLineRectangle(gl, this.layerRef.width || frameInfo.width, this.layerRef.height || frameInfo.height)
+    const width = this.layerRef.width
+    const height = this.layerRef.height
 
-    // 合并绘制纹理
-    const framebuffer = this._framebuffer || (gl.createFramebuffer() as WebGLFramebuffer & {texture: WebGLTexture})
-    if (!framebuffer.texture) {
-      framebuffer.texture = createTexture(gl) as WebGLTexture
-    }
-    this._framebuffer = framebuffer
-    gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, viewWidth, viewHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+    // 子图层渲染
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, framebuffer.texture, 0)
-
-    const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
-    if (gl.FRAMEBUFFER_COMPLETE !== status) {
-      console.log('Frame buffer object is incomplete: ' + status.toString())
-    }
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
-    gl.bindTexture(gl.TEXTURE_2D, null)
-
-    // 绘制合并子图层
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
-    gl.viewport(0, 0, viewWidth, viewHeight)
+    gl.viewport(0, 0, width, height)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    const viewFrameInfo = {...frameInfo, width: viewWidth, height: viewHeight}
-    const projectionMatrix = this.layerRef.projectionMatrix
+    const frameInfo = {...parentFrameInfo, width: width, height: height}
+    const projectionMatrix = this._projectionMatrix
 
-    this.subLayers?.forEach(layer => {
-      layer.render(gl, projectionMatrix, viewFrameInfo)
-    })
-
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0)
+    for (let i = 0, l = subLayers.length; i < l; i++) {
+      const layer = subLayers[i]
+      await layer.render(gl, projectionMatrix, frameInfo, framebuffer)
+    }
+    // 上屏
     gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
     gl.viewport(
       0,
       0,
-      parentFramebuffer ? frameInfo.width : gl.canvas.width,
-      parentFramebuffer ? frameInfo.height : gl.canvas.height,
+      parentFramebuffer ? parentFrameInfo.width : gl.canvas.width,
+      parentFramebuffer ? parentFrameInfo.height : gl.canvas.height,
     )
 
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
-    drawTexRectangle(gl, viewWidth, viewHeight, true)
+    drawTexRectangle(gl, width, height, true)
+
+    // 释放
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   destroy(gl?: ThisWebGLContext) {
     if (this._framebuffer) {
       gl?.deleteFramebuffer(this._framebuffer)
       gl?.deleteTexture(this._framebuffer.texture)
-      this._framebuffer = undefined
+      this._framebuffer = null
     }
 
-    this.subLayers?.forEach(el => el.destroy(gl))
-    this.subLayers = undefined
+    this._subLayers?.forEach(el => el.destroy(gl))
+    this._subLayers = undefined
   }
 }

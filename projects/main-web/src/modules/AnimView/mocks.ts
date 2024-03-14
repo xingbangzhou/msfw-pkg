@@ -407,7 +407,7 @@ import {PlayProps} from 'src/components/Anim'
 export const mocks: PlayProps = {
   width: 500,
   height: 500,
-  duration: 4000,
+  duration: 4,
   frameRate: 30,
   layers: [
     {
@@ -659,7 +659,7 @@ export const mocks: PlayProps = {
         inFrame: 0,
         outFrame: 120,
         content: 'http://localhost:5002/q1_objmaskid2_1_0054.png',
-        name: 'q1_objmaskid2_1_0000.png',
+        name: 'q1_objmaskid2_1',
         transform: {
           anchorPoint: [
             {
@@ -700,7 +700,7 @@ export const mocks: PlayProps = {
       height: 500,
       inFrame: 0,
       outFrame: 120,
-      name: 'q1_0000.png',
+      name: 'q1',
       content: 'http://localhost:5002/q1_0054.png',
       transform: {
         anchorPoint: [
