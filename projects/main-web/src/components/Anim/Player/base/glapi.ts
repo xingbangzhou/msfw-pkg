@@ -7,7 +7,7 @@ export type ThisWebGLContext = WebGLRenderingContext & {
   uniforms: {
     matrix: WebGLUniformLocation
     texMatrix: WebGLUniformLocation
-    enableMask: WebGLUniformLocation
+    maskMode: WebGLUniformLocation
     opacity: WebGLUniformLocation
   }
 }

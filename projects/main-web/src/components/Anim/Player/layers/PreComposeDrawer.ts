@@ -27,7 +27,7 @@ export default class PreComposeDrawer extends AbstractDrawer {
     }
   }
 
-  async draw(
+  draw(
     gl: ThisWebGLContext,
     matrix: m4.Mat4,
     parentFrameInfo: FrameInfo,
@@ -50,7 +50,7 @@ export default class PreComposeDrawer extends AbstractDrawer {
 
     for (let i = 0, l = subLayers.length; i < l; i++) {
       const layer = subLayers[i]
-      await layer.render(gl, projectionMatrix, frameInfo, framebuffer)
+      layer.render(gl, projectionMatrix, frameInfo, framebuffer)
     }
     // 上屏
     gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)

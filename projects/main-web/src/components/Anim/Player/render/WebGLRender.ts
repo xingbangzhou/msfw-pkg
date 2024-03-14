@@ -47,7 +47,7 @@ export default class WebGLRender {
         gl.uniforms = {
           matrix: gl.getUniformLocation(program, 'u_matrix') as WebGLUniformLocation,
           texMatrix: gl.getUniformLocation(program, 'u_texMatrix') as WebGLUniformLocation,
-          enableMask: gl.getUniformLocation(program, 'u_enableMask') as WebGLUniformLocation,
+          maskMode: gl.getUniformLocation(program, 'u_maskMode') as WebGLUniformLocation,
           opacity: gl.getUniformLocation(program, 'u_opacity') as WebGLUniformLocation,
         }
 
@@ -79,12 +79,12 @@ export default class WebGLRender {
     if (rootLayers) {
       for (let i = 0, l = rootLayers?.length || 0; i < l; i++) {
         const layer = rootLayers?.[i]
-        await layer.render(gl, this.viewProjectionMatrix, frameInfo)
+        layer.render(gl, this.viewProjectionMatrix, frameInfo)
       }
     }
   }
 
-  clear() {
+  destroy() {
     const {gl, canvas} = this
 
     this.rootLayers?.forEach(layer => layer.destroy(gl))

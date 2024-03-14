@@ -35,7 +35,6 @@ export default class Layer {
   private _props: LayerProps
   private _transform3D: Transform3D
   private _drawer?: Drawer
-  private _projectionMatrix?: m4.Mat4
 
   // 遮罩
   private _trackMatteLayer?: Layer
@@ -91,7 +90,7 @@ export default class Layer {
     await this._drawer?.init(gl)
   }
 
-  async render(
+  render(
     gl: ThisWebGLContext,
     parentMatrix: m4.Mat4,
     frameInfo: FrameInfo,
@@ -120,13 +119,13 @@ export default class Layer {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       const viewMatrix = m4.worldProjection(parentWidth, parentHeight)
       const matrix = m4.multiply(viewMatrix, localMatrix)
-      await this._drawer.draw(gl, matrix, frameInfo, framebuffer)
+      this._drawer.draw(gl, matrix, frameInfo, framebuffer)
 
       // 遮罩渲染
       gl.bindFramebuffer(gl.FRAMEBUFFER, trackFramebuffer)
       gl.viewport(0, 0, parentWidth, parentHeight)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      await this._trackMatteLayer.render(gl, parentMatrix, frameInfo, trackFramebuffer)
+      this._trackMatteLayer.render(gl, parentMatrix, frameInfo, trackFramebuffer)
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
 
@@ -138,7 +137,7 @@ export default class Layer {
         parentFramebuffer ? frameInfo.height : gl.canvas.height,
       )
 
-      gl.uniform1i(gl.uniforms.enableMask, 1)
+      gl.uniform1i(gl.uniforms.maskMode, 1)
       gl.uniformMatrix4fv(gl.uniforms.matrix, false, parentMatrix)
       gl.activeTexture(gl.TEXTURE0)
       gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
@@ -150,10 +149,10 @@ export default class Layer {
       // 释放
       gl.bindTexture(gl.TEXTURE_2D, null)
       gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
-      gl.uniform1i(gl.uniforms.enableMask, 0)
+      gl.uniform1i(gl.uniforms.maskMode, 0)
     } else {
       const matrix = m4.multiply(parentMatrix, localMatrix)
-      await this._drawer.draw(gl, matrix, frameInfo, parentFramebuffer)
+      this._drawer.draw(gl, matrix, frameInfo, parentFramebuffer)
     }
   }
 

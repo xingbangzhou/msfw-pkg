@@ -30,7 +30,7 @@ export default class Player {
   clear() {
     this.cancelRequestAnimation()
 
-    this.ctxRender.clear()
+    this.ctxRender.destroy()
 
     this.playState = PlayState.None
   }

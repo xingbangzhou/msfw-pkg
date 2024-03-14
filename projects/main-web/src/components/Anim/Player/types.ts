@@ -16,6 +16,42 @@ export interface FrameInfo {
   height: number
 }
 
+export interface TransformProps {
+  anchorPoint: {
+    inFrame: number
+    value: number[]
+  }[]
+  position: {
+    inFrame: number
+    value: number[]
+  }[]
+  scale: {
+    inFrame: number
+    value: number[]
+  }[]
+  opacity: {
+    inFrame: number
+    value: number
+  }[]
+  rotationX?: {
+    inFrame: number
+    value: number
+  }[]
+  rotationY?: {
+    inFrame: number
+    value: number
+  }[]
+  rotationZ?: {
+    inFrame: number
+    value: number
+  }[]
+  orientation?: {
+    inFrame: number
+    value: number[]
+    timeFunc?: number
+  }[]
+}
+
 export interface LayerProps {
   type: string
   width: number
@@ -25,36 +61,7 @@ export interface LayerProps {
   id?: number
   name?: string
   content?: string
-  transform: {
-    anchorPoint: {
-      inFrame: number
-      value: number[]
-    }[]
-    position: {
-      inFrame: number
-      value: number[]
-    }[]
-    scale: {
-      inFrame: number
-      value: number[]
-    }[]
-    opacity: {
-      inFrame: number
-      value: number
-    }[]
-    rotationX?: {
-      inFrame: number
-      value: number
-    }[]
-    rotationY?: {
-      inFrame: number
-      value: number
-    }[]
-    rotationZ?: {
-      inFrame: number
-      value: number
-    }[]
-  }
+  transform: TransformProps
   layers?: LayerProps[]
   trackMatteLayer?: LayerProps
 }

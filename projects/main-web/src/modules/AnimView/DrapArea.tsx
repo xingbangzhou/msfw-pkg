@@ -2,7 +2,7 @@ import {memo, useCallback, DragEvent, useState} from 'react'
 import styled from '@emotion/styled'
 
 type DrapAreaProps = {
-  onDrapped?: (fileUrl: string) => void
+  onDrapped?: (fileObj: File) => void
 } & React.HTMLAttributes<HTMLDivElement>
 
 const Cover = styled.div`
@@ -58,10 +58,10 @@ const DrapArea = function (props: DrapAreaProps) {
       setDrapping(undefined)
 
       const df = ev.dataTransfer
-      const mp4File = df.files[0]
-      if (!mp4File) return
+      const file = df.files[0]
+      if (!file) return
 
-      onDrapped?.(URL.createObjectURL(mp4File))
+      onDrapped?.(file)
     },
     [onDrapped],
   )
