@@ -1,5 +1,5 @@
 import PData from '../PlayData'
-import {ThisWebGLContext, createTexture, drawTexRectangle} from '../base'
+import {ThisWebGLContext, createTexture, drawTexture} from '../base'
 import {Mat4} from '../base/m4'
 import {FrameInfo, LayerRectProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
@@ -80,7 +80,7 @@ export default class RectDrawer extends AbstractDrawer<LayerRectProps> {
 
     const width = this.width
     const height = this.height
-    drawTexRectangle(gl, width, height)
+    drawTexture(gl, width, height)
   }
 
   destroy(gl?: ThisWebGLContext | undefined): void {

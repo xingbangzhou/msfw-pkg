@@ -1,4 +1,4 @@
-import {ThisWebGLContext, createTexture, drawTexRectangle, m4} from '../base'
+import {ThisWebGLContext, createTexture, drawTexture, m4} from '../base'
 import {FrameInfo, LayerImageProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
@@ -52,7 +52,7 @@ export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
 
     const width = this.width
     const height = this.height
-    drawTexRectangle(gl, width, height)
+    drawTexture(gl, width, height)
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {
