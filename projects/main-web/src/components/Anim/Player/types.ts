@@ -1,5 +1,5 @@
+export const PreComposition = 'precomposition'
 export enum LayerType {
-  PreComposition = 'precomposition',
   Image = 'image',
   Video = 'video',
   Text = 'text',
@@ -67,7 +67,7 @@ export interface TransformProps {
 
 export interface LayerBaseProps {
   id: number
-  type: LayerType
+  type: string
   name?: string
   transform: TransformProps
   width: number
@@ -151,8 +151,28 @@ export type LayerTextProps = {
   content: string
 } & LayerBaseProps
 
+export type LayerPathProps = {
+  name?: string
+  blendMode?: number
+  elements: {
+    shapeInfo: {
+      points: Array<[number, number]>
+      actions: number[]
+    }
+    strokeInfo: {
+      blendMode?: number
+      color: [number, number, number, number]
+      opacity: number
+      width: number
+      lineCap: number
+      lineJoin: number
+      miterLimit: number
+    }
+  }
+} & LayerBaseProps
+
 export type LayerShapeProps = {
-  content: Array<LayerRectProps | LayerEllipseProps>
+  content: Array<LayerRectProps | LayerEllipseProps | LayerPathProps>
 } & LayerBaseProps
 
 export type LayerVectorProps = {
@@ -167,6 +187,7 @@ export type LayerProps =
   | LayerVectorProps
   | LayerRectProps
   | LayerEllipseProps
+  | LayerPathProps
 
 export interface PlayProps {
   width: number

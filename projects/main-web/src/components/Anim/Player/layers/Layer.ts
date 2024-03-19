@@ -1,4 +1,4 @@
-import PData from '../PlayData'
+import PlayBus from '../PlayBus'
 import {Framebuffer, ThisWebGLContext, createFramebuffer, drawTexture, m4} from '../base'
 import {
   FrameInfo,
@@ -9,6 +9,7 @@ import {
   LayerType,
   LayerVectorProps,
   LayerVideoProps,
+  PreComposition,
 } from '../types'
 import AbstractDrawer from './AbstractDrawer'
 import ImageDrawer from './ImageDrawer'
@@ -59,7 +60,7 @@ export default class Layer {
     if (trackId && parentLayers) {
       const trackProps = parentLayers.find(el => el.id == trackId)
       if (trackProps) {
-        this.trackMatteLayer = createLayer(trackProps, this.drawer.pdata)
+        this.trackMatteLayer = createLayer(trackProps, this.drawer.playBus)
       }
     }
     // 初始化
@@ -153,10 +154,10 @@ export default class Layer {
   }
 }
 
-export function createLayer(props: LayerProps, pdata: PData) {
+export function createLayer(props: LayerProps, playBus: PlayBus) {
   const {id, type, ...other} = props
-  if (type === LayerType.PreComposition) {
-    const compProps = pdata.getLayerByComps(id)
+  if (type === PreComposition) {
+    const compProps = playBus.getLayerByComps(id)
     if (!compProps) return undefined
     props = {...compProps, ...other}
   }
@@ -164,15 +165,15 @@ export function createLayer(props: LayerProps, pdata: PData) {
   const curType = props.type
   switch (curType) {
     case LayerType.Image:
-      return new Layer(new ImageDrawer(props as LayerImageProps, pdata))
+      return new Layer(new ImageDrawer(props as LayerImageProps, playBus))
     case LayerType.Video:
-      return new Layer(new VideoDrawer(props as LayerVideoProps, pdata))
+      return new Layer(new VideoDrawer(props as LayerVideoProps, playBus))
     case LayerType.Text:
-      return new Layer(new TextDrawer(props as LayerTextProps, pdata))
+      return new Layer(new TextDrawer(props as LayerTextProps, playBus))
     case LayerType.Vector:
-      return new Layer(new VectorDrawer(props as LayerVectorProps, pdata))
+      return new Layer(new VectorDrawer(props as LayerVectorProps, playBus))
     case LayerType.ShapeLayer:
-      return new Layer(new ShapeDrawer(props as LayerShapeProps, pdata))
+      return new Layer(new ShapeDrawer(props as LayerShapeProps, playBus))
   }
 
   return undefined

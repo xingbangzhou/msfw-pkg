@@ -7,13 +7,13 @@ import Layer, {createLayer} from './Layer'
 export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
   private _subLayers?: Layer[]
   private _framebuffer: Framebuffer | null = null
-  private _projectionMatrix: m4.Mat4 = m4.identity()
+  private _viewMatrix: m4.Mat4 = m4.identity()
 
   async init(gl: ThisWebGLContext) {
     const width = this.width
     const height = this.height
     this._framebuffer = createFramebuffer(gl, width, height)
-    this._projectionMatrix = m4.worldProjection(width, height)
+    this._viewMatrix = m4.worldProjection(width, height)
     const parInFrame = this.props.inFrame
 
     // 子图层列表
@@ -27,7 +27,7 @@ export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
         // 遮罩过滤
         if (props.isTrackMatte) continue
         // 创建图层
-        const layer = createLayer({...props, inFrame, outFrame}, this.pdata)
+        const layer = createLayer({...props, inFrame, outFrame}, this.playBus)
         if (!layer) continue
         await layer.init(gl, layerPropss)
         this._subLayers.push(layer)
@@ -55,12 +55,12 @@ export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
 
     const opacity = this.transform.getOpacity(parentFrameInfo.frameId)
     const frameInfo = {...parentFrameInfo, width: width, height: height, opacity}
-    const projectionMatrix = this._projectionMatrix
+    const viewMatrix = this._viewMatrix
 
     for (let i = 0, l = subLayers.length; i < l; i++) {
       const layer = subLayers[i]
       if (!layer.verifyTime(frameInfo.frameId)) continue
-      layer.render(gl, projectionMatrix, frameInfo, framebuffer)
+      layer.render(gl, viewMatrix, frameInfo, framebuffer)
     }
     // 上屏
     gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)

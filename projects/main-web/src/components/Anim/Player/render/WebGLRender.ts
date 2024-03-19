@@ -3,47 +3,48 @@ import {ThisWebGLContext, createProgram, resizeCanvasToDisplaySize} from '../bas
 import {FragmentShader, VertexShader} from './shaders'
 import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
-import PData from '../PlayData'
+import PlayBus from '../PlayBus'
 
 export default class WebGLRender {
-  constructor(pdata: PData) {
-    this.pdata = pdata
-  }
-
-  readonly pdata: PData
+  protected playBus?: PlayBus
 
   private container?: HTMLElement
-  private canvas?: HTMLCanvasElement
-  private gl?: ThisWebGLContext
+  private _canvas?: HTMLCanvasElement
+  private _gl?: ThisWebGLContext
 
-  private viewProjectionMatrix = m4.identity()
-  private rootLayers?: Layer[]
+  private _worldMatrix = m4.identity()
+  private _rootLayers?: Layer[]
 
   setContainer(container: HTMLElement) {
-    if (this.container === container) return
-    this.container = container
+    if (container === this._canvas?.parentElement) return
 
-    if (this.canvas) {
-      this.canvas.parentNode?.removeChild(this.canvas)
-      this.container.appendChild(this.canvas)
+    if (this._canvas) {
+      this._canvas.parentNode?.removeChild(this._canvas)
+      container.appendChild(this._canvas)
     }
+
+    this.container = container
   }
 
-  setRenderInfo(width: number, height: number, layerPropss: LayerProps[]) {
-    if (!this.canvas) {
-      const canvas = (this.canvas = document.createElement('canvas'))
+  async load(playBus: PlayBus) {
+    this.playBus = playBus
+
+    const width = playBus.width
+    const height = playBus.height
+
+    if (!this._canvas) {
+      const canvas = (this._canvas = document.createElement('canvas'))
       canvas.width = width
       canvas.height = height
 
-      const gl = (this.gl = canvas.getContext('webgl', {
+      const gl = (this._gl = canvas.getContext('webgl', {
         premultipliedAlpha: true, // 请求非预乘阿尔法通道
       }) as ThisWebGLContext)
-      this.container?.appendChild(this.canvas)
+      this.container?.appendChild(this._canvas)
 
-      // 初始化webgl
+      // Init WebGL
       gl.enable(gl.BLEND)
       gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-
       const program = (gl.program = createProgram(gl, VertexShader, FragmentShader))
       if (program) {
         // 设置参数
@@ -57,7 +58,6 @@ export default class WebGLRender {
           maskMode: gl.getUniformLocation(program, 'u_maskMode') as WebGLUniformLocation,
           opacity: gl.getUniformLocation(program, 'u_opacity') as WebGLUniformLocation,
         }
-
         // 纹理位置
         const uTextureLocation = gl.getUniformLocation(program, 'u_texture')
         const uMaskTextureLocation = gl.getUniformLocation(program, 'u_maskTexture')
@@ -66,54 +66,66 @@ export default class WebGLRender {
       }
     }
 
-    if (!this.gl) {
-      throw `WebGLRender, getContext('webgl') is null`
+    if (!this._gl) {
+      console.error(`WebGLRender, getContext('webgl') is null`)
+      return false
     }
 
-    resizeCanvasToDisplaySize(this.canvas)
+    resizeCanvasToDisplaySize(this._canvas)
 
-    this.viewProjectionMatrix = m4.worldProjection(width, height)
+    this._worldMatrix = m4.worldProjection(width, height)
 
-    this.initLayers(this.gl, layerPropss)
+    if (this._gl) {
+      const layerPropsList = playBus.rootLayers
+      await this.resetLayers(this._gl, playBus, layerPropsList || [])
+    }
+
+    return true
   }
 
   async render(frameInfo: FrameInfo) {
-    const gl = this.gl
+    const gl = this._gl
     if (!gl) return
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-    const rootLayers = this.rootLayers
+    const rootLayers = this._rootLayers
     if (rootLayers) {
       for (let i = 0, l = rootLayers?.length || 0; i < l; i++) {
         const layer = rootLayers?.[i]
         if (!layer.verifyTime(frameInfo.frameId)) continue
-        layer.render(gl, this.viewProjectionMatrix, frameInfo)
+        layer.render(gl, this._worldMatrix, frameInfo)
       }
     }
   }
 
   destroy() {
-    const {gl, canvas} = this
+    this.clearLayers()
 
-    this.rootLayers?.forEach(layer => layer.destroy(gl))
-    this.rootLayers = undefined
-
-    canvas?.parentNode && canvas.parentNode.removeChild(canvas)
-    this.canvas = undefined
+    this._canvas?.parentNode?.removeChild(this._canvas)
+    this._canvas = undefined
+    this.container = undefined
   }
 
-  private async initLayers(gl: ThisWebGLContext, layerPropss: LayerProps[]) {
-    this.rootLayers = []
+  private async resetLayers(gl: ThisWebGLContext, playBus: PlayBus, layerPropsList: LayerProps[]) {
+    this._rootLayers?.forEach(layer => layer.destroy(gl))
+    this._rootLayers = []
 
-    for (let i = layerPropss.length - 1; i >= 0; i--) {
-      const props = layerPropss[i]
+    for (let i = layerPropsList.length - 1; i >= 0; i--) {
+      const props = layerPropsList[i]
       // 遮罩过滤
       if (props.isTrackMatte) continue
       // 创建图层
-      const layer = createLayer(props, this.pdata)
+      const layer = createLayer(props, playBus)
       if (!layer) continue
-      await layer.init(gl, layerPropss)
-      this.rootLayers.push(layer)
+      this._rootLayers.push(layer)
+      await layer.init(gl, layerPropsList)
     }
+  }
+
+  private clearLayers() {
+    const {_gl} = this
+
+    this._rootLayers?.forEach(layer => layer.destroy(_gl))
+    this._rootLayers = undefined
   }
 }

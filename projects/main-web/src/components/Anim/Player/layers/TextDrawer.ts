@@ -4,7 +4,7 @@ import AbstractDrawer from './AbstractDrawer'
 
 const alignMap: CanvasTextAlign[] = ['left', 'center', 'right', 'left', 'left', 'left', 'left', 'left']
 
-function drawHorizontalText(ctx: CanvasRenderingContext2D, text: string, textDocAttr: LayerTextProps['textDocAttr']) {
+function drawHorizText(ctx: CanvasRenderingContext2D, text: string, textDocAttr: LayerTextProps['textDocAttr']) {
   // 设置字体
   ctx.font = `${textDocAttr.fontSize || 24}px ${textDocAttr.fontFamily || 'Arial'}`
 
@@ -26,7 +26,7 @@ function drawHorizontalText(ctx: CanvasRenderingContext2D, text: string, textDoc
   ctx.fillText(text, width * 0.5, height * 0.5)
 }
 
-function drawVerticalText(ctx: CanvasRenderingContext2D, text: string, textDocAttr: LayerTextProps['textDocAttr']) {
+function drawVertiText(ctx: CanvasRenderingContext2D, text: string, textDocAttr: LayerTextProps['textDocAttr']) {
   // 设置字体
   ctx.font = `${textDocAttr.fontSize || 24}px ${textDocAttr.fontFamily || 'Arial'}`
   const metrics = ctx.measureText('国')
@@ -66,7 +66,7 @@ export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
       const textDocAttr = this.props.textDocAttr
       // 横向画字
       if (textDocAttr.orientation) {
-        drawVerticalText(ctx, this.text, textDocAttr)
+        drawVertiText(ctx, this.text, textDocAttr)
         // 此处记住锚点偏移
         // if (textDocAttr.textAligment !== undefined) {
         //   const align = alignMap[textDocAttr.textAligment]
@@ -81,7 +81,7 @@ export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
         this.setAnchorOffXY(canvas.width * 0.5, 0)
       } else {
         // 水平画字
-        drawHorizontalText(ctx, this.text, textDocAttr)
+        drawHorizText(ctx, this.text, textDocAttr)
         if (textDocAttr.textAligment !== undefined) {
           const align = alignMap[textDocAttr.textAligment]
           if (align === 'left') {

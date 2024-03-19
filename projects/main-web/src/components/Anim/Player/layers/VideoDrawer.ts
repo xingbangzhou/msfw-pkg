@@ -3,65 +3,65 @@ import {FrameInfo, LayerVideoProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
 export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
-  private video?: HTMLVideoElement
-  private texture: WebGLTexture | null = null
-  private currentTime = 0
-  private playing = false
+  private _video?: HTMLVideoElement
+  private _texture: WebGLTexture | null = null
+  private _currentTime = 0
+  private _playing = false
 
   get url() {
     return this.props.content || ''
   }
 
   async init(gl: ThisWebGLContext) {
-    this.texture = createTexture(gl)
+    this._texture = createTexture(gl)
 
     this.load()
   }
 
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
-    if (!this.video) return
+    if (!this._video) return
 
-    if (!this.playing) {
+    if (!this._playing) {
       this.restart()
     }
 
-    const texture = this.texture
+    const texture = this._texture
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._video)
     if (this.props.isAlpha) gl.uniform1i(gl.uniforms.maskMode, 3)
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
-    const width = this.width || this.video.videoWidth
-    const height = this.height || this.video.videoHeight
+    const width = this.width
+    const height = this.height
     drawVideo(gl, width, height, this.props.isAlpha)
 
     gl.uniform1i(gl.uniforms.maskMode, 0)
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {
-    gl?.deleteTexture(this.texture)
-    this.texture = null
+    gl?.deleteTexture(this._texture)
+    this._texture = null
 
-    this.video?.parentNode && this.video.parentNode.removeChild(this.video)
-    this.video = undefined
+    this._video?.parentNode?.removeChild(this._video)
+    this._video = undefined
   }
 
   private load() {
-    const video = (this.video = document.createElement('video'))
+    const video = (this._video = document.createElement('video'))
     video.crossOrigin = 'anonymous'
     video.autoplay = false
     video.preload = 'auto'
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
 
-    this.video.muted = true
-    this.video.volume = 0
+    video.muted = true
+    video.volume = 0
 
     video.style.display = 'none'
 
     video.src = this.url
-    document.body.appendChild(this.video)
+    document.body.appendChild(video)
     video.load()
 
     // 绑定事件
@@ -75,22 +75,22 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
   }
 
   private restart() {
-    if (!this.video) return
+    if (!this._video) return
 
-    this.video.currentTime = 0
-    const prom = this.video?.play()
+    this._video.currentTime = 0
+    const prom = this._video?.play()
     prom?.catch(() => {
-      this.video?.play().catch(error => {
+      this._video?.play().catch(error => {
         console.error('play, error: ', error, this.url)
       })
     })
-    this.playing = true
+    this._playing = true
   }
 
   private onLoadedData = () => {}
 
   private onTimeUpdate = () => {
-    this.currentTime = this.video?.currentTime || 0
+    this._currentTime = this._video?.currentTime || 0
   }
 
   private onPlaying = () => {}
@@ -101,7 +101,7 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
 
   private onEnded = () => {
     // console.log('[Video]: ended', this.url)
-    this.playing = false
+    this._playing = false
   }
 
   private onCanplay = () => {

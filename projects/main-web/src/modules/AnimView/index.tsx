@@ -9,7 +9,7 @@ const DiView = memo(function DiView() {
   const handlerRef = useRef<AnimHandler>(null)
 
   useEffect(() => {
-    import('./buildMock.json').then(data => {
+    import('./mock_build.json').then(data => {
       handlerRef.current?.play(data.default as any)
     })
   }, [])

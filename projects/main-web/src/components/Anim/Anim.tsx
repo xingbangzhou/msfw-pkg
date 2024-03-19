@@ -5,7 +5,6 @@ import DiPlayer from './Player'
 
 export interface AnimHandler {
   play(props: PlayProps): void
-  clear(): void
 }
 
 type DiAnimProps = {
@@ -21,22 +20,18 @@ const Anim = memo(function DiAnim(props: DiAnimProps) {
 
   useImperativeHandle(handlerRef, () => ({
     play: (opts: PlayProps) => {
-      if (playerRef.current) playerRef.current.clear()
-      if (!rootRef.current) {
-        console.error('[DiAnim]: play', 'container is null')
-      } else {
-        playerRef.current = new DiPlayer(rootRef.current, opts)
-        playerRef.current.play()
-      }
-    },
-    clear: () => {
-      playerRef.current?.clear()
+      if (!rootRef.current) return
+
+      playerRef.current = new DiPlayer(rootRef.current)
+      playerRef.current.load(opts).then(() => {
+        playerRef.current?.play()
+      })
     },
   }))
 
   useEffect(() => {
     return () => {
-      playerRef.current?.clear()
+      playerRef.current?.detroy()
     }
   }, [])
 

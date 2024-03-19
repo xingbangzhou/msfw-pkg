@@ -1,4 +1,4 @@
-import PData from '../PlayData'
+import PlayBus from '../PlayBus'
 import {ThisWebGLContext, createTexture, drawTexture} from '../base'
 import {Mat4} from '../base/m4'
 import {FrameInfo, LayerRectProps} from '../types'
@@ -20,8 +20,8 @@ function drawRoundedRect(ctx: CanvasRenderingContext2D, width: number, height: n
 }
 
 export default class RectDrawer extends AbstractDrawer<LayerRectProps> {
-  constructor(props: LayerRectProps, pdata: PData) {
-    super(props, pdata)
+  constructor(props: LayerRectProps, playBus: PlayBus) {
+    super(props, playBus)
     this.props.width = props.elements.rectInfo.size[0] || 0
     this.props.height = props.elements.rectInfo.size[1] || 0
   }

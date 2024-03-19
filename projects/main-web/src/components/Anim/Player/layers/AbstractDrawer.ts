@@ -1,16 +1,16 @@
-import PData from '../PlayData'
+import PlayBus from '../PlayBus'
 import {ThisWebGLContext, degToRad, m4} from '../base'
 import {Transform3D} from '../base/transforms'
 import {FrameInfo, LayerProps} from '../types'
 
 export default abstract class AbstractDrawer<Props extends LayerProps> {
-  constructor(props: Props, pdata: PData) {
-    this.pdata = pdata
+  constructor(props: Props, playBus: PlayBus) {
+    this.playBus = playBus
     this.props = props
     this.transform = new Transform3D(props.transform)
   }
 
-  readonly pdata: PData
+  readonly playBus: PlayBus
   readonly props: Props
   readonly transform: Transform3D
 

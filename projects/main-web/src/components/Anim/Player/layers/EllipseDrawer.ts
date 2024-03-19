@@ -1,27 +1,12 @@
-import PData from '../PlayData'
+import PlayBus from '../PlayBus'
 import {ThisWebGLContext, createTexture, drawTexture} from '../base'
 import {Mat4} from '../base/m4'
 import {FrameInfo, LayerEllipseProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
-function drawRoundedRect(ctx: CanvasRenderingContext2D, width: number, height: number, radius: number) {
-  ctx.beginPath()
-  ctx.moveTo(radius, 0)
-  ctx.lineTo(width - radius, 0)
-  ctx.arcTo(width, 0, width, 0 + radius, radius)
-  ctx.lineTo(width, 0 + height - radius)
-  ctx.arcTo(width, 0 + height, width - radius, 0 + height, radius)
-  ctx.lineTo(radius, 0 + height)
-  ctx.arcTo(0, 0 + height, 0, 0 + height - radius, radius)
-  ctx.lineTo(0, 0 + radius)
-  ctx.arcTo(0, 0, radius, 0, radius)
-  ctx.closePath()
-  ctx.fill()
-}
-
 export default class EllipseDrawer extends AbstractDrawer<LayerEllipseProps> {
-  constructor(props: LayerEllipseProps, pdata: PData) {
-    super(props, pdata)
+  constructor(props: LayerEllipseProps, playBus: PlayBus) {
+    super(props, playBus)
     this.props.width = props.elements.ellipseInfo.size[0] || 0
     this.props.height = props.elements.ellipseInfo.size[1] || 0
   }
