@@ -1,4 +1,4 @@
-import {LayerProps} from '../types'
+import {LayerProps, TransformProps} from '../types'
 import {Vec3} from './m4'
 
 class Property<T = number[] | number> {
@@ -43,7 +43,7 @@ class Property<T = number[] | number> {
 }
 
 export class Transform3D {
-  constructor(props: LayerProps['transform']) {
+  constructor(props: TransformProps) {
     this.anchorPoint = new Property<number[]>(props.anchorPoint)
     this.position = new Property<number[]>(props.position)
 
@@ -51,15 +51,10 @@ export class Transform3D {
 
     this.opacity = new Property<number>(props.opacity)
 
-    if (props.rotationX) {
-      this.rotationX = new Property<number>(props.rotationX)
-    }
-    if (props.rotationY) {
-      this.rotationY = new Property<number>(props.rotationY)
-    }
-    if (props.rotationZ) {
-      this.rotationZ = new Property<number>(props.rotationZ)
-    }
+    this.rotationX = props.rotationX ? new Property<number>(props.rotationX) : undefined
+    this.rotationY = props.rotationY ? new Property<number>(props.rotationY) : undefined
+    this.rotationZ = props.rotationZ ? new Property<number>(props.rotationZ) : undefined
+    this.orientation = props.orientation ? new Property<number[]>(props.orientation) : undefined
   }
 
   // 锚点
@@ -76,17 +71,23 @@ export class Transform3D {
   rotationY?: Property<number>
   // 旋转
   rotationZ?: Property<number>
+  // 朝向
+  orientation?: Property<number[]>
 
-  getAnchorPoint(frameId: number) {
+  getAnchorPoint(frameId: number, offX = 0, offY = 0) {
     if (!this.anchorPoint) return null
 
     const value = this.anchorPoint.getValue(frameId) as number[] | null
     if (!value) return null
 
-    return [value[0] || 0, value[1] || 0, value[2] || 0] as Vec3
+    const x = value[0] || 0
+    const y = value[1] || 0
+    const z = value[1] || 0
+
+    return [x + offX, y + offY, z] as Vec3
   }
 
-  getPosition(frameId: number) {
+  getPosition(frameId: number, offX = 0, offY = 0) {
     if (!this.position) return null
 
     const value = this.position.getValue(frameId) as number[] | null
@@ -96,11 +97,15 @@ export class Transform3D {
     const y = value[1] || 0
     const z = value[2] || 0
 
-    return [x, y, z] as Vec3
+    return [x + offX, y + offY, z] as Vec3
   }
 
   getScale(frameId: number) {
     return this.scale?.getValue(frameId) as Vec3
+  }
+
+  getOpacity(frameId: number) {
+    return ((this.opacity?.getValue(frameId) ?? 100) as number) * 0.01
   }
 
   getRotation(frameId: number) {
@@ -111,7 +116,9 @@ export class Transform3D {
     return [x, y, z] as Vec3
   }
 
-  getOpacity(frameId: number) {
-    return ((this.opacity?.getValue(frameId) ?? 100) as number) * 0.01
+  getOrientation(frameId: number) {
+    if (!this.orientation) return [0, 0, 0] as Vec3
+
+    return this.orientation?.getValue(frameId) as Vec3
   }
 }

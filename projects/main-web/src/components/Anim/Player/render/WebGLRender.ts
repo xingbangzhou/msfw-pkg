@@ -1,10 +1,17 @@
 import {FrameInfo, LayerProps} from '../types'
 import {ThisWebGLContext, createProgram, resizeCanvasToDisplaySize} from '../base/glapi'
-import {FragmentShader, VertexShader} from '../layers/shaders'
+import {FragmentShader, VertexShader} from './shaders'
 import * as m4 from '../base/m4'
-import Layer from '../layers/Layer'
+import Layer, {createLayer} from '../layers/Layer'
+import PData from '../PlayData'
 
 export default class WebGLRender {
+  constructor(pdata: PData) {
+    this.pdata = pdata
+  }
+
+  readonly pdata: PData
+
   private container?: HTMLElement
   private canvas?: HTMLCanvasElement
   private gl?: ThisWebGLContext
@@ -79,6 +86,7 @@ export default class WebGLRender {
     if (rootLayers) {
       for (let i = 0, l = rootLayers?.length || 0; i < l; i++) {
         const layer = rootLayers?.[i]
+        if (!layer.verifyTime(frameInfo.frameId)) continue
         layer.render(gl, this.viewProjectionMatrix, frameInfo)
       }
     }
@@ -98,8 +106,13 @@ export default class WebGLRender {
     this.rootLayers = []
 
     for (let i = layerPropss.length - 1; i >= 0; i--) {
-      const layer = new Layer(layerPropss[i])
-      await layer.init(gl)
+      const props = layerPropss[i]
+      // 遮罩过滤
+      if (props.isTrackMatte) continue
+      // 创建图层
+      const layer = createLayer(props, this.pdata)
+      if (!layer) continue
+      await layer.init(gl, layerPropss)
       this.rootLayers.push(layer)
     }
   }

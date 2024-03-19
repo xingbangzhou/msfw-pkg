@@ -1,21 +1,15 @@
-import {ThisWebGLContext, createTexture, drawTexRectangle, m4} from '../base'
-import {FrameInfo} from '../types'
+import {ThisWebGLContext, createTexture, drawVideo, m4} from '../base'
+import {FrameInfo, LayerVideoProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
-import Layer from './Layer'
 
-export default class VideoDrawer extends AbstractDrawer {
-  constructor(layerRef: Layer) {
-    super(layerRef)
-  }
-
+export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
   private video?: HTMLVideoElement
   private texture: WebGLTexture | null = null
-  private texture0: WebGLTexture | null = null
   private currentTime = 0
-  private played = false
+  private playing = false
 
   get url() {
-    return this.layerRef.props.content || ''
+    return this.props.content || ''
   }
 
   async init(gl: ThisWebGLContext) {
@@ -27,40 +21,27 @@ export default class VideoDrawer extends AbstractDrawer {
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     if (!this.video) return
 
-    let texture = this.texture
-    let noNeedTexImage = false
-
-    if (!this.played) {
+    if (!this.playing) {
       this.restart()
-      if (!this.texture0) {
-        this.texture0 = gl.createTexture()
-      } else {
-        noNeedTexImage = true
-      }
-      texture = this.texture0
-    }
-    if (frameInfo.frames === frameInfo.frameId + 1) {
-      this.stop()
     }
 
+    const texture = this.texture
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
-    if (!noNeedTexImage) {
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video)
-    }
-
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video)
+    if (this.props.isAlpha) gl.uniform1i(gl.uniforms.maskMode, 3)
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
-    const width = this.layerRef.width || this.video.videoWidth
-    const height = this.layerRef.height || this.video.videoHeight
-    drawTexRectangle(gl, width, height)
+    const width = this.width || this.video.videoWidth
+    const height = this.height || this.video.videoHeight
+    drawVideo(gl, width, height, this.props.isAlpha)
+
+    gl.uniform1i(gl.uniforms.maskMode, 0)
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {
     gl?.deleteTexture(this.texture)
-    gl?.deleteTexture(this.texture0)
     this.texture = null
-    this.texture0 = null
 
     this.video?.parentNode && this.video.parentNode.removeChild(this.video)
     this.video = undefined
@@ -103,12 +84,7 @@ export default class VideoDrawer extends AbstractDrawer {
         console.error('play, error: ', error, this.url)
       })
     })
-    this.played = true
-  }
-
-  private stop() {
-    this.video?.pause()
-    this.played = false
+    this.playing = true
   }
 
   private onLoadedData = () => {}
@@ -120,18 +96,19 @@ export default class VideoDrawer extends AbstractDrawer {
   private onPlaying = () => {}
 
   private onPause = () => {
-    console.log('[Video]: pause', this.url)
+    // console.log('[Video]: pause', this.url)
   }
 
   private onEnded = () => {
-    console.log('[Video]: ended', this.url)
+    // console.log('[Video]: ended', this.url)
+    this.playing = false
   }
 
   private onCanplay = () => {
-    console.log('[Video]: canplay', this.url)
+    // console.log('[Video]: canplay', this.url)
   }
 
   private onError = (err: unknown) => {
-    console.error('[Video]: play error: ', this.url, err)
+    // console.error('[Video]: play error: ', this.url, err)
   }
 }

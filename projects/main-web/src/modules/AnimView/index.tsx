@@ -2,7 +2,6 @@ import {memo, useCallback, useEffect, useRef} from 'react'
 import './index.scss'
 import Anim, {AnimHandler} from 'src/components/Anim'
 import {Box, Grid} from '@mui/material'
-import {mocks} from './mocks'
 import DrapArea from './DrapArea'
 import JSZip from 'jszip'
 
@@ -10,7 +9,9 @@ const DiView = memo(function DiView() {
   const handlerRef = useRef<AnimHandler>(null)
 
   useEffect(() => {
-    handlerRef.current?.play(mocks)
+    import('./buildMock.json').then(data => {
+      handlerRef.current?.play(data.default as any)
+    })
   }, [])
 
   const onDrapped = useCallback((fileObj: File) => {

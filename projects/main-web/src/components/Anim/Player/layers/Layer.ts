@@ -1,93 +1,70 @@
-import {Framebuffer, ThisWebGLContext, createFramebuffer, createTexture, degToRad, drawTexRectangle, m4} from '../base'
-import {str$m4} from '../base/m4'
-import {Transform3D} from '../base/transforms'
-import {FrameInfo, LayerProps, LayerType} from '../types'
-import Drawer from './AbstractDrawer'
+import PData from '../PlayData'
+import {Framebuffer, ThisWebGLContext, createFramebuffer, drawTexture, m4} from '../base'
+import {
+  FrameInfo,
+  LayerImageProps,
+  LayerProps,
+  LayerShapeProps,
+  LayerTextProps,
+  LayerType,
+  LayerVectorProps,
+  LayerVideoProps,
+} from '../types'
+import AbstractDrawer from './AbstractDrawer'
 import ImageDrawer from './ImageDrawer'
-import PreComposeDrawer from './PreComposeDrawer'
+import ShapeDrawer from './ShapeDrawer'
+import TextDrawer from './TextDrawer'
+import VectorDrawer from './VectorDrawer'
 import VideoDrawer from './VideoDrawer'
 
-function newDrawer(props: LayerProps, layerRef: Layer) {
-  const type = props.type
-  switch (type) {
-    case LayerType.Video:
-      return new VideoDrawer(layerRef)
-    case LayerType.Image:
-      return new ImageDrawer(layerRef)
-    case LayerType.PreComposition:
-      return new PreComposeDrawer(layerRef)
-  }
-
-  return undefined
-}
-
 export default class Layer {
-  constructor(props: LayerProps) {
-    this._props = props
-    this._transform3D = new Transform3D(props.transform)
-
-    this._drawer = newDrawer(props, this)
-    if (props.trackMatteLayer) {
-      this._trackMatteLayer = new Layer(props.trackMatteLayer)
-    }
+  constructor(drawer: AbstractDrawer<LayerProps>) {
+    this.drawer = drawer
   }
 
-  private _props: LayerProps
-  private _transform3D: Transform3D
-  private _drawer?: Drawer
+  private drawer: AbstractDrawer<LayerProps>
 
   // 遮罩
-  private _trackMatteLayer?: Layer
-  private _trackFramebuffer?: Framebuffer | null = null
-  private _framebuffer: Framebuffer | null = null
+  private trackMatteLayer?: Layer
+  private trackFramebuffer?: Framebuffer | null = null
+  private framebuffer: Framebuffer | null = null
 
-  get props() {
-    return this._props
-  }
-
-  get transform3D() {
-    return this._transform3D
+  get type() {
+    return this.drawer.props.type
   }
 
   get width() {
-    return this._props.width
+    return this.drawer.width
   }
 
   get height() {
-    return this._props.height
+    return this.drawer.height
   }
 
-  getFrameMatrix({frameId}: FrameInfo) {
-    const anchorPoint = this.transform3D.getAnchorPoint(frameId)
-    const position = this.transform3D.getPosition(frameId)
-    const scale = this.transform3D.getScale(frameId)
-    const rotation = this.transform3D.getRotation(frameId)
-
-    if (!anchorPoint || !position) return null
-
-    const [x, y, z] = position
-    let matrix = m4.translation(x, -y, -z)
-
-    if (rotation) {
-      rotation[0] && (matrix = m4.xRotate(matrix, degToRad(rotation[0])))
-      rotation[1] && (matrix = m4.yRotate(matrix, degToRad(360 - rotation[1])))
-      rotation[2] && (matrix = m4.zRotate(matrix, degToRad(360 - rotation[2])))
-    }
-    if (scale) {
-      matrix = m4.scale(matrix, (scale[0] || 100) * 0.01, (scale[1] || 100) * 0.01, (scale[2] || 100) * 0.01)
-    }
-
-    const moveOrighMatrix = m4.translation(-anchorPoint[0], anchorPoint[1], 0)
-    matrix = m4.multiply(matrix, moveOrighMatrix)
-
-    return matrix
+  get inFrame() {
+    return this.drawer.props.inFrame
   }
 
-  async init(gl: ThisWebGLContext) {
-    if (this._trackMatteLayer) {
-      await this._trackMatteLayer?.init(gl)
+  get outFrame() {
+    return this.drawer.props.outFrame
+  }
+
+  verifyTime(frameId: number) {
+    return frameId >= this.inFrame && frameId <= this.outFrame
+  }
+
+  async init(gl: ThisWebGLContext, parentLayers?: LayerProps[]) {
+    // 遮罩对象
+    const trackId = this.drawer.props.trackMatteLayer
+    if (trackId && parentLayers) {
+      const trackProps = parentLayers.find(el => el.id == trackId)
+      if (trackProps) {
+        this.trackMatteLayer = createLayer(trackProps, this.drawer.pdata)
+      }
     }
-    await this._drawer?.init(gl)
+    // 初始化
+    await this.drawer.init(gl)
+    await this.trackMatteLayer?.init(gl)
   }
 
   render(
@@ -96,21 +73,21 @@ export default class Layer {
     frameInfo: FrameInfo,
     parentFramebuffer: WebGLFramebuffer | null = null,
   ) {
-    if (!this._drawer) return
-    const localMatrix = this.getFrameMatrix(frameInfo)
+    const drawer = this.drawer
+    const localMatrix = drawer.getMatrix(frameInfo)
     if (!localMatrix) return
 
     const {width: parentWidth, height: parentHeight} = frameInfo
 
-    // 设置透明度
-    const opcaity = this.transform3D.getOpacity(frameInfo.frameId)
-    gl.uniform1f(gl.uniforms.opacity, opcaity)
+    const opcaity = drawer.getOpacity(frameInfo)
 
     // 处理遮罩
-    if (this._trackMatteLayer) {
-      const framebuffer = this._framebuffer || createFramebuffer(gl, parentWidth, parentHeight)
-
-      const trackFramebuffer = this._trackFramebuffer || createFramebuffer(gl, parentWidth, parentHeight)
+    const trackMatteLayer = this.trackMatteLayer
+    if (trackMatteLayer) {
+      const framebuffer = this.framebuffer || createFramebuffer(gl, parentWidth, parentHeight)
+      this.framebuffer = framebuffer
+      const trackFramebuffer = this.trackFramebuffer || createFramebuffer(gl, parentWidth, parentHeight)
+      this.trackFramebuffer = trackFramebuffer
       if (!framebuffer || !trackFramebuffer) return
 
       // 纹理渲染
@@ -119,13 +96,13 @@ export default class Layer {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       const viewMatrix = m4.worldProjection(parentWidth, parentHeight)
       const matrix = m4.multiply(viewMatrix, localMatrix)
-      this._drawer.draw(gl, matrix, frameInfo, framebuffer)
+      drawer.draw(gl, matrix, frameInfo, framebuffer)
 
       // 遮罩渲染
       gl.bindFramebuffer(gl.FRAMEBUFFER, trackFramebuffer)
       gl.viewport(0, 0, parentWidth, parentHeight)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      this._trackMatteLayer.render(gl, parentMatrix, frameInfo, trackFramebuffer)
+      trackMatteLayer.render(gl, parentMatrix, frameInfo, trackFramebuffer)
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
 
@@ -137,6 +114,8 @@ export default class Layer {
         parentFramebuffer ? frameInfo.height : gl.canvas.height,
       )
 
+      // 设置透明度
+      gl.uniform1f(gl.uniforms.opacity, opcaity)
       gl.uniform1i(gl.uniforms.maskMode, 1)
       gl.uniformMatrix4fv(gl.uniforms.matrix, false, parentMatrix)
       gl.activeTexture(gl.TEXTURE0)
@@ -144,30 +123,57 @@ export default class Layer {
       gl.activeTexture(gl.TEXTURE1)
       gl.bindTexture(gl.TEXTURE_2D, trackFramebuffer.texture)
 
-      drawTexRectangle(gl, parentWidth, parentHeight, true)
+      drawTexture(gl, parentWidth, parentHeight, true)
 
       // 释放
       gl.bindTexture(gl.TEXTURE_2D, null)
       gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
       gl.uniform1i(gl.uniforms.maskMode, 0)
     } else {
+      // 设置透明度
+      gl.uniform1f(gl.uniforms.opacity, opcaity)
       const matrix = m4.multiply(parentMatrix, localMatrix)
-      this._drawer.draw(gl, matrix, frameInfo, parentFramebuffer)
+      drawer.draw(gl, matrix, frameInfo, parentFramebuffer)
     }
   }
 
   destroy(gl?: ThisWebGLContext) {
-    if (this._framebuffer) {
-      gl?.deleteFramebuffer(this._framebuffer)
-      gl?.deleteTexture(this._framebuffer.texture)
-      this._framebuffer = null
+    if (this.framebuffer) {
+      gl?.deleteFramebuffer(this.framebuffer)
+      gl?.deleteTexture(this.framebuffer.texture)
+      this.framebuffer = null
     }
-    if (this._trackFramebuffer) {
-      gl?.deleteFramebuffer(this._trackFramebuffer)
-      gl?.deleteTexture(this._trackFramebuffer.texture)
-      this._trackFramebuffer = null
+    if (this.trackFramebuffer) {
+      gl?.deleteFramebuffer(this.trackFramebuffer)
+      gl?.deleteTexture(this.trackFramebuffer.texture)
+      this.trackFramebuffer = null
     }
 
-    this._drawer?.destroy(gl)
+    this.drawer.destroy(gl)
   }
+}
+
+export function createLayer(props: LayerProps, pdata: PData) {
+  const {id, type, ...other} = props
+  if (type === LayerType.PreComposition) {
+    const compProps = pdata.getLayerByComps(id)
+    if (!compProps) return undefined
+    props = {...compProps, ...other}
+  }
+
+  const curType = props.type
+  switch (curType) {
+    case LayerType.Image:
+      return new Layer(new ImageDrawer(props as LayerImageProps, pdata))
+    case LayerType.Video:
+      return new Layer(new VideoDrawer(props as LayerVideoProps, pdata))
+    case LayerType.Text:
+      return new Layer(new TextDrawer(props as LayerTextProps, pdata))
+    case LayerType.Vector:
+      return new Layer(new VectorDrawer(props as LayerVectorProps, pdata))
+    case LayerType.ShapeLayer:
+      return new Layer(new ShapeDrawer(props as LayerShapeProps, pdata))
+  }
+
+  return undefined
 }

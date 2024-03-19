@@ -1,19 +1,19 @@
 import {PlayProps, PlayState} from './types'
 import WebGLRender from './render/WebGLRender'
-import Parser from './base/parser'
+import PlayData from './PlayData'
 
 export default class Player {
   constructor(container: HTMLElement, props: PlayProps) {
     this.requestAnim = this.requestAnimFunc()
 
-    const parser = (this.parser = new Parser(props))
-    this.ctxRender = new WebGLRender()
+    const pdata = (this.pdata = new PlayData(props))
+    this.ctxRender = new WebGLRender(pdata)
 
     this.ctxRender.setContainer(container)
-    this.ctxRender.setRenderInfo(parser.width, parser.height, parser.rootLayers)
+    this.ctxRender.setRenderInfo(pdata.width, pdata.height, pdata.rootLayers)
   }
 
-  private parser: Parser
+  private pdata: PlayData
   private ctxRender: WebGLRender
 
   protected frameAnimId: any
@@ -23,28 +23,36 @@ export default class Player {
 
   play() {
     if (this.playState === PlayState.None) {
+      this.playState = PlayState.Play
       this.render()
     }
   }
 
   clear() {
     this.cancelRequestAnimation()
-
     this.ctxRender.destroy()
 
     this.playState = PlayState.None
   }
 
+  private _startTime = 0
   protected render = (_?: unknown, info?: any) => {
-    this.frameIndex++
-    if (this.frameIndex === this.parser.frames) {
+    if (!this._startTime) {
+      this._startTime = new Date().getTime()
       this.frameIndex = 0
+    } else {
+      this.frameIndex = Math.floor((new Date().getTime() - this._startTime) * this.pdata.frameRate * 0.001)
+      if (this.frameIndex >= this.pdata.frames) {
+        this.frameIndex = this.pdata.frames
+      }
     }
+
     const frameInfo = {
-      frames: this.parser.frames,
+      frames: this.pdata.frames,
       frameId: this.frameIndex,
-      width: this.parser.width,
-      height: this.parser.height,
+      width: this.pdata.width,
+      height: this.pdata.height,
+      opacity: 1.0,
     }
 
     this.ctxRender.render(frameInfo)
@@ -54,7 +62,7 @@ export default class Player {
 
   private requestAnimFunc = () => {
     return (cb: () => void) => {
-      return setTimeout(cb, 1000 / this.parser.frameRate)
+      return setTimeout(cb, 1000 / this.pdata.frameRate)
     }
   }
 
