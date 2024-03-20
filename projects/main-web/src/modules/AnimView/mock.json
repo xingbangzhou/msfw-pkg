@@ -16,11 +16,11 @@
                 "name": "sdasd ",
                 "textDocAttr": {
                     "text": "sdasd ",
-                    "textColor": {
-                        "r": 0,
-                        "g": 0,
-                        "b": 0
-                    },
+                    "textColor": [
+                        0,
+                        0,
+                        0
+                    ],
                     "font": "STHeitiSC-Light",
                     "fontFamily": "Heiti SC",
                     "fontSize": 48,
@@ -29,7 +29,7 @@
                     "fauxItalic": false,
                     "lineSpacing": 57.6000022888184,
                     "wordSpacing": 25,
-                    "textAligment": 1
+                    "textAligment": 0
                 },
                 "content": "sdasd ",
                 "transform": {
@@ -181,23 +181,20 @@
                         {
                             "inFrame": 0,
                             "value": 0
-                        },
-                        {
-                            "inFrame": 30,
-                            "value": 90,
-                            "timeFunc": 0
                         }
                     ]
                 },
                 "width": 900,
                 "height": 1000,
                 "inFrame": 0,
-                "outFrame": 120
+                "outFrame": 120,
+                "isTrackMatte": false
             },
             {
                 "id": 5294,
                 "type": "precomposition",
                 "name": "6_bmp",
+                "isAlpha": true,
                 "transform": {
                     "anchorPoint": [
                         {
@@ -420,9 +417,9 @@
                             "fillInfo": {
                                 "blendMode": 1,
                                 "color": [
-                                    0.9365509631587,
-                                    0.88237298703661,
-                                    0.88237298703661,
+                                    0.94,
+                                    0.88,
+                                    0.88,
                                     1
                                 ],
                                 "opacity": 100
@@ -525,8 +522,8 @@
             {
                 "id": 8226,
                 "type": "video",
-                "content": "temp_change_264_mid.mp4",
-                "name": "temp_change_264_mid.mp4",
+                "content": "temp_change_264_mid_1.mp4",
+                "name": "temp_change_264_mid_1.mp4",
                 "transform": {
                     "anchorPoint": [
                         {
@@ -1004,9 +1001,9 @@
                                 "strokeInfo": {
                                     "blendMode": 1,
                                     "color": [
-                                        0.79305303096771,
-                                        0.1382269859314,
-                                        0.1382269859314,
+                                        0.79,
+                                        0.14,
+                                        0.14,
                                         1
                                     ],
                                     "opacity": 100,
@@ -1560,7 +1557,8 @@
                     "width": 900,
                     "height": 1000,
                     "inFrame": 0,
-                    "outFrame": 120
+                    "outFrame": 120,
+                    "isTrackMatte": false
                 }
             ],
             "bgColor": [
@@ -1574,7 +1572,7 @@
         {
             "id": 5294,
             "type": "video",
-            "content": "6_bmp.mov",
+            "content": "6_bmp.mp4",
             "name": "6_bmp",
             "bgColor": [
                 0,
@@ -1606,13 +1604,13 @@
     ],
     "videoSource": [
         {
-            "content": "6_bmp.mov",
+            "content": "6_bmp.mp4",
             "name": "6_bmp"
         },
         {
-            "srcPath": "/Users/ynot16/Desktop/testYYXXX/temp_change_264_mid.mp4",
-            "content": "temp_change_264_mid.mp4",
-            "name": "temp_change_264_mid.mp4"
+            "srcPath": "/Users/ynot16/Desktop/testYYXXX/temp_change_264_mid_1.mp4",
+            "content": "temp_change_264_mid_1.mp4",
+            "name": "temp_change_264_mid_1.mp4"
         }
     ]
 }
