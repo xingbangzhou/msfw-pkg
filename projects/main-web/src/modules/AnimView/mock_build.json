@@ -1016,7 +1016,8 @@
                         "fauxItalic": false,
                         "lineSpacing": 22.8000011444092,
                         "wordSpacing": 92,
-                        "textAligment": 0
+                        "textAligment": 0,
+                        "orientation": 1
                     },
                     "content": "进入直播间",
                     "transform": {
@@ -1135,7 +1136,8 @@
                         "fauxItalic": false,
                         "lineSpacing": 22.8000011444092,
                         "wordSpacing": 92,
-                        "textAligment": 0
+                        "textAligment": 0,
+                        "orientation": 1
                     },
                     "content": "进入直播间",
                     "transform": {

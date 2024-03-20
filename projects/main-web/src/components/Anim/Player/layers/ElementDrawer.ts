@@ -1,15 +1,10 @@
-import {createTexture, drawTexture, m4, ThisWebGLContext} from '../base'
+import {createTexture, drawTexture, m4, rgba, ThisWebGLContext} from '../base'
 import {Property} from '../base/transforms'
-import {FrameInfo, LayerEllipseProps, LayerPathProps, LayerRectProps, LayerShapeProps} from '../types'
+import {FrameInfo, LayerEllipseProps, LayerPathProps, LayerRectProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
 const LineCap: CanvasLineCap[] = ['butt', 'round', 'square']
 const LineJoin: CanvasLineJoin[] = ['bevel', 'miter', 'round']
-
-function rgba(color: number[], opacity?: number) {
-  opacity = opacity ?? 100
-  return `rgba(${color[0] * 255}, ${color[1] * 255}, ${color[2] * 255}, ${(color[3] ?? 1.0) * opacity * 0.01})`
-}
 
 export default abstract class ElementDrawer<
   Props extends LayerRectProps | LayerEllipseProps | LayerPathProps,

@@ -68,17 +68,16 @@ export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
       if (textDocAttr.orientation) {
         drawVertiText(ctx, this.text, textDocAttr)
         // 此处记住锚点偏移
-        // if (textDocAttr.textAligment !== undefined) {
-        //   const align = alignMap[textDocAttr.textAligment]
-        //   if (align === 'left') {
-        //     this.setAnchorOffXY(0, 0)
-        //   } else if (align === 'center') {
-        //     this.setAnchorOffXY(canvas.width * 0.5, 0)
-        //   } else {
-        //     this.setAnchorOffXY(canvas.width, 0)
-        //   }
-        // }
-        this.setAnchorOffXY(canvas.width * 0.5, 0)
+        if (textDocAttr.textAligment !== undefined) {
+          const align = alignMap[textDocAttr.textAligment]
+          if (align === 'left') {
+            this.setAnchorOffXY(canvas.width * 0.5, 0)
+          } else if (align === 'center') {
+            this.setAnchorOffXY(canvas.width * 0.5, canvas.height * 0.5)
+          } else {
+            this.setAnchorOffXY(canvas.width * 0.5, canvas.height)
+          }
+        }
       } else {
         // 水平画字
         drawHorizText(ctx, this.text, textDocAttr)
