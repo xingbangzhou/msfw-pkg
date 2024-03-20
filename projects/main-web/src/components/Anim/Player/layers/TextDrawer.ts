@@ -1,4 +1,4 @@
-import {ThisWebGLContext, createTexture, drawTexture, m4} from '../base'
+import {ThisWebGLContext, createTexture, drawTexture, m4, rgba} from '../base'
 import {FrameInfo, LayerTextProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
@@ -18,9 +18,7 @@ function drawHorizText(ctx: CanvasRenderingContext2D, text: string, textDocAttr:
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   // 设置字体
-  ctx.fillStyle = `rgba(${textDocAttr.textColor.r || 0},${textDocAttr.textColor.g || 0},${
-    textDocAttr.textColor.b || 0
-  }, 1)`
+  ctx.fillStyle = rgba(textDocAttr.textColor)
   ctx.font = `${textDocAttr.fontSize || 24}px ${textDocAttr.fontFamily || 'Arial'}`
 
   ctx.fillText(text, width * 0.5, height * 0.5)
@@ -39,9 +37,7 @@ function drawVertiText(ctx: CanvasRenderingContext2D, text: string, textDocAttr:
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   // 设置字体
-  ctx.fillStyle = `rgba(${textDocAttr.textColor.r || 0},${textDocAttr.textColor.g || 0},${
-    textDocAttr.textColor.b || 0
-  }, 1)`
+  ctx.fillStyle = rgba(textDocAttr.textColor)
   ctx.font = `${textDocAttr.fontSize || 24}px ${textDocAttr.fontFamily || 'Arial'}`
 
   const x = width * 0.5

@@ -49,6 +49,7 @@ export default abstract class ElementDrawer<
     const width = this.width
     const height = this.height
     let hasTexture = true
+
     if (!this._ctx) {
       const canvas = document.createElement('canvas')
       canvas.width = width

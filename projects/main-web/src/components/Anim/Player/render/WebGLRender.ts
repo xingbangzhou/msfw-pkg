@@ -38,13 +38,16 @@ export default class WebGLRender {
       canvas.height = height
 
       const gl = (this._gl = canvas.getContext('webgl', {
-        premultipliedAlpha: true, // 请求非预乘阿尔法通道
+        premultipliedAlpha: false, // 请求非预乘阿尔法通道
       }) as ThisWebGLContext)
       this.container?.appendChild(this._canvas)
 
       // Init WebGL
       gl.enable(gl.BLEND)
-      gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+      // gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
+
       const program = (gl.program = createProgram(gl, VertexShader, FragmentShader))
       if (program) {
         // 设置参数

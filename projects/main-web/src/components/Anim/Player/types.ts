@@ -92,7 +92,7 @@ export type LayerVideoProps = {
 export type LayerTextProps = {
   textDocAttr: {
     text: string
-    textColor: {r: number; g: number; b: number}
+    textColor: number[]
     font: string
     fontFamily: string
     fontSize: number
