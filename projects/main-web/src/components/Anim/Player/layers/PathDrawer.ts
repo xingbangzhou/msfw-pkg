@@ -1,34 +1,50 @@
-import PlayBus from '../PlayBus'
-import {ThisWebGLContext, drawTexture} from '../base'
-import {Mat4} from '../base/m4'
-import {FrameInfo, LayerRectProps} from '../types'
-import AbstractDrawer from './AbstractDrawer'
+import {ThisWebGLContext} from '../base'
+import {LayerPathProps} from '../types'
+import ElementDrawer from './ElementDrawer'
 
-export default class PathDrawer extends AbstractDrawer<LayerRectProps> {
-  constructor(props: LayerRectProps, playBus: PlayBus) {
-    super(props, playBus)
-    this.props.width = props.elements.rectInfo.size[0] || 0
-    this.props.height = props.elements.rectInfo.size[1] || 0
-  }
+export default class PathDrawer extends ElementDrawer<LayerPathProps> {
+  private points: Array<[number, number]> = []
 
-  private _texture: WebGLTexture | null = null
-
-  async init(gl: ThisWebGLContext) {}
-
-  draw(gl: ThisWebGLContext, matrix: Mat4, frameInfo: FrameInfo, parentFramebuffer: WebGLFramebuffer | null) {
-    if (!this._texture) return
-
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, this._texture)
-    gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
+  async init(gl: ThisWebGLContext) {
+    super.init(gl)
 
     const width = this.width
     const height = this.height
-    drawTexture(gl, width, height)
+    const cx = width * 0.5
+    const cy = height * 0.5
+    this.setAnchorOffXY(cx, cy)
+
+    this.points = this.props.elements.shapeInfo.points.map(el => [cx + el[0], cy + el[1]])
   }
 
-  destroy(gl?: ThisWebGLContext | undefined): void {
-    gl?.deleteTexture(this._texture || null)
-    this._texture = null
+  protected getDrawPath(ctx: CanvasRenderingContext2D) {
+    const path = new Path2D()
+    const actions = this.props.elements.shapeInfo.actions
+    const al = actions.length
+    for (let ai = 0, pi = 0; ai < al; ai++) {
+      const ac = actions[ai] || 0
+      if (ac === 0) {
+        const pt = this.points[pi]
+        path.moveTo(pt[0], pt[1])
+        pi++
+      } else if (ac === 1) {
+        const pt = this.points[pi]
+        path.lineTo(pt[0], pt[1])
+        pi++
+      } else if (ac === 2) {
+        const pt1 = this.points[pi]
+        const pt2 = this.points[pi + 1]
+        const pt3 = this.points[pi + 2]
+        path.bezierCurveTo(pt1[0], pt1[1], pt2[0], pt2[1], pt3[0], pt3[1])
+        pi += 3
+      } else if (ac === 3) {
+        const pt = this.points[this.points.length - 1]
+        const pt0 = this.points[0]
+        path.moveTo(pt[0], pt[1])
+        path.lineTo(pt0[0], pt0[1])
+      }
+    }
+
+    return path
   }
 }

@@ -119,7 +119,24 @@
                                 "width": 6,
                                 "lineCap": 2,
                                 "lineJoin": 1,
-                                "miterLimit": 4
+                                "miterLimit": 4,
+                                "dashesInfo": {
+                                    "dash": [
+                                        10,
+                                        10
+                                    ],
+                                    "offset": [
+                                        {
+                                            "inFrame": 0,
+                                            "value": 0
+                                        },
+                                        {
+                                            "inFrame": 179,
+                                            "value": 300,
+                                            "timeFunc": 0
+                                        }
+                                    ]
+                                }
                             }
                         },
                         "transform": {
@@ -999,8 +1016,7 @@
                         "fauxItalic": false,
                         "lineSpacing": 22.8000011444092,
                         "wordSpacing": 92,
-                        "textAligment": 0,
-                        "orientation": 1
+                        "textAligment": 0
                     },
                     "content": "进入直播间",
                     "transform": {
@@ -1119,8 +1135,7 @@
                         "fauxItalic": false,
                         "lineSpacing": 22.8000011444092,
                         "wordSpacing": 92,
-                        "textAligment": 0,
-                        "orientation": 1
+                        "textAligment": 0
                     },
                     "content": "进入直播间",
                     "transform": {

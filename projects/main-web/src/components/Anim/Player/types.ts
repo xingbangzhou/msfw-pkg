@@ -7,6 +7,7 @@ export enum LayerType {
   ShapeLayer = 'ShapeLayer',
   Ellipse = 'Ellipse',
   Rect = 'Rect',
+  Path = 'Path',
 }
 
 export enum PlayState {
@@ -78,51 +79,6 @@ export interface LayerBaseProps {
   trackMatteLayer?: number
 }
 
-export type LayerRectProps = {
-  name?: string
-  blendMode?: number
-  elements: {
-    rectInfo: {
-      direction?: number
-      size: [number, number]
-      position: [number, number]
-      roundness?: number
-    }
-    strokeInfo: {
-      blendMode?: number
-      color: string
-      opacity?: number
-      width?: number
-      lineCap?: number
-      lineJoin?: number
-      miterLimit?: number
-    }
-    fillInfo: {
-      blendMode?: number
-      color: [number, number, number, number]
-      opacity: number
-    }
-  }
-  transform: TransformProps
-} & LayerBaseProps
-
-export type LayerEllipseProps = {
-  name?: string
-  blendMode?: number
-  elements: {
-    ellipseInfo: {
-      direction?: number
-      size: [number, number]
-      position: [number, number]
-    }
-    fillInfo: {
-      blendMode?: number
-      color: [number, number, number, number]
-      opacity: number
-    }
-  }
-} & LayerBaseProps
-
 export type LayerImageProps = {
   content: string
   fillMode?: number
@@ -151,6 +107,26 @@ export type LayerTextProps = {
   content: string
 } & LayerBaseProps
 
+interface ShapeFillInfo {
+  blendMode?: number
+  color: [number, number, number, number]
+  opacity: number
+}
+
+interface ShapeStrokeInfo {
+  blendMode?: number
+  color: [number, number, number, number]
+  opacity: number
+  width: number
+  lineCap: number
+  lineJoin: number
+  miterLimit: number
+  dashesInfo?: {
+    dash: number[]
+    offset: [{inFrame: number; value: number; timeFunc?: number}]
+  }
+}
+
 export type LayerPathProps = {
   name?: string
   blendMode?: number
@@ -159,15 +135,38 @@ export type LayerPathProps = {
       points: Array<[number, number]>
       actions: number[]
     }
-    strokeInfo: {
-      blendMode?: number
-      color: [number, number, number, number]
-      opacity: number
-      width: number
-      lineCap: number
-      lineJoin: number
-      miterLimit: number
+    strokeInfo?: ShapeStrokeInfo
+    fillInfo?: ShapeFillInfo
+  }
+} & LayerBaseProps
+
+export type LayerRectProps = {
+  name?: string
+  blendMode?: number
+  elements: {
+    rectInfo: {
+      direction?: number
+      size: [number, number]
+      position: [number, number]
+      roundness?: number
     }
+    strokeInfo?: ShapeStrokeInfo
+    fillInfo?: ShapeFillInfo
+  }
+  transform: TransformProps
+} & LayerBaseProps
+
+export type LayerEllipseProps = {
+  name?: string
+  blendMode?: number
+  elements: {
+    ellipseInfo: {
+      direction?: number
+      size: [number, number]
+      position: [number, number]
+    }
+    strokeInfo?: ShapeStrokeInfo
+    fillInfo?: ShapeFillInfo
   }
 } & LayerBaseProps
 

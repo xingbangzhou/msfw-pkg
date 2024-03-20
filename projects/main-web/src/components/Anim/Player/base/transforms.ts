@@ -1,7 +1,7 @@
-import {LayerProps, TransformProps} from '../types'
+import {TransformProps} from '../types'
 import {Vec3} from './m4'
 
-class Property<T = number[] | number> {
+export class Property<T = number[] | number> {
   constructor(data: {inFrame: number; value: T}[]) {
     this.data = data
   }

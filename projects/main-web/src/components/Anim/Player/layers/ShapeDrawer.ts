@@ -1,9 +1,10 @@
 import {ThisWebGLContext} from '../base'
 import {m4} from '../base'
-import {FrameInfo, LayerEllipseProps, LayerRectProps, LayerShapeProps, LayerType} from '../types'
+import {FrameInfo, LayerEllipseProps, LayerPathProps, LayerRectProps, LayerShapeProps, LayerType} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 import EllipseDrawer from './EllipseDrawer'
 import Layer from './Layer'
+import PathDrawer from './PathDrawer'
 import RectDrawer from './RectDrawer'
 
 export default class ShapeDrawer extends AbstractDrawer<LayerShapeProps> {
@@ -13,18 +14,26 @@ export default class ShapeDrawer extends AbstractDrawer<LayerShapeProps> {
     this._subLayers = []
     const shapeElements = this.props.content
     if (shapeElements) {
+      const width = this.props.width
+      const height = this.props.height
+      const inFrame = this.props.inFrame
+      const outFrame = this.props.outFrame
       for (let i = shapeElements.length - 1; i >= 0; i--) {
         const element = shapeElements[i]
+        let layer: Layer | null = null
+        const props = {...element, inFrame, outFrame}
         if (element.type === LayerType.Rect) {
-          const props = {...element, inFrame: this.props.inFrame, outFrame: this.props.outFrame}
-          const rectLayer = new Layer(new RectDrawer(props as LayerRectProps, this.playBus))
-          await rectLayer.init(gl)
-          this._subLayers.push(rectLayer)
+          layer = new Layer(new RectDrawer(props as LayerRectProps, this.playBus))
         } else if (element.type === LayerType.Ellipse) {
-          const props = {...element, inFrame: this.props.inFrame, outFrame: this.props.outFrame}
-          const ellipseLayer = new Layer(new EllipseDrawer(props as LayerEllipseProps, this.playBus))
-          await ellipseLayer.init(gl)
-          this._subLayers.push(ellipseLayer)
+          layer = new Layer(new EllipseDrawer(props as LayerEllipseProps, this.playBus))
+        } else if (element.type === LayerType.Path) {
+          props.width = width
+          props.height = height
+          layer = new Layer(new PathDrawer(props as LayerPathProps, this.playBus))
+        }
+        if (layer) {
+          await layer.init(gl)
+          this._subLayers.push(layer)
         }
       }
     }

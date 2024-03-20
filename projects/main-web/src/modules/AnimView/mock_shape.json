@@ -1,0 +1,443 @@
+{
+    "bgColor": [
+        0,
+        0,
+        0
+    ],
+    "width": 900,
+    "height": 1000,
+    "duration": 15,
+    "frameRate": 30,
+    "targetComp": {
+        "layers": [
+            {
+                "type": "ShapeLayer",
+                "id": 267,
+                "content": [
+                    {
+                        "type": "Path",
+                        "name": "形状 1",
+                        "blendMode": 1,
+                        "elements": {
+                            "shapeInfo": {
+                                "points": [
+                                    [
+                                        -332,
+                                        214
+                                    ],
+                                    [
+                                        -156,
+                                        212
+                                    ],
+                                    [
+                                        -224,
+                                        370
+                                    ],
+                                    [
+                                        -384,
+                                        370
+                                    ]
+                                ],
+                                "actions": [
+                                    0,
+                                    2
+                                ]
+                            },
+                            "fillInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    0,
+                                    0,
+                                    1
+                                ],
+                                "opacity": 100
+                            }
+                        },
+                        "transform": {
+                            "anchorPoint": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "position": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "scale": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        100,
+                                        100
+                                    ]
+                                }
+                            ],
+                            "rotationZ": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 0
+                                }
+                            ],
+                            "opacity": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 100
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "Ellipse",
+                        "name": "椭圆 1",
+                        "blendMode": 1,
+                        "elements": {
+                            "ellipseInfo": {
+                                "direction": 1,
+                                "size": [
+                                    254.853515625,
+                                    93.2822875976564
+                                ],
+                                "position": [
+                                    0,
+                                    0
+                                ]
+                            },
+                            "strokeInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "opacity": 100,
+                                "width": 2,
+                                "lineCap": 1,
+                                "lineJoin": 1,
+                                "miterLimit": 4,
+                                "dashesInfo": {
+                                    "dash": [
+                                        10,
+                                        10
+                                    ],
+                                    "offset": [
+                                        {
+                                            "inFrame": 0,
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            },
+                            "fillInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    0,
+                                    0,
+                                    1
+                                ],
+                                "opacity": 100
+                            }
+                        },
+                        "transform": {
+                            "anchorPoint": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "position": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        -240.5732421875,
+                                        54.6411437988281
+                                    ]
+                                }
+                            ],
+                            "scale": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        100,
+                                        100
+                                    ]
+                                }
+                            ],
+                            "rotationZ": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 0
+                                }
+                            ],
+                            "opacity": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 100
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "Rect",
+                        "name": "矩形 2",
+                        "blendMode": 1,
+                        "elements": {
+                            "rectInfo": {
+                                "direction": 1,
+                                "size": [
+                                    246.7314453125,
+                                    100.588500976563
+                                ],
+                                "position": [
+                                    0,
+                                    0
+                                ],
+                                "roundness": 20
+                            },
+                            "strokeInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "opacity": 100,
+                                "width": 2,
+                                "lineCap": 1,
+                                "lineJoin": 1,
+                                "miterLimit": 4,
+                                "dashesInfo": {
+                                    "dash": [
+                                        10,
+                                        10
+                                    ],
+                                    "offset": [
+                                        {
+                                            "inFrame": 0,
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            },
+                            "fillInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    0,
+                                    0,
+                                    1
+                                ],
+                                "opacity": 100
+                            }
+                        },
+                        "transform": {
+                            "anchorPoint": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "position": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        -258.63427734375,
+                                        -141.705749511719
+                                    ]
+                                }
+                            ],
+                            "scale": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        100,
+                                        100
+                                    ]
+                                }
+                            ],
+                            "rotationZ": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 0
+                                }
+                            ],
+                            "opacity": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 100
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "Rect",
+                        "name": "矩形 1",
+                        "blendMode": 1,
+                        "elements": {
+                            "rectInfo": {
+                                "direction": 1,
+                                "size": [
+                                    233.173828125,
+                                    98.6221923828126
+                                ],
+                                "position": [
+                                    0,
+                                    0
+                                ],
+                                "roundness": 0
+                            },
+                            "strokeInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "opacity": 100,
+                                "width": 2,
+                                "lineCap": 1,
+                                "lineJoin": 1,
+                                "miterLimit": 4,
+                                "dashesInfo": {
+                                    "dash": [
+                                        10,
+                                        10
+                                    ],
+                                    "offset": [
+                                        {
+                                            "inFrame": 0,
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            },
+                            "fillInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    0,
+                                    0,
+                                    1
+                                ],
+                                "opacity": 100
+                            }
+                        },
+                        "transform": {
+                            "anchorPoint": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "position": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        -269.4130859375,
+                                        -336.688903808594
+                                    ]
+                                }
+                            ],
+                            "scale": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        100,
+                                        100
+                                    ]
+                                }
+                            ],
+                            "rotationZ": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 0
+                                }
+                            ],
+                            "opacity": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 100
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "name": "形状图层 1",
+                "transform": {
+                    "anchorPoint": [
+                        {
+                            "inFrame": 0,
+                            "value": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ],
+                    "position": [
+                        {
+                            "inFrame": 0,
+                            "value": [
+                                484,
+                                500,
+                                0
+                            ]
+                        }
+                    ],
+                    "scale": [
+                        {
+                            "inFrame": 0,
+                            "value": [
+                                100,
+                                100,
+                                100
+                            ]
+                        }
+                    ],
+                    "opacity": [
+                        {
+                            "inFrame": 0,
+                            "value": 100
+                        }
+                    ],
+                    "rotationZ": [
+                        {
+                            "inFrame": 0,
+                            "value": 0
+                        }
+                    ]
+                },
+                "isTrackMatte": false,
+                "width": 900,
+                "height": 1000,
+                "inFrame": 0,
+                "outFrame": 450
+            }
+        ]
+    },
+    "comps": [],
+    "imgSource": [],
+    "videoSource": []
+}
