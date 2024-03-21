@@ -11,13 +11,222 @@
     "targetComp": {
         "layers": [
             {
+                "type": "ShapeLayer",
+                "id": 8227,
+                "content": [
+                    {
+                        "type": "Rect",
+                        "name": "矩形 1",
+                        "blendMode": 1,
+                        "elements": {
+                            "rectInfo": {
+                                "direction": 1,
+                                "size": [
+                                    105.5546875,
+                                    74.8251953125001
+                                ],
+                                "position": [
+                                    0,
+                                    0
+                                ],
+                                "roundness": 0
+                            },
+                            "strokeInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    1,
+                                    1,
+                                    1
+                                ],
+                                "opacity": 100,
+                                "width": 2,
+                                "lineCap": 1,
+                                "lineJoin": 1,
+                                "miterLimit": 4
+                            },
+                            "fillInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    0.94,
+                                    0.88,
+                                    0.88,
+                                    1
+                                ],
+                                "opacity": 100
+                            }
+                        },
+                        "transform": {
+                            "anchorPoint": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "position": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        -350.22265625,
+                                        0.58740234375
+                                    ]
+                                }
+                            ],
+                            "scale": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        100,
+                                        100
+                                    ]
+                                }
+                            ],
+                            "rotationZ": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 0
+                                }
+                            ],
+                            "opacity": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 100
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "Ellipse",
+                        "name": "椭圆 1",
+                        "blendMode": 1,
+                        "elements": {
+                            "ellipseInfo": {
+                                "direction": 1,
+                                "size": [
+                                    167,
+                                    167
+                                ],
+                                "position": [
+                                    0,
+                                    0
+                                ]
+                            },
+                            "fillInfo": {
+                                "blendMode": 1,
+                                "color": [
+                                    1,
+                                    1,
+                                    1,
+                                    0.5
+                                ],
+                                "opacity": 100
+                            }
+                        },
+                        "transform": {
+                            "anchorPoint": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "position": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        200.22265625,
+                                        50.58740234375
+                                    ]
+                                }
+                            ],
+                            "scale": [
+                                {
+                                    "inFrame": 0,
+                                    "value": [
+                                        100,
+                                        100
+                                    ]
+                                }
+                            ],
+                            "rotationZ": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 0
+                                }
+                            ],
+                            "opacity": [
+                                {
+                                    "inFrame": 0,
+                                    "value": 100
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "name": "形状图层 1",
+                "transform": {
+                    "anchorPoint": [
+                        {
+                            "inFrame": 0,
+                            "value": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ],
+                    "position": [
+                        {
+                            "inFrame": 0,
+                            "value": [
+                                450,
+                                500,
+                                0
+                            ]
+                        }
+                    ],
+                    "scale": [
+                        {
+                            "inFrame": 0,
+                            "value": [
+                                100,
+                                100,
+                                100
+                            ]
+                        }
+                    ],
+                    "opacity": [
+                        {
+                            "inFrame": 0,
+                            "value": 100
+                        }
+                    ],
+                    "rotationZ": [
+                        {
+                            "inFrame": 0,
+                            "value": 0
+                        }
+                    ]
+                },
+                "isTrackMatte": false,
+                "width": 900,
+                "height": 1000,
+                "inFrame": 0,
+                "outFrame": 120
+            },
+            {
                 "type": "text",
                 "id": 7951,
                 "name": "sdasd ",
                 "textDocAttr": {
                     "text": "sdasd ",
                     "textColor": [
-                        0,
+                        1,
                         0,
                         0
                     ],
@@ -376,146 +585,6 @@
                 "isTrackMatte": false,
                 "width": 1200,
                 "height": 801,
-                "inFrame": 0,
-                "outFrame": 120
-            },
-            {
-                "type": "ShapeLayer",
-                "id": 8227,
-                "content": [
-                    {
-                        "type": "Rect",
-                        "name": "矩形 1",
-                        "blendMode": 1,
-                        "elements": {
-                            "rectInfo": {
-                                "direction": 1,
-                                "size": [
-                                    105.5546875,
-                                    74.8251953125001
-                                ],
-                                "position": [
-                                    0,
-                                    0
-                                ],
-                                "roundness": 0
-                            },
-                            "strokeInfo": {
-                                "blendMode": 1,
-                                "color": [
-                                    1,
-                                    1,
-                                    1,
-                                    1
-                                ],
-                                "opacity": 100,
-                                "width": 2,
-                                "lineCap": 1,
-                                "lineJoin": 1,
-                                "miterLimit": 4
-                            },
-                            "fillInfo": {
-                                "blendMode": 1,
-                                "color": [
-                                    0.94,
-                                    0.88,
-                                    0.88,
-                                    1
-                                ],
-                                "opacity": 100
-                            }
-                        },
-                        "transform": {
-                            "anchorPoint": [
-                                {
-                                    "inFrame": 0,
-                                    "value": [
-                                        0,
-                                        0
-                                    ]
-                                }
-                            ],
-                            "position": [
-                                {
-                                    "inFrame": 0,
-                                    "value": [
-                                        -155.22265625,
-                                        -334.58740234375
-                                    ]
-                                }
-                            ],
-                            "scale": [
-                                {
-                                    "inFrame": 0,
-                                    "value": [
-                                        100,
-                                        100
-                                    ]
-                                }
-                            ],
-                            "rotationZ": [
-                                {
-                                    "inFrame": 0,
-                                    "value": 0
-                                }
-                            ],
-                            "opacity": [
-                                {
-                                    "inFrame": 0,
-                                    "value": 100
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "name": "形状图层 1",
-                "transform": {
-                    "anchorPoint": [
-                        {
-                            "inFrame": 0,
-                            "value": [
-                                0,
-                                0,
-                                0
-                            ]
-                        }
-                    ],
-                    "position": [
-                        {
-                            "inFrame": 0,
-                            "value": [
-                                450,
-                                500,
-                                0
-                            ]
-                        }
-                    ],
-                    "scale": [
-                        {
-                            "inFrame": 0,
-                            "value": [
-                                100,
-                                100,
-                                100
-                            ]
-                        }
-                    ],
-                    "opacity": [
-                        {
-                            "inFrame": 0,
-                            "value": 100
-                        }
-                    ],
-                    "rotationZ": [
-                        {
-                            "inFrame": 0,
-                            "value": 0
-                        }
-                    ]
-                },
-                "isTrackMatte": false,
-                "width": 900,
-                "height": 1000,
                 "inFrame": 0,
                 "outFrame": 120
             },

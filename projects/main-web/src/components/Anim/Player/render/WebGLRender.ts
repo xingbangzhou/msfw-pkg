@@ -12,7 +12,7 @@ export default class WebGLRender {
   private _canvas?: HTMLCanvasElement
   private _gl?: ThisWebGLContext
 
-  private _worldMatrix = m4.identity()
+  private _camera = m4.identity()
   private _rootLayers?: Layer[]
 
   setContainer(container: HTMLElement) {
@@ -38,11 +38,11 @@ export default class WebGLRender {
       canvas.height = height
 
       const gl = (this._gl = canvas.getContext('webgl', {
-        premultipliedAlpha: false, // 请求非预乘阿尔法通道
+        premultipliedAlpha: true, // 请求非预乘阿尔法通道
       }) as ThisWebGLContext)
       this.container?.appendChild(this._canvas)
 
-      // Init WebGL
+      // 混合
       gl.enable(gl.BLEND)
       // gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -76,7 +76,7 @@ export default class WebGLRender {
 
     resizeCanvasToDisplaySize(this._canvas)
 
-    this._worldMatrix = m4.worldProjection(width, height)
+    this._camera = m4.perspectiveCamera(width, height)
 
     if (this._gl) {
       const layerPropsList = playBus.rootLayers
@@ -96,7 +96,7 @@ export default class WebGLRender {
       for (let i = 0, l = rootLayers?.length || 0; i < l; i++) {
         const layer = rootLayers?.[i]
         if (!layer.verifyTime(frameInfo.frameId)) continue
-        layer.render(gl, this._worldMatrix, frameInfo)
+        layer.render(gl, this._camera, frameInfo)
       }
     }
   }

@@ -6,7 +6,7 @@ import {Typography} from '@mui/material'
 const TitleBar = memo(function TitleBar() {
   return (
     <Box className="titleBarWrap">
-      <Typography className="title">DIANIM</Typography>
+      <Typography className="title">图形世界</Typography>
     </Box>
   )
 })

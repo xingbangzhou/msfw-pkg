@@ -550,7 +550,7 @@ export function axisRotate(m: Mat4, axis: Vec3, angleInRadians: number, dst?: Ma
 }
 
 // 世界坐标系 (摄像机+透视矩阵)
-export function worldProjection(width: number, height: number, fieldOfViewDeg = 40) {
+export function perspectiveCamera(width: number, height: number, fieldOfViewDeg = 40) {
   // 透视矩阵
   const fieldOfViewRadians = degToRad(40)
   const aspect = width / height

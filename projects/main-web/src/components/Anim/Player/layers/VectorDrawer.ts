@@ -13,7 +13,7 @@ export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
     const width = this.width
     const height = this.height
     this._framebuffer = createFramebuffer(gl, width, height)
-    this._viewMatrix = m4.worldProjection(width, height)
+    this._viewMatrix = m4.perspectiveCamera(width, height)
     const parInFrame = this.props.inFrame
 
     // 子图层列表

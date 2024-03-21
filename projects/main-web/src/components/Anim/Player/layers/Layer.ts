@@ -95,7 +95,7 @@ export default class Layer {
       gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
       gl.viewport(0, 0, parentWidth, parentHeight)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      const viewMatrix = m4.worldProjection(parentWidth, parentHeight)
+      const viewMatrix = m4.perspectiveCamera(parentWidth, parentHeight)
       const matrix = m4.multiply(viewMatrix, localMatrix)
       drawer.draw(gl, matrix, frameInfo, framebuffer)
 

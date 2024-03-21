@@ -19,7 +19,9 @@ function drawHorizText(ctx: CanvasRenderingContext2D, text: string, textDocAttr:
   ctx.textBaseline = 'middle'
   // 设置字体
   ctx.fillStyle = rgba(textDocAttr.textColor)
-  ctx.font = `${textDocAttr.fontSize || 24}px ${textDocAttr.fontFamily || 'Arial'}`
+  ctx.font = `${textDocAttr.fauxBold ? 'bold' : 'normal'} ${textDocAttr.fontSize || 24}px ${
+    textDocAttr.fontFamily || 'Arial'
+  }`
 
   ctx.fillText(text, width * 0.5, height * 0.5)
 }
@@ -38,7 +40,9 @@ function drawVertiText(ctx: CanvasRenderingContext2D, text: string, textDocAttr:
   ctx.textBaseline = 'middle'
   // 设置字体
   ctx.fillStyle = rgba(textDocAttr.textColor)
-  ctx.font = `${textDocAttr.fontSize || 24}px ${textDocAttr.fontFamily || 'Arial'}`
+  ctx.font = `${textDocAttr.fauxBold ? 'bold' : 'normal'} ${textDocAttr.fontSize || 24}px ${
+    textDocAttr.fontFamily || 'Arial'
+  }`
 
   const x = width * 0.5
   let y = -fontHeight * 0.5

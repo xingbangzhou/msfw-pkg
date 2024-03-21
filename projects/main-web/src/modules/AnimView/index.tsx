@@ -5,11 +5,11 @@ import {Box, Grid} from '@mui/material'
 import DrapArea from './DrapArea'
 import JSZip from 'jszip'
 
-const DiView = memo(function DiView() {
+const AnimView = memo(function AnimView() {
   const handlerRef = useRef<AnimHandler>(null)
 
   useEffect(() => {
-    import('./mock.json').then(data => {
+    import('./mock_build.json').then(data => {
       handlerRef.current?.play(data.default as any)
     })
   }, [])
@@ -53,4 +53,4 @@ const DiView = memo(function DiView() {
   )
 })
 
-export default DiView
+export default AnimView

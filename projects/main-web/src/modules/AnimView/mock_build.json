@@ -1003,11 +1003,7 @@
                     "name": "进入直播间 2",
                     "textDocAttr": {
                         "text": "进入直播间",
-                        "textColor": {
-                            "r": 91,
-                            "g": 137,
-                            "b": 255
-                        },
+                        "textColor": [0.357, 0.537, 1.0],
                         "font": "ZiZhiQuXiMaiTi",
                         "fontFamily": "ZiZhiQuXiMaiTi",
                         "fontSize": 19,
@@ -1123,11 +1119,7 @@
                     "name": "进入直播间",
                     "textDocAttr": {
                         "text": "进入直播间",
-                        "textColor": {
-                            "r": 91,
-                            "g": 137,
-                            "b": 255
-                        },
+                        "textColor": [0.357, 0.537, 1.0],
                         "font": "ZiZhiQuXiMaiTi",
                         "fontFamily": "ZiZhiQuXiMaiTi",
                         "fontSize": 19,
