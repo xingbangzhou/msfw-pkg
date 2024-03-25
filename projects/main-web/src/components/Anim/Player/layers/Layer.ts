@@ -1,4 +1,4 @@
-import PlayBus from '../PlayBus'
+import PlayContext from '../PlayContext'
 import {Framebuffer, ThisWebGLContext, createFramebuffer, drawTexture, m4} from '../base'
 import {
   FrameInfo,
@@ -60,7 +60,7 @@ export default class Layer {
     if (trackId && parentLayers) {
       const trackProps = parentLayers.find(el => el.id == trackId)
       if (trackProps) {
-        this.trackMatteLayer = createLayer(trackProps, this.drawer.playBus)
+        this.trackMatteLayer = createLayer(trackProps, this.drawer.playContext)
       }
     }
     // 初始化
@@ -154,10 +154,10 @@ export default class Layer {
   }
 }
 
-export function createLayer(props: LayerProps, playBus: PlayBus) {
+export function createLayer(props: LayerProps, playContext: PlayContext) {
   const {id, type, ...other} = props
   if (type === PreComposition) {
-    const compProps = playBus.getLayerByComps(id)
+    const compProps = playContext.getLayerByComps(id)
     if (!compProps) return undefined
     props = {...compProps, ...other}
   }
@@ -165,15 +165,15 @@ export function createLayer(props: LayerProps, playBus: PlayBus) {
   const curType = props.type
   switch (curType) {
     case LayerType.Image:
-      return new Layer(new ImageDrawer(props as LayerImageProps, playBus))
+      return new Layer(new ImageDrawer(props as LayerImageProps, playContext))
     case LayerType.Video:
-      return new Layer(new VideoDrawer(props as LayerVideoProps, playBus))
+      return new Layer(new VideoDrawer(props as LayerVideoProps, playContext))
     case LayerType.Text:
-      return new Layer(new TextDrawer(props as LayerTextProps, playBus))
+      return new Layer(new TextDrawer(props as LayerTextProps, playContext))
     case LayerType.Vector:
-      return new Layer(new VectorDrawer(props as LayerVectorProps, playBus))
+      return new Layer(new VectorDrawer(props as LayerVectorProps, playContext))
     case LayerType.ShapeLayer:
-      return new Layer(new ShapeDrawer(props as LayerShapeProps, playBus))
+      return new Layer(new ShapeDrawer(props as LayerShapeProps, playContext))
   }
 
   return undefined

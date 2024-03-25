@@ -1,11 +1,11 @@
-import PlayBus from '../PlayBus'
+import PlayContext from '../PlayContext'
 import {ThisWebGLContext} from '../base'
 import {LayerRectProps} from '../types'
 import ElementDrawer from './ElementDrawer'
 
 export default class RectDrawer extends ElementDrawer<LayerRectProps> {
-  constructor(props: LayerRectProps, playBus: PlayBus) {
-    super(props, playBus)
+  constructor(props: LayerRectProps, playContext: PlayContext) {
+    super(props, playContext)
     this.props.width = props.elements.rectInfo.size[0] || 0
     this.props.height = props.elements.rectInfo.size[1] || 0
   }

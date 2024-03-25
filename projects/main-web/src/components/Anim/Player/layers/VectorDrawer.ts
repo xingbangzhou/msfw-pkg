@@ -27,7 +27,7 @@ export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
         // 遮罩过滤
         if (props.isTrackMatte) continue
         // 创建图层
-        const layer = createLayer({...props, inFrame, outFrame}, this.playBus)
+        const layer = createLayer({...props, inFrame, outFrame}, this.playContext)
         if (!layer) continue
         await layer.init(gl, layerPropss)
         this._subLayers.push(layer)

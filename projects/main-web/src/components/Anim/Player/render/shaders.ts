@@ -28,6 +28,9 @@ export const FragmentShader = `
   void main(void) {
     vec4 texColor = texture2D(u_texture, v_texcoord);
     texColor.a = texColor.a * u_opacity;
+    // if (texColor.r <= 0.0 && texColor.g <= 0.0 && texColor.b <= 0.0) {
+    //   discard;
+    // }
     if (u_maskMode == 1) {
       vec4 maskColor = texture2D(u_maskTexture, v_texcoord.xy);
       float light = maskColor.r * 0.3 + maskColor.g * 0.6 + maskColor.b * 0.1;

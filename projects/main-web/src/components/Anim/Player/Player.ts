@@ -1,27 +1,27 @@
 import {PlayProps, PlayState} from './types'
 import WebGLRender from './render/WebGLRender'
-import PlayBus from './PlayBus'
+import PlayContext from './PlayContext'
 
 export default class Player {
   constructor(container: HTMLElement) {
-    this.requestAnim = this.requestAnimFunc()
-
-    this._playBus = new PlayBus()
+    this._playContext = new PlayContext()
     this._ctxRender = new WebGLRender()
     this._ctxRender.setContainer(container)
   }
 
-  private _playBus: PlayBus
+  private _playContext: PlayContext
   private _ctxRender: WebGLRender
 
   protected frameAnimId: any
-  protected requestAnim: (cb: () => void) => any
-  private _frameIndex = -1
+  protected requestAnim?: (cb: () => void) => any
   private _playState = PlayState.None
+  private _startStamp = 0
 
   async load(props: PlayProps) {
-    this._playBus.loadProps(props)
-    const result = await this._ctxRender.load(this._playBus)
+    this._playContext.setPlayProps(props)
+    this.requestAnim = this.requestAnimFunc()
+
+    const result = await this._ctxRender.load(this._playContext)
     return result
   }
 
@@ -49,34 +49,35 @@ export default class Player {
     this._playState = PlayState.None
   }
 
-  private _startTime = 0
-  protected render = (_?: unknown, info?: any) => {
-    if (!this._startTime) {
-      this._startTime = new Date().getTime()
-      this._frameIndex = 0
+  protected render = (timeStamp?: number) => {
+    timeStamp = timeStamp || performance.now()
+    if (!this._startStamp) {
+      this._startStamp = timeStamp
+      this._playContext.setFrameId(0, timeStamp)
     } else {
-      this._frameIndex = Math.floor((new Date().getTime() - this._startTime) * this._playBus.frameRate * 0.001)
-      if (this._frameIndex >= this._playBus.frames) {
-        this._frameIndex = this._playBus.frames
+      const frameId = (timeStamp - this._startStamp) * this._playContext.frameRate * 0.001
+      this._playContext.setFrameId(frameId, timeStamp)
+      if (this._playContext.frameId >= this._playContext.frames) {
+        this._playContext.setFrameId(0, timeStamp)
+        this._startStamp = 0
       }
     }
 
     const frameInfo = {
-      frames: this._playBus.frames,
-      frameId: this._frameIndex,
-      width: this._playBus.width,
-      height: this._playBus.height,
+      frames: this._playContext.frames,
+      frameId: this._playContext.frameId,
+      width: this._playContext.width,
+      height: this._playContext.height,
       opacity: 1.0,
     }
-
     this._ctxRender.render(frameInfo)
 
-    this.frameAnimId = this.requestAnim(this.render)
+    this.frameAnimId = this.requestAnim?.(this.render)
   }
 
   private requestAnimFunc = () => {
     return (cb: () => void) => {
-      return setTimeout(cb, 1000 / this._playBus.frameRate)
+      return setTimeout(cb, this._playContext.frameInterval)
     }
   }
 

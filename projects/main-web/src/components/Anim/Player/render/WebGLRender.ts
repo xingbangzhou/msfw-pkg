@@ -3,10 +3,10 @@ import {ThisWebGLContext, createProgram, resizeCanvasToDisplaySize} from '../bas
 import {FragmentShader, VertexShader} from './shaders'
 import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
-import PlayBus from '../PlayBus'
+import PlayContext from '../PlayContext'
 
 export default class WebGLRender {
-  protected playBus?: PlayBus
+  protected playContext?: PlayContext
 
   private container?: HTMLElement
   private _canvas?: HTMLCanvasElement
@@ -26,16 +26,17 @@ export default class WebGLRender {
     this.container = container
   }
 
-  async load(playBus: PlayBus) {
-    this.playBus = playBus
+  async load(playContext: PlayContext) {
+    this.playContext = playContext
 
-    const width = playBus.width
-    const height = playBus.height
+    const width = playContext.width
+    const height = playContext.height
 
     if (!this._canvas) {
       const canvas = (this._canvas = document.createElement('canvas'))
       canvas.width = width
       canvas.height = height
+      canvas.style.backgroundColor = '#ffffff'
 
       const gl = (this._gl = canvas.getContext('webgl', {
         premultipliedAlpha: true, // 请求非预乘阿尔法通道
@@ -79,8 +80,8 @@ export default class WebGLRender {
     this._camera = m4.perspectiveCamera(width, height)
 
     if (this._gl) {
-      const layerPropsList = playBus.rootLayers
-      await this.resetLayers(this._gl, playBus, layerPropsList || [])
+      const layerPropsList = playContext.rootLayers
+      await this.resetLayers(this._gl, playContext, layerPropsList || [])
     }
 
     return true
@@ -109,7 +110,7 @@ export default class WebGLRender {
     this.container = undefined
   }
 
-  private async resetLayers(gl: ThisWebGLContext, playBus: PlayBus, layerPropsList: LayerProps[]) {
+  private async resetLayers(gl: ThisWebGLContext, playContext: PlayContext, layerPropsList: LayerProps[]) {
     this._rootLayers?.forEach(layer => layer.destroy(gl))
     this._rootLayers = []
 
@@ -118,7 +119,7 @@ export default class WebGLRender {
       // 遮罩过滤
       if (props.isTrackMatte) continue
       // 创建图层
-      const layer = createLayer(props, playBus)
+      const layer = createLayer(props, playContext)
       if (!layer) continue
       this._rootLayers.push(layer)
       await layer.init(gl, layerPropsList)

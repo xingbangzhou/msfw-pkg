@@ -9,12 +9,11 @@
     .animWrap {
       width: 450px;
       height: 100%;
-
       background:
         0 0/15px 15px,
         0 0/15px 15px,
         0 0/75px 75px,
-        0 0/75px 75px rgb(255, 255, 255);
+        0 0/75px 75px rgb(0, 0, 0);
       background-image: linear-gradient(
           hsla(0, 0%, 100%, 0.2) 1px,
           transparent 0
