@@ -117,9 +117,9 @@
                             "fillInfo": {
                                 "blendMode": 1,
                                 "color": [
-                                    1,
-                                    1,
-                                    1,
+                                    0,
+                                    0,
+                                    0,
                                     0.5
                                 ],
                                 "opacity": 100
@@ -1161,9 +1161,9 @@
                                 "fillInfo": {
                                     "blendMode": 1,
                                     "color": [
-                                        1,
-                                        1,
-                                        1,
+                                        0,
+                                        0,
+                                        0,
                                         1
                                     ],
                                     "opacity": 100

@@ -9,7 +9,7 @@ const AnimView = memo(function AnimView() {
   const handlerRef = useRef<AnimHandler>(null)
 
   useEffect(() => {
-    import('./mock_ship.json').then(data => {
+    import('./mock.json').then(data => {
       handlerRef.current?.play(data.default as any)
     })
   }, [])

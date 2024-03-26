@@ -4,6 +4,7 @@ import {FragmentShader, VertexShader} from './shaders'
 import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
 import PlayContext from '../PlayContext'
+import {alpha} from '@mui/system'
 
 export default class WebGLRender {
   protected playContext?: PlayContext
@@ -36,18 +37,19 @@ export default class WebGLRender {
       const canvas = (this._canvas = document.createElement('canvas'))
       canvas.width = width
       canvas.height = height
-      canvas.style.backgroundColor = '#ffffff'
 
-      const gl = (this._gl = canvas.getContext('webgl', {
-        premultipliedAlpha: true, // 请求非预乘阿尔法通道
-      }) as ThisWebGLContext)
+      const gl = (this._gl = canvas.getContext('webgl') as ThisWebGLContext)
       this.container?.appendChild(this._canvas)
 
       // 混合
-      gl.enable(gl.BLEND)
+      // gl.enable(gl.BLEND)
       // gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+      // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+      // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
+
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
+      gl.enable(gl.BLEND)
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 
       const program = (gl.program = createProgram(gl, VertexShader, FragmentShader))
       if (program) {
@@ -92,6 +94,8 @@ export default class WebGLRender {
     if (!gl) return
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+    // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    gl.clear(gl.COLOR_BUFFER_BIT)
     const rootLayers = this._rootLayers
     if (rootLayers) {
       for (let i = 0, l = rootLayers?.length || 0; i < l; i++) {
