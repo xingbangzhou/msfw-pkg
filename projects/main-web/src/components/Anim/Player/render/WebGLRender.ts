@@ -4,7 +4,6 @@ import {FragmentShader, VertexShader} from './shaders'
 import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
 import PlayContext from '../PlayContext'
-import {alpha} from '@mui/system'
 
 export default class WebGLRender {
   protected playContext?: PlayContext

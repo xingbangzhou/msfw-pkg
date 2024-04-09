@@ -117,9 +117,9 @@
                             "fillInfo": {
                                 "blendMode": 1,
                                 "color": [
-                                    0,
-                                    0,
-                                    0,
+                                    1,
+                                    1,
+                                    1,
                                     0.5
                                 ],
                                 "opacity": 100
@@ -139,8 +139,8 @@
                                 {
                                     "inFrame": 0,
                                     "value": [
-                                        200.22265625,
-                                        50.58740234375
+                                        -20.22265625,
+                                        -20.58740234375
                                     ]
                                 }
                             ],
@@ -397,7 +397,7 @@
                 "height": 1000,
                 "inFrame": 0,
                 "outFrame": 120,
-                "isTrackMatte": false
+                "isTrackMatte": true
             },
             {
                 "id": 5294,
@@ -452,7 +452,9 @@
                 "width": 700,
                 "height": 700,
                 "inFrame": 0,
-                "outFrame": 120
+                "outFrame": 120,
+                "trackMatteLayer": 7891,
+                "trackMatteType": 3
             },
             {
                 "id": 8201,

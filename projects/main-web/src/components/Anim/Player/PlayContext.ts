@@ -9,7 +9,6 @@ export default class PlayContext {
   private _frames = 0
   private _frameInterval = 0
   private _frameId = -1
-  private _frameStamp = 0
 
   setPlayProps(props: PlayProps) {
     this._props = props
@@ -42,18 +41,12 @@ export default class PlayContext {
     return this._props?.duration
   }
 
-  // 当前帧id
-  setFrameId(id: number, stamp: number) {
+  set frameId(id: number) {
     this._frameId = id
-    this._frameStamp = stamp
   }
 
   get frameId() {
     return this._frameId
-  }
-
-  get frameStamp() {
-    return this._frameStamp
   }
 
   get rootLayers() {

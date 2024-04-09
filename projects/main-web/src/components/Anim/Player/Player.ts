@@ -15,7 +15,6 @@ export default class Player {
   protected frameAnimId: any
   protected requestAnim?: (cb: () => void) => any
   private _playState = PlayState.None
-  private _startStamp = 0
 
   async load(props: PlayProps) {
     this._playContext.setPlayProps(props)
@@ -49,17 +48,13 @@ export default class Player {
     this._playState = PlayState.None
   }
 
-  protected render = (timeStamp?: number) => {
-    timeStamp = timeStamp || performance.now()
-    if (!this._startStamp) {
-      this._startStamp = timeStamp
-      this._playContext.setFrameId(0, timeStamp)
+  protected render = () => {
+    if (this._playContext.frameId === -1) {
+      this._playContext.frameId = 0
     } else {
-      const frameId = (timeStamp - this._startStamp) * this._playContext.frameRate * 0.001
-      this._playContext.setFrameId(frameId, timeStamp)
+      this._playContext.frameId = this._playContext.frameId + 1
       if (this._playContext.frameId >= this._playContext.frames) {
-        this._playContext.setFrameId(0, timeStamp)
-        this._startStamp = 0
+        this._playContext.frameId = 0
       }
     }
 

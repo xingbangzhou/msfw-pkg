@@ -105,15 +105,16 @@ export default class Layer {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       trackMatteLayer.render(gl, parentMatrix, frameInfo, trackFramebuffer)
 
-      gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
-
       // 上屏
+      gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
       gl.viewport(
         0,
         0,
         parentFramebuffer ? frameInfo.width : gl.canvas.width,
         parentFramebuffer ? frameInfo.height : gl.canvas.height,
       )
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
       // 设置透明度
       gl.uniform1f(gl.uniforms.opacity, opcaity)
@@ -128,8 +129,9 @@ export default class Layer {
 
       // 释放
       gl.bindTexture(gl.TEXTURE_2D, null)
-      gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
       gl.uniform1i(gl.uniforms.maskMode, 0)
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
     } else {
       // 设置透明度
       gl.uniform1f(gl.uniforms.opacity, opcaity)

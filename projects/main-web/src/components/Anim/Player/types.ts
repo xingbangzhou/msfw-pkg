@@ -66,6 +66,14 @@ export interface TransformProps {
   }[]
 }
 
+export enum TrackMatteType {
+  None = 0,
+  ALPHA = 1,
+  ALPHA_INVERTED = 2,
+  LUMA = 3,
+  LUMA_INVERTED = 4,
+}
+
 export interface LayerBaseProps {
   id: number
   type: string
@@ -77,6 +85,7 @@ export interface LayerBaseProps {
   outFrame: number
   isTrackMatte?: boolean
   trackMatteLayer?: number
+  trackMatteType?: TrackMatteType
 }
 
 export type LayerImageProps = {
