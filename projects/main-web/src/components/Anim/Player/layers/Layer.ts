@@ -1,4 +1,4 @@
-import PlayContext from '../PlayContext'
+import PlayData from '../PlayData'
 import {Framebuffer, ThisWebGLContext, createFramebuffer, drawTexture, m4} from '../base'
 import {
   FrameInfo,
@@ -60,7 +60,7 @@ export default class Layer {
     if (trackId && parentLayers) {
       const trackProps = parentLayers.find(el => el.id == trackId)
       if (trackProps) {
-        this.trackMatteLayer = createLayer(trackProps, this.drawer.playContext)
+        this.trackMatteLayer = createLayer(trackProps, this.drawer.playData)
       }
     }
     // 初始化
@@ -156,10 +156,10 @@ export default class Layer {
   }
 }
 
-export function createLayer(props: LayerProps, playContext: PlayContext) {
+export function createLayer(props: LayerProps, playData: PlayData) {
   const {id, type, ...other} = props
   if (type === PreComposition) {
-    const compProps = playContext.getLayerByComps(id)
+    const compProps = playData.getLayerByComps(id)
     if (!compProps) return undefined
     props = {...compProps, ...other}
   }
@@ -167,15 +167,15 @@ export function createLayer(props: LayerProps, playContext: PlayContext) {
   const curType = props.type
   switch (curType) {
     case LayerType.Image:
-      return new Layer(new ImageDrawer(props as LayerImageProps, playContext))
+      return new Layer(new ImageDrawer(props as LayerImageProps, playData))
     case LayerType.Video:
-      return new Layer(new VideoDrawer(props as LayerVideoProps, playContext))
+      return new Layer(new VideoDrawer(props as LayerVideoProps, playData))
     case LayerType.Text:
-      return new Layer(new TextDrawer(props as LayerTextProps, playContext))
+      return new Layer(new TextDrawer(props as LayerTextProps, playData))
     case LayerType.Vector:
-      return new Layer(new VectorDrawer(props as LayerVectorProps, playContext))
+      return new Layer(new VectorDrawer(props as LayerVectorProps, playData))
     case LayerType.ShapeLayer:
-      return new Layer(new ShapeDrawer(props as LayerShapeProps, playContext))
+      return new Layer(new ShapeDrawer(props as LayerShapeProps, playData))
   }
 
   return undefined

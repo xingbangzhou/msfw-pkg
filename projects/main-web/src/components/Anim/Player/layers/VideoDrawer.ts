@@ -19,7 +19,7 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     if (!this._texture || !this.decoder) return
 
-    this.decoder.seek(frameInfo.frameId * this.playContext.frameInterval)
+    this.decoder.seek(frameInfo.frameId * this.playData.frameMs)
     const hasFrame = this.decoder.rendVideoFrame(gl, this._texture)
     if (hasFrame) {
       gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)

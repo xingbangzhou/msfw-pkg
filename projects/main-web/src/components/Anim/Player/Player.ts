@@ -1,15 +1,15 @@
 import {PlayProps, PlayState} from './types'
 import WebGLRender from './render/WebGLRender'
-import PlayContext from './PlayContext'
+import PlayData from './PlayData'
 
 export default class Player {
   constructor(container: HTMLElement) {
-    this._playContext = new PlayContext()
+    this._playData = new PlayData()
     this._ctxRender = new WebGLRender()
     this._ctxRender.setContainer(container)
   }
 
-  private _playContext: PlayContext
+  private _playData: PlayData
   private _ctxRender: WebGLRender
 
   protected frameAnimId: any
@@ -17,10 +17,10 @@ export default class Player {
   private _playState = PlayState.None
 
   async load(props: PlayProps) {
-    this._playContext.setPlayProps(props)
+    this._playData.setPlayProps(props)
     this.requestAnim = this.requestAnimFunc()
 
-    const result = await this._ctxRender.load(this._playContext)
+    const result = await this._ctxRender.load(this._playData)
     return result
   }
 
@@ -49,20 +49,20 @@ export default class Player {
   }
 
   protected render = () => {
-    if (this._playContext.frameId === -1) {
-      this._playContext.frameId = 0
+    if (this._playData.frameId === -1) {
+      this._playData.frameId = 0
     } else {
-      this._playContext.frameId = this._playContext.frameId + 1
-      if (this._playContext.frameId >= this._playContext.frames) {
-        this._playContext.frameId = 0
+      this._playData.frameId = this._playData.frameId + 1
+      if (this._playData.frameId >= this._playData.frames) {
+        this._playData.frameId = 0
       }
     }
 
     const frameInfo = {
-      frames: this._playContext.frames,
-      frameId: this._playContext.frameId,
-      width: this._playContext.width,
-      height: this._playContext.height,
+      frames: this._playData.frames,
+      frameId: this._playData.frameId,
+      width: this._playData.width,
+      height: this._playData.height,
       opacity: 1.0,
     }
     this._ctxRender.render(frameInfo)
@@ -72,7 +72,7 @@ export default class Player {
 
   private requestAnimFunc = () => {
     return (cb: () => void) => {
-      return setTimeout(cb, this._playContext.frameInterval)
+      return setTimeout(cb, this._playData.frameMs)
     }
   }
 

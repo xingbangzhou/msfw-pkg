@@ -3,7 +3,7 @@ import {ThisWebGLContext, createProgram, resizeCanvasToDisplaySize} from '../bas
 import {FragmentShader, VertexShader} from './shaders'
 import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
-import PlayContext from '../PlayContext'
+import PlayContext from '../PlayData'
 
 export default class WebGLRender {
   protected playContext?: PlayContext
