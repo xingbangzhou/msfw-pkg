@@ -68,6 +68,7 @@ export default class MP4Demuxer {
       if (box) {
         const stream = new (DataStream as any)(undefined, 0, DataStream.BIG_ENDIAN)
         box.write(stream)
+
         return new Uint8Array(stream.buffer, 8) // Remove the box header.
       }
     }
