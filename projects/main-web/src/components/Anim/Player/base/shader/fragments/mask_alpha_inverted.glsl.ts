@@ -10,9 +10,10 @@ uniform float u_opacity;
 
 void main(void) {
   vec4 texColor = texture2D(u_texture, v_texcoord);
-  texColor.a = texColor.a * u_opacity;
+  texColor = texColor * u_opacity;
 
-  vec4 maskColor = texture2D(u_maskTexture, v_texcoord.xy);
-  gl_FragColor = vec4(texColor.rgb, texColor.a * (1.0 - maskColor.a));
+  vec4 a = texture2D(u_maskTexture, v_texcoord.xy).a;
+
+  gl_FragColor = texColor * (1.0 - a);
 }
 `
