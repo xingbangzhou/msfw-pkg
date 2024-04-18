@@ -1,7 +1,7 @@
 import PlayData from '../PlayData'
 import {ThisWebGLContext, degToRad, m4} from '../base'
 import {Transform3D} from '../base/transforms'
-import {FrameInfo, LayerProps} from '../types'
+import {BlendMode, FrameInfo, LayerProps, TrackMatteType} from '../types'
 
 export default abstract class AbstractDrawer<Props extends LayerProps> {
   constructor(props: Props, playData: PlayData) {
@@ -17,12 +17,32 @@ export default abstract class AbstractDrawer<Props extends LayerProps> {
   protected offXY = [0, 0]
   protected anchorOffXY = [0, 0]
 
+  get type() {
+    return this.props.type
+  }
+
   get width() {
     return this.props.width
   }
 
   get height() {
     return this.props.height
+  }
+
+  get inFrame() {
+    return this.props.inFrame
+  }
+
+  get outFrame() {
+    return this.props.outFrame
+  }
+
+  get blendMode() {
+    return this.props.blendMode || BlendMode.Default
+  }
+
+  get trackMatteType() {
+    return this.props.trackMatteType || TrackMatteType.None
   }
 
   setOffXY(x = 0, y = 0) {
@@ -81,12 +101,7 @@ export default abstract class AbstractDrawer<Props extends LayerProps> {
 
   abstract init(gl: ThisWebGLContext): Promise<void>
 
-  abstract draw(
-    gl: ThisWebGLContext,
-    matrix: m4.Mat4,
-    frameInfo: FrameInfo,
-    parentFramebuffer: WebGLFramebuffer | null,
-  ): void
+  abstract draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo): void
 
   abstract destroy(gl?: ThisWebGLContext): void
 }

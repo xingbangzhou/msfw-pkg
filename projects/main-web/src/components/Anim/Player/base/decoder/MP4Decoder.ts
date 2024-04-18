@@ -1,11 +1,12 @@
-import MP4Demuxer from '../demuxer/MP4Demuxer'
-import {ThisWebGLContext} from '../glapi'
+import MP4Demuxer, {MP4DemuxConfig} from '../demuxer/MP4Demuxer'
+import {ThisWebGLContext} from '../webgl'
 
 export default class MP4Decoder {
   constructor(uri: string) {
     this.decoder = new VideoDecoder({
       output: videoFrame => {
         if (videoFrame.timestamp - this.currentTime >= 0) {
+          this.videoFrames = this.videoFrames || []
           this.videoFrames.push(videoFrame)
         } else {
           videoFrame.close()
@@ -25,46 +26,90 @@ export default class MP4Decoder {
 
   private decoder: VideoDecoder
   private demuxer: MP4Demuxer
-  private chunksList: EncodedVideoChunk[][] = []
+  private config?: MP4DemuxConfig
+  private chunksList?: EncodedVideoChunk[][]
   private currentTime = 0
-  private videoFrames: VideoFrame[] = []
+  private videoFrames?: VideoFrame[]
 
-  rendVideoFrame(gl: ThisWebGLContext, texture: WebGLTexture) {
-    const videoFrame = this.videoFrames[0]
-    if (!videoFrame) return false
+  // 获取当前视频帧
+  get videoFrame() {
+    return this.videoFrames?.[0]
+  }
 
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, videoFrame)
-    videoFrame.close()
-    this.videoFrames = this.videoFrames.slice(1)
-
-    return true
+  // 移动到下一帧
+  next() {
+    const videoFrame = this.videoFrames?.[0]
+    if (videoFrame) {
+      videoFrame.close()
+      this.videoFrames = this.videoFrames?.slice(1)
+    }
   }
 
   // time: ms
   seek(time: number) {
+    const lastTime = this.currentTime
     this.currentTime = time * 1000
-    this.videoFrames = this.videoFrames.filter(el => {
-      if (el.timestamp - this.currentTime >= 0) return true
-      el.close()
-    })
+    if (this.currentTime >= lastTime) {
+      this.videoFrames = this.videoFrames?.filter(el => {
+        if (el.timestamp >= this.currentTime) return true
+        el.close()
+      })
+    } else if (this.config) {
+      // 定位到之前
+      this.decoder.reset()
+      this.decoder.configure(this.config)
+      this.videoFrames = this.videoFrames?.filter(el => el.close())
+      this.videoFrames = []
+
+      if (this.chunksList) {
+        let i = 0
+        const l = this.chunksList?.length
+        for (; i < l; i++) {
+          const chunks = this.chunksList[i]
+          if (chunks[0].timestamp - this.currentTime > 0) break
+        }
+        if (i >= this.chunksList.length) {
+          i = this.chunksList.length - 1
+        }
+        if (this.chunksList[i][0].timestamp - this.currentTime >= 1000) {
+          i = Math.max(i - 1, 0)
+        }
+        for (; i < l; i++) {
+          const chunks = this.chunksList[i]
+          chunks.forEach(el => this.decoder.decode(el))
+        }
+      }
+    }
   }
 
-  private onConfig = (config: any) => {
+  destroy() {
+    this.demuxer.destroy()
+    this.decoder.close()
+    this.config = undefined
+    this.chunksList = undefined
+    this.videoFrames?.forEach(el => el.close())
+    this.videoFrames = undefined
+  }
+
+  private onConfig = (config: MP4DemuxConfig) => {
+    this.config = config
     this.decoder.configure(config)
   }
 
   private onChunk = (chunk: EncodedVideoChunk) => {
+    this.chunksList = this.chunksList || []
+    // 关键帧
     if (chunk.type === 'key') {
       this.chunksList.push([chunk])
     } else {
+      // 延迟帧
       const kl = this.chunksList.length
       const chunks = this.chunksList[kl - 1]
       if (chunks) {
         chunks.push(chunk)
       }
     }
+    // 直接解码
     this.decoder.decode(chunk)
   }
 

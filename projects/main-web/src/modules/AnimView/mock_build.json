@@ -63,6 +63,7 @@
                 "isTrackMatte": false,
                 "width": 469,
                 "height": 330,
+                "blendMode": 0,
                 "inFrame": 0,
                 "outFrame": 180
             },
@@ -73,7 +74,7 @@
                     {
                         "type": "Path",
                         "name": "形状 1",
-                        "blendMode": 1,
+                        "blendMode": 0,
                         "elements": {
                             "shapeInfo": {
                                 "points": [
@@ -108,9 +109,9 @@
                                 ]
                             },
                             "strokeInfo": {
-                                "blendMode": 1,
+                                "blendMode": 0,
                                 "color": [
-                                    0.7058822332644,
+                                    0.71,
                                     0,
                                     1,
                                     1
@@ -230,11 +231,13 @@
                 "isTrackMatte": false,
                 "width": 900,
                 "height": 1000,
+                "blendMode": 1,
                 "inFrame": 0,
                 "outFrame": 180
             },
             {
                 "type": "precomposition",
+                "name": "网格",
                 "id": 145,
                 "transform": {
                     "anchorPoint": [
@@ -310,6 +313,7 @@
             },
             {
                 "type": "precomposition",
+                "name": "屏幕",
                 "id": 33,
                 "transform": {
                     "anchorPoint": [
@@ -438,6 +442,7 @@
                 "isTrackMatte": false,
                 "width": 552,
                 "height": 861,
+                "blendMode": 0,
                 "inFrame": 0,
                 "outFrame": 180
             },
@@ -494,6 +499,7 @@
                 "isTrackMatte": false,
                 "width": 706,
                 "height": 270,
+                "blendMode": 0,
                 "inFrame": 0,
                 "outFrame": 180
             },
@@ -501,7 +507,6 @@
                 "id": 220,
                 "type": "precomposition",
                 "name": "烟花_bmp",
-                "isAlpha": true,
                 "transform": {
                     "anchorPoint": [
                         {
@@ -549,6 +554,7 @@
                 "isTrackMatte": false,
                 "width": 900,
                 "height": 1000,
+                "blendMode": 1,
                 "inFrame": 0,
                 "outFrame": 180
             },
@@ -605,6 +611,7 @@
                 "isTrackMatte": false,
                 "width": 900,
                 "height": 1000,
+                "blendMode": 0,
                 "inFrame": 0,
                 "outFrame": 180
             }
@@ -668,14 +675,15 @@
                     "isTrackMatte": false,
                     "width": 200,
                     "height": 700,
+                    "blendMode": 0,
                     "inFrame": 0,
                     "outFrame": 180
                 }
             ],
             "bgColor": [
-                0.57647058823529,
-                0.57647058823529,
-                0.57647058823529
+                0.58,
+                0.58,
+                0.58
             ],
             "width": 200,
             "height": 700
@@ -751,6 +759,7 @@
                     "isTrackMatte": false,
                     "width": 200,
                     "height": 700,
+                    "blendMode": 0,
                     "inFrame": 0,
                     "outFrame": 180
                 },
@@ -761,7 +770,7 @@
                         {
                             "type": "Rect",
                             "name": "矩形 1",
-                            "blendMode": 1,
+                            "blendMode": 0,
                             "elements": {
                                 "rectInfo": {
                                     "direction": 1,
@@ -776,7 +785,7 @@
                                     "roundness": 0
                                 },
                                 "fillInfo": {
-                                    "blendMode": 1,
+                                    "blendMode": 0,
                                     "color": [
                                         1,
                                         1,
@@ -877,6 +886,7 @@
                     "isTrackMatte": true,
                     "width": 200,
                     "height": 700,
+                    "blendMode": 0,
                     "inFrame": 64,
                     "outFrame": 180
                 },
@@ -939,6 +949,7 @@
                     "trackMatteType": 1,
                     "width": 640,
                     "height": 360,
+                    "blendMode": 0,
                     "inFrame": 64,
                     "outFrame": 180
                 },
@@ -994,6 +1005,7 @@
                     "isTrackMatte": false,
                     "width": 200,
                     "height": 700,
+                    "blendMode": 0,
                     "inFrame": 46,
                     "outFrame": 180
                 },
@@ -1003,7 +1015,11 @@
                     "name": "进入直播间 2",
                     "textDocAttr": {
                         "text": "进入直播间",
-                        "textColor": [0.357, 0.537, 1.0],
+                        "textColor": [
+                            0.36,
+                            0.54,
+                            1
+                        ],
                         "font": "ZiZhiQuXiMaiTi",
                         "fontFamily": "ZiZhiQuXiMaiTi",
                         "fontSize": 19,
@@ -1110,6 +1126,7 @@
                     "isTrackMatte": false,
                     "width": 200,
                     "height": 700,
+                    "blendMode": 0,
                     "inFrame": 0,
                     "outFrame": 180
                 },
@@ -1119,7 +1136,11 @@
                     "name": "进入直播间",
                     "textDocAttr": {
                         "text": "进入直播间",
-                        "textColor": [0.357, 0.537, 1.0],
+                        "textColor": [
+                            0.36,
+                            0.54,
+                            1
+                        ],
                         "font": "ZiZhiQuXiMaiTi",
                         "fontFamily": "ZiZhiQuXiMaiTi",
                         "fontSize": 19,
@@ -1206,6 +1227,7 @@
                     "isTrackMatte": false,
                     "width": 200,
                     "height": 700,
+                    "blendMode": 0,
                     "inFrame": 0,
                     "outFrame": 180
                 }
@@ -1232,53 +1254,6 @@
             "height": 1000,
             "duration": 6,
             "frameRate": 30
-        }
-    ],
-    "imgSource": [
-        {
-            "srcPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/(素材)/前景.png",
-            "desPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/temp/前景.png",
-            "path": "前景.png"
-        },
-        {
-            "srcPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/(素材)/网格2.png",
-            "desPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/temp/网格2.png",
-            "path": "网格2.png"
-        },
-        {
-            "srcPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/(素材)/主楼.png",
-            "desPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/temp/主楼.png",
-            "path": "主楼.png"
-        },
-        {
-            "srcPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/(素材)/后景.png",
-            "desPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/temp/后景.png",
-            "path": "后景.png"
-        },
-        {
-            "srcPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/(素材)/bg.png",
-            "desPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/temp/bg.png",
-            "path": "bg.png"
-        }
-    ],
-    "videoSource": [
-        {
-            "content": "粒子_bmp.mp4",
-            "name": "粒子_bmp"
-        },
-        {
-            "srcPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/(素材)/preview.mp4",
-            "content": "preview.mp4",
-            "name": "preview.mp4"
-        },
-        {
-            "srcPath": "/Users/ynot16/Downloads/LED大楼demo文件夹/(素材)/temp_change_264_mid.mp4",
-            "content": "temp_change_264_mid.mp4",
-            "name": "temp_change_264_mid.mp4"
-        },
-        {
-            "content": "烟花_bmp.mp4",
-            "name": "烟花_bmp"
         }
     ]
 }

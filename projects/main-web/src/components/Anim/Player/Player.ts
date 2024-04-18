@@ -58,21 +58,14 @@ export default class Player {
       }
     }
 
-    const frameInfo = {
-      frames: this._playData.frames,
-      frameId: this._playData.frameId,
-      width: this._playData.width,
-      height: this._playData.height,
-      opacity: 1.0,
-    }
-    this._ctxRender.render(frameInfo)
+    this._ctxRender.render()
 
     this.frameAnimId = this.requestAnim?.(this.render)
   }
 
   private requestAnimFunc = () => {
     return (cb: () => void) => {
-      return setTimeout(cb, this._playData.frameMs)
+      return setTimeout(cb, this._playData.frameTime)
     }
   }
 

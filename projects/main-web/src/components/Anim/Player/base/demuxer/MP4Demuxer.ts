@@ -1,25 +1,24 @@
 import MP4Box, {ISOFile, DataStream} from './mp4box.all'
 
-export interface setStatusFn {
-  (type: string, message: any): void
+export interface MP4DemuxConfig {
+  codec: string
+  codedWidth: number
+  codedHeight: number
+  description: any
 }
 
-export interface onConfigFn {
-  (config: {codec: string; codedWidth: number; codedHeight: number; description: any}): void
-}
-
-export interface onChunkFn {
-  (chunk: EncodedVideoChunk): void
+export interface MP4DemuxHandles {
+  onConfig(config: MP4DemuxConfig): void
+  onChunk(chunk: EncodedVideoChunk): void
+  setStatus(type: string, message: any): void
 }
 
 class MP4FileSink {
-  constructor(file: ISOFile, setStatus: setStatusFn) {
+  constructor(file: ISOFile) {
     this.file = file
-    this.setStatus = setStatus
   }
 
   private file: ISOFile
-  private setStatus: setStatusFn
   private _offset = 0
 
   write(chunk: any) {
@@ -28,60 +27,64 @@ class MP4FileSink {
     ;(buffer as any).fileStart = this._offset
     this._offset += buffer.byteLength
 
-    this.setStatus('fetch', (this._offset / 1024 ** 2).toFixed(1) + ' MiB')
+    console.log('fetch', (this._offset / 1024 ** 2).toFixed(1) + ' MiB')
 
     this.file.appendBuffer(buffer)
   }
 
   close() {
-    this.setStatus('fetch', 'Done')
+    console.log('fetch', 'Done')
     this.file.flush()
   }
 }
 
 export default class MP4Demuxer {
-  constructor(uri: string, handlers: {onConfig: onConfigFn; onChunk: onChunkFn; setStatus: setStatusFn}) {
-    this.onConfig = handlers.onConfig
-    this.onChunk = handlers.onChunk
-    this.setStatus = handlers.setStatus
+  constructor(uri: string, handles: MP4DemuxHandles) {
+    this.handles = handles
 
     this._file = MP4Box.createFile()
-    this._file.onError = (error: unknown) => this.setStatus('demux', error)
+    this._file.onError = (error: unknown) => this.handles?.setStatus('demux', error)
     this._file.onReady = this.onReady
     this._file.onSamples = this.onSamples
 
-    const fileSink = new MP4FileSink(this._file, this.setStatus)
+    const fileSink = new MP4FileSink(this._file)
     fetch(uri).then(response => {
-      response.body?.pipeTo(new WritableStream(fileSink, {highWaterMark: 2}))
+      this._respBody = response.body
+      this._respBody?.pipeTo(new WritableStream(fileSink, {highWaterMark: 2}))
     })
   }
 
-  private onConfig: onConfigFn
-  private onChunk: onChunkFn
-  private setStatus: setStatusFn
+  private handles: MP4DemuxHandles | null = null
   private _file: ISOFile
+  private _respBody: ReadableStream<Uint8Array> | null = null
+
+  destroy() {
+    this.handles = null
+    this._respBody?.cancel()
+    this._respBody = null
+  }
 
   private description(track: any) {
     const trak = this._file.getTrackById(track.id)
     for (const entry of trak.mdia.minf.stbl.stsd.entries) {
       const box = entry.avcC || entry.hvcC || entry.vpcC || entry.av1C
       if (box) {
-        const stream = new (DataStream as any)(undefined, 0, DataStream.BIG_ENDIAN)
+        const stream = new DataStream(new ArrayBuffer(0), 0, DataStream.BIG_ENDIAN)
         box.write(stream)
 
-        return new Uint8Array(stream.buffer, 8) // Remove the box header.
+        return new Uint8Array(stream.buffer as ArrayBuffer, 8) // Remove the box header.
       }
     }
-    this.setStatus('description', 'avcC, hvcC, vpcC, or av1C box not found')
+    this.handles?.setStatus('description', 'avcC, hvcC, vpcC, or av1C box not found')
     return undefined
   }
 
   private onReady = (info: any) => {
-    this.setStatus('demux', 'Ready')
+    this.handles?.setStatus('demux', 'Ready')
     const track = info.videoTracks[0]
 
     // Generate and emit an appropriate VideoDecoderConfig.
-    this.onConfig({
+    this.handles?.onConfig({
       // Browser doesn't support parsing full vp8 codec (eg: `vp08.00.41.08`),
       // they only support `vp8`.
       codec: track.codec.startsWith('vp08') ? 'vp8' : track.codec,
@@ -103,7 +106,7 @@ export default class MP4Demuxer {
         duration: (1e6 * sample.duration) / sample.timescale,
         data: sample.data,
       })
-      this.onChunk(chunk)
+      this.handles?.onChunk(chunk)
     }
   }
 }

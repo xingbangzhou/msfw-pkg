@@ -53,6 +53,8 @@ export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
     const width = this.width
     const height = this.height
     drawTexture(gl, width, height)
+
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {

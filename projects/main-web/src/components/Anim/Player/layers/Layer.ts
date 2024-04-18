@@ -1,5 +1,5 @@
 import PlayData from '../PlayData'
-import {Framebuffer, ThisWebGLContext, createFramebuffer, drawTexture, m4} from '../base'
+import {drawTexture, Framebuffer, m4, ThisWebGLContext} from '../base'
 import {
   FrameInfo,
   LayerImageProps,
@@ -17,6 +17,7 @@ import ShapeDrawer from './ShapeDrawer'
 import TextDrawer from './TextDrawer'
 import VectorDrawer from './VectorDrawer'
 import VideoDrawer from './VideoDrawer'
+import {setMaskProgram, setProgram} from './setPrograms'
 
 export default class Layer {
   constructor(drawer: AbstractDrawer<LayerProps>) {
@@ -24,11 +25,11 @@ export default class Layer {
   }
 
   private drawer: AbstractDrawer<LayerProps>
+  private _framebuffer: Framebuffer | null = null
 
   // 遮罩
-  private _trackMatteLayer?: Layer
-  private _drawFramebuffer: Framebuffer | null = null
-  private _trackFramebuffer?: Framebuffer | null = null
+  private _maskLayer?: Layer
+  private _maskFramebuffer?: Framebuffer | null = null
 
   get type() {
     return this.drawer.props.type
@@ -43,11 +44,11 @@ export default class Layer {
   }
 
   get inFrame() {
-    return this.drawer.props.inFrame
+    return this.drawer.inFrame
   }
 
   get outFrame() {
-    return this.drawer.props.outFrame
+    return this.drawer.outFrame
   }
 
   verifyTime(frameId: number) {
@@ -60,100 +61,87 @@ export default class Layer {
     if (trackId && parentLayers) {
       const trackProps = parentLayers.find(el => el.id == trackId)
       if (trackProps) {
-        this._trackMatteLayer = createLayer(trackProps, this.drawer.playData)
+        this._maskLayer = createLayer(trackProps, this.drawer.playData)
       }
     }
     // 初始化
     await this.drawer.init(gl)
-    await this._trackMatteLayer?.init(gl)
+    await this._maskLayer?.init(gl)
   }
 
-  render(
-    gl: ThisWebGLContext,
-    parentMatrix: m4.Mat4,
-    frameInfo: FrameInfo,
-    parentFramebuffer: WebGLFramebuffer | null = null,
-  ) {
+  render(gl: ThisWebGLContext, parentMatrix: m4.Mat4, frameInfo: FrameInfo) {
     const drawer = this.drawer
     const localMatrix = drawer.getMatrix(frameInfo)
     if (!localMatrix) return
+    const opacity = drawer.getOpacity(frameInfo)
 
-    const {width: parentWidth, height: parentHeight} = frameInfo
-
-    const opcaity = drawer.getOpacity(frameInfo)
-
-    // 处理遮罩
-    const trackMatteLayer = this._trackMatteLayer
-    if (trackMatteLayer) {
-      const drawFramebuffer = (this._drawFramebuffer =
-        this._drawFramebuffer || createFramebuffer(gl, parentWidth, parentHeight))
-      this._drawFramebuffer = drawFramebuffer
-      const trackFramebuffer = (this._trackFramebuffer =
-        this._trackFramebuffer || createFramebuffer(gl, parentWidth, parentHeight))
-      if (!drawFramebuffer || !trackFramebuffer) return
-
-      // 纹理渲染
-      gl.bindFramebuffer(gl.FRAMEBUFFER, drawFramebuffer)
-      gl.viewport(0, 0, parentWidth, parentHeight)
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      const viewMatrix = m4.perspectiveCamera(parentWidth, parentHeight)
-      const matrix = m4.multiply(viewMatrix, localMatrix)
-      drawer.draw(gl, matrix, frameInfo, drawFramebuffer)
-
-      // 遮罩渲染
-      gl.bindFramebuffer(gl.FRAMEBUFFER, trackFramebuffer)
-      gl.viewport(0, 0, parentWidth, parentHeight)
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      trackMatteLayer.render(gl, parentMatrix, frameInfo, trackFramebuffer)
-
-      // 上屏
-      gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
-      gl.viewport(
-        0,
-        0,
-        parentFramebuffer ? frameInfo.width : gl.canvas.width,
-        parentFramebuffer ? frameInfo.height : gl.canvas.height,
-      )
-      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-      // 设置透明度
-      gl.uniform1f(gl.uniforms.opacity, opcaity)
-      gl.uniform1i(gl.uniforms.maskMode, 1)
-      gl.uniformMatrix4fv(gl.uniforms.matrix, false, parentMatrix)
-      gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, drawFramebuffer.texture)
-      gl.activeTexture(gl.TEXTURE1)
-      gl.bindTexture(gl.TEXTURE_2D, trackFramebuffer.texture)
-
-      drawTexture(gl, parentWidth, parentHeight, true)
-
-      // 释放
-      gl.bindTexture(gl.TEXTURE_2D, null)
-      gl.uniform1i(gl.uniforms.maskMode, 0)
-      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
-      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-    } else {
-      // 设置透明度
-      gl.uniform1f(gl.uniforms.opacity, opcaity)
-      const matrix = m4.multiply(parentMatrix, localMatrix)
-      drawer.draw(gl, matrix, frameInfo, parentFramebuffer)
+    setProgram(gl)
+    if (this._maskLayer) {
+      this.maskDraw(this._maskLayer, gl, {localMatrix, opacity}, frameInfo, parentMatrix)
+      return
     }
+
+    gl.uniform1f(gl.uniforms.opacity, opacity)
+    const matrix = m4.multiply(parentMatrix, localMatrix)
+    drawer.draw(gl, matrix, frameInfo)
   }
 
   destroy(gl?: ThisWebGLContext) {
-    if (this._drawFramebuffer) {
-      gl?.deleteFramebuffer(this._drawFramebuffer)
-      gl?.deleteTexture(this._drawFramebuffer.texture)
-      this._drawFramebuffer = null
-    }
-    if (this._trackFramebuffer) {
-      gl?.deleteFramebuffer(this._trackFramebuffer)
-      gl?.deleteTexture(this._trackFramebuffer.texture)
-      this._trackFramebuffer = null
-    }
+    this._framebuffer?.destory()
+    this._maskFramebuffer?.destory()
 
+    this._maskLayer?.destroy(gl)
     this.drawer.destroy(gl)
+  }
+
+  private maskDraw(
+    maskLayer: Layer,
+    gl: ThisWebGLContext,
+    state: {localMatrix: m4.Mat4; opacity: number},
+    frameInfo: FrameInfo,
+    parentMatrix: m4.Mat4,
+  ) {
+    const {localMatrix, opacity} = state
+    const {width: parentWidth, height: parentHeight, framebuffer: parentFramebuffer} = frameInfo
+
+    const framebuffer = this._framebuffer || new Framebuffer(gl)
+    this._framebuffer = framebuffer
+    const maskFramebuffer = this._maskFramebuffer || new Framebuffer(gl)
+    this._maskFramebuffer = maskFramebuffer
+
+    // 绘制纹理
+    framebuffer.bind()
+    framebuffer.viewport(parentWidth, parentHeight)
+    let matrix = m4.perspectiveCamera(parentWidth, parentHeight)
+    matrix = m4.multiply(matrix, localMatrix)
+    this.drawer.draw(gl, matrix, {
+      ...frameInfo,
+      framebuffer: framebuffer,
+    })
+
+    // 遮罩纹理
+    maskFramebuffer.bind()
+    maskFramebuffer.viewport(parentWidth, parentHeight)
+    maskLayer.render(gl, parentMatrix, {
+      ...frameInfo,
+      framebuffer: maskFramebuffer,
+    })
+
+    // 合并纹理
+    parentFramebuffer.bind()
+    setMaskProgram(gl, this.drawer.trackMatteType)
+
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+    gl.activeTexture(gl.TEXTURE1)
+    gl.bindTexture(gl.TEXTURE_2D, maskFramebuffer.texture)
+    gl.uniform1f(gl.uniforms.opacity, opacity)
+    gl.uniformMatrix4fv(gl.uniforms.matrix, false, parentMatrix)
+
+    drawTexture(gl, parentWidth, parentHeight, true)
+
+    // 释放
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 }
 

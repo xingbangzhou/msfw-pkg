@@ -1,4 +1,4 @@
-import {ThisWebGLContext, setArribInfo} from './glapi'
+import {ThisWebGLContext, setArribInfo} from './webgl'
 
 export function setRectangle(gl: ThisWebGLContext, x: number, y: number, w: number, h: number) {
   const x1 = 0
@@ -83,5 +83,31 @@ export function drawLineRectangle(gl: ThisWebGLContext, w: number, h: number) {
 
   const primitiveType = gl.LINE_LOOP
   const count = 4
+  gl.drawArrays(primitiveType, 0, count)
+}
+
+export function drawSimpleTexture(gl: ThisWebGLContext) {
+  {
+    const x1 = -1.0
+    const y1 = -1.0
+    const x2 = 1.0
+    const y2 = 1.0
+
+    setArribInfo(gl, gl.attribs.position, {
+      size: 2,
+      data: [x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2],
+    })
+  }
+
+  const tx1 = 0
+  const ty1 = 0
+  const tx2 = 1
+  const ty2 = 1
+  setArribInfo(gl, gl.attribs.texcoord, {
+    data: [tx1, ty1, tx2, ty1, tx1, ty2, tx1, ty2, tx2, ty1, tx2, ty2],
+  })
+
+  const primitiveType = gl.TRIANGLES
+  const count = 6
   gl.drawArrays(primitiveType, 0, count)
 }

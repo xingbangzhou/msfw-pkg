@@ -23,7 +23,7 @@ export default abstract class ElementDrawer<
     }
   }
 
-  draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo, parentFramebuffer: WebGLFramebuffer | null) {
+  draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     if (!this._texture) return
 
     this.drawShape(gl, frameInfo)
@@ -35,6 +35,8 @@ export default abstract class ElementDrawer<
     const width = this.width
     const height = this.height
     drawTexture(gl, width, height)
+
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   destroy(gl?: ThisWebGLContext | undefined): void {

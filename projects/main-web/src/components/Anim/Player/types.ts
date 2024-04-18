@@ -1,3 +1,5 @@
+import {Framebuffer} from './base/webgl'
+
 export const PreComposition = 'precomposition'
 export enum LayerType {
   Image = 'image',
@@ -21,6 +23,7 @@ export interface FrameInfo {
   width: number
   height: number
   opacity: number // 父级的透明度
+  framebuffer: Framebuffer
 }
 
 export interface TransformProps {
@@ -74,6 +77,14 @@ export enum TrackMatteType {
   LUMA_INVERTED = 4,
 }
 
+export enum BlendMode {
+  Default = 0,
+  Add = 1,
+  Screen = 2,
+  Overlay = 3,
+  SoftLight = 4,
+}
+
 export interface LayerBaseProps {
   id: number
   type: string
@@ -86,6 +97,7 @@ export interface LayerBaseProps {
   isTrackMatte?: boolean
   trackMatteLayer?: number
   trackMatteType?: TrackMatteType
+  blendMode?: BlendMode
 }
 
 export type LayerImageProps = {
