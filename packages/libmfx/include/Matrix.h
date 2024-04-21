@@ -4,7 +4,7 @@
 
 namespace libdraw
 {
-#define PI 3.1415926
+    #define PI 3.1415926
     typedef float vec3f[3];
 
     float degToRad(float d)
