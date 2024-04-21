@@ -1,29 +1,30 @@
-import {Framebuffer, ThisWebGLContext, createFramebuffer, drawTexture} from '../base'
+import {Framebuffer, ThisWebGLContext, drawLineRectangle, drawTexture} from '../base'
 import {m4} from '../base'
 import {FrameInfo, LayerVectorProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 import Layer, {createLayer} from './Layer'
+import {setProgram} from './setPrograms'
 
 export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
   private _subLayers?: Layer[]
-  private _framebuffer: Framebuffer | null = null
+  private _viewFramebuffer: Framebuffer | null = null
   private _viewMatrix: m4.Mat4 = m4.identity()
 
   async init(gl: ThisWebGLContext) {
     const width = this.width
     const height = this.height
-    this._framebuffer = createFramebuffer(gl, width, height)
+    this._viewFramebuffer = new Framebuffer(gl)
     this._viewMatrix = m4.perspectiveCamera(width, height)
-    const parInFrame = this.props.inFrame
 
     // 子图层列表
+    const viewInFrame = this.props.inFrame
     this._subLayers = []
     const layerPropss = this.props.layers
     if (layerPropss) {
       for (let i = layerPropss.length - 1; i >= 0; i--) {
         const props = layerPropss[i]
-        const inFrame = props.inFrame + parInFrame
-        const outFrame = props.outFrame + parInFrame
+        const inFrame = props.inFrame + viewInFrame
+        const outFrame = props.outFrame + viewInFrame
         // 遮罩过滤
         if (props.isTrackMatte) continue
         // 创建图层
@@ -35,44 +36,37 @@ export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
     }
   }
 
-  draw(
-    gl: ThisWebGLContext,
-    matrix: m4.Mat4,
-    parentFrameInfo: FrameInfo,
-    parentFramebuffer: WebGLFramebuffer | null = null,
-  ) {
-    const framebuffer = this._framebuffer
+  draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
+    const framebuffer = this._viewFramebuffer
     const subLayers = this._subLayers
     if (!framebuffer || !subLayers || !subLayers.length) return
 
     const width = this.width
     const height = this.height
+    const opacity = this.transform.getOpacity(frameInfo.frameId)
 
     // 子图层渲染
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
-    gl.viewport(0, 0, width, height)
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    framebuffer.bind()
+    framebuffer.viewport(width, height)
 
-    const opacity = this.transform.getOpacity(parentFrameInfo.frameId)
-    const frameInfo = {...parentFrameInfo, width: width, height: height, opacity}
+    const viewFrameInfo = {...frameInfo, width: width, height: height, opacity, framebuffer}
     const viewMatrix = this._viewMatrix
 
     for (let i = 0, l = subLayers.length; i < l; i++) {
       const layer = subLayers[i]
-      if (!layer.verifyTime(frameInfo.frameId)) continue
-      layer.render(gl, viewMatrix, frameInfo, framebuffer)
+      if (!layer.verifyTime(viewFrameInfo.frameId)) continue
+      layer.render(gl, viewMatrix, viewFrameInfo)
     }
-    // 上屏
-    gl.bindFramebuffer(gl.FRAMEBUFFER, parentFramebuffer || null)
-    gl.viewport(
-      0,
-      0,
-      parentFramebuffer ? parentFrameInfo.width : gl.canvas.width,
-      parentFramebuffer ? parentFrameInfo.height : gl.canvas.height,
-    )
 
+    // 上屏
+    const parentFramebuffer = frameInfo.framebuffer
+    parentFramebuffer.bind()
+    parentFramebuffer.viewport(frameInfo.width, frameInfo.height, true)
+
+    setProgram(gl)
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+    gl.uniform1f(gl.uniforms.opacity, opacity)
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
     drawTexture(gl, width, height, true)
@@ -82,11 +76,8 @@ export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
   }
 
   destroy(gl?: ThisWebGLContext) {
-    if (this._framebuffer) {
-      gl?.deleteFramebuffer(this._framebuffer)
-      gl?.deleteTexture(this._framebuffer.texture)
-      this._framebuffer = null
-    }
+    this._viewFramebuffer?.destory()
+    this._viewFramebuffer = null
 
     this._subLayers?.forEach(el => el.destroy(gl))
     this._subLayers = undefined

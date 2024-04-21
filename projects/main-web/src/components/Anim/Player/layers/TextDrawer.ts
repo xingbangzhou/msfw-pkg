@@ -116,6 +116,8 @@ export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
     const width = this.width
     const height = this.height
     drawTexture(gl, width, height)
+
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {

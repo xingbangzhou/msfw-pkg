@@ -39,7 +39,7 @@ export default class ShapeDrawer extends AbstractDrawer<LayerShapeProps> {
     }
   }
 
-  draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo, parentFramebuffer: WebGLFramebuffer | null) {
+  draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     const subLayers = this._subLayers || []
     for (let i = 0, l = subLayers.length; i < l; i++) {
       const layer = subLayers[i]

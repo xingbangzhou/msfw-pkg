@@ -1,16 +1,18 @@
-import {FrameInfo, LayerProps} from '../types'
-import {ThisWebGLContext, createProgram, resizeCanvasToDisplaySize} from '../base/glapi'
-import {FragmentShader, VertexShader} from './shaders'
+import {LayerProps} from '../types'
 import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
-import PlayContext from '../PlayData'
+import PlayData from '../PlayData'
+import {Framebuffer, resizeCanvasToDisplaySize, ThisWebGLContext} from '../base/webgl'
+import {setProgram, setSimpleProgram} from '../layers/setPrograms'
+import {drawSimpleTexture, drawTexture} from '../base/primitives'
 
 export default class WebGLRender {
-  protected playContext?: PlayContext
+  protected playData?: PlayData
 
   private container?: HTMLElement
   private _canvas?: HTMLCanvasElement
   private _gl?: ThisWebGLContext
+  private _framebuffer?: Framebuffer
 
   private _camera = m4.identity()
   private _rootLayers?: Layer[]
@@ -26,49 +28,19 @@ export default class WebGLRender {
     this.container = container
   }
 
-  async load(playContext: PlayContext) {
-    this.playContext = playContext
+  async load(playData: PlayData) {
+    this.playData = playData
 
-    const width = playContext.width
-    const height = playContext.height
+    const width = playData.width
+    const height = playData.height
 
     if (!this._canvas) {
       const canvas = (this._canvas = document.createElement('canvas'))
       canvas.width = width
       canvas.height = height
 
-      const gl = (this._gl = canvas.getContext('webgl') as ThisWebGLContext)
+      this._gl = canvas.getContext('webgl') as ThisWebGLContext
       this.container?.appendChild(this._canvas)
-
-      // 混合
-      // gl.enable(gl.BLEND)
-      // gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-      // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-      // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
-
-      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
-      gl.enable(gl.BLEND)
-      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-
-      const program = (gl.program = createProgram(gl, VertexShader, FragmentShader))
-      if (program) {
-        // 设置参数
-        gl.attribs = {
-          position: gl.getAttribLocation(program, 'a_position'),
-          texcoord: gl.getAttribLocation(program, 'a_texcoord'),
-        }
-        gl.uniforms = {
-          matrix: gl.getUniformLocation(program, 'u_matrix') as WebGLUniformLocation,
-          texMatrix: gl.getUniformLocation(program, 'u_texMatrix') as WebGLUniformLocation,
-          maskMode: gl.getUniformLocation(program, 'u_maskMode') as WebGLUniformLocation,
-          opacity: gl.getUniformLocation(program, 'u_opacity') as WebGLUniformLocation,
-        }
-        // 纹理位置
-        const uTextureLocation = gl.getUniformLocation(program, 'u_texture')
-        const uMaskTextureLocation = gl.getUniformLocation(program, 'u_maskTexture')
-        gl.uniform1i(uTextureLocation, 0)
-        gl.uniform1i(uMaskTextureLocation, 1)
-      }
     }
 
     if (!this._gl) {
@@ -80,21 +52,39 @@ export default class WebGLRender {
 
     this._camera = m4.perspectiveCamera(width, height)
 
-    if (this._gl) {
-      const layerPropsList = playContext.rootLayers
-      await this.resetLayers(this._gl, playContext, layerPropsList || [])
-    }
+    const layerPropsList = playData.rootLayers
+    await this.resetLayers(this._gl, playData, layerPropsList || [])
 
     return true
   }
 
-  async render(frameInfo: FrameInfo) {
-    const gl = this._gl
-    if (!gl) return
+  showed = false
 
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-    // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    gl.clear(gl.COLOR_BUFFER_BIT)
+  async render() {
+    const gl = this._gl
+    if (!gl || !this.playData) return
+
+    const {frames, frameId, width, height} = this.playData
+
+    const framebuffer = this._framebuffer || new Framebuffer(gl)
+    this._framebuffer = framebuffer
+
+    const frameInfo = {
+      frames,
+      frameId,
+      width,
+      height,
+      opacity: 1.0,
+      framebuffer: framebuffer,
+    }
+
+    gl.enable(gl.BLEND)
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+
+    framebuffer.bind()
+    framebuffer.viewport(width, height)
+
     const rootLayers = this._rootLayers
     if (rootLayers) {
       for (let i = 0, l = rootLayers?.length || 0; i < l; i++) {
@@ -103,17 +93,38 @@ export default class WebGLRender {
         layer.render(gl, this._camera, frameInfo)
       }
     }
+
+    // 上屏
+    // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
+    // gl.blendFunc(gl.SRC_ALPHA, gl.ZERO)
+    // gl.blendFuncSeparate(gl.SRC_COLOR, gl.ONE_MINUS_SRC_COLOR, gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.disable(gl.BLEND)
+
+    setSimpleProgram(gl)
+
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+
+    drawSimpleTexture(gl)
+
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   destroy() {
     this.clearLayers()
+    this._framebuffer?.destory()
+    this._framebuffer = undefined
 
     this._canvas?.parentNode?.removeChild(this._canvas)
     this._canvas = undefined
     this.container = undefined
   }
 
-  private async resetLayers(gl: ThisWebGLContext, playContext: PlayContext, layerPropsList: LayerProps[]) {
+  private async resetLayers(gl: ThisWebGLContext, playData: PlayData, layerPropsList: LayerProps[]) {
     this._rootLayers?.forEach(layer => layer.destroy(gl))
     this._rootLayers = []
 
@@ -122,7 +133,7 @@ export default class WebGLRender {
       // 遮罩过滤
       if (props.isTrackMatte) continue
       // 创建图层
-      const layer = createLayer(props, playContext)
+      const layer = createLayer(props, playData)
       if (!layer) continue
       this._rootLayers.push(layer)
       await layer.init(gl, layerPropsList)

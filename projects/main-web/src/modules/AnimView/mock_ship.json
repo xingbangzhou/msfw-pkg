@@ -549,7 +549,8 @@
             "width": 500,
             "height": 500,
             "duration": 4.03333333333333,
-            "frameRate": 30
+            "frameRate": 30,
+            "isAlpha": true
         },
         {
             "id": 173,
@@ -558,7 +559,7 @@
                 {
                     "id": 188,
                     "type": "video",
-                    "content": "h265.mp4",
+                    "content": "temp_change_264_mid_1.mp4",
                     "name": "temp_change_264_mid_1.mp4",
                     "transform": {
                         "anchorPoint": [

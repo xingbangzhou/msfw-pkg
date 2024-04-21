@@ -5,28 +5,28 @@ export default class PlayData {
 
   private _props?: PlayProps
 
-  private _frameRate = 30
   private _frames = 0
-  private _frameMs = 0
+  private _frameRate = 30
+  private _frameTime = 0 // 毫秒单位
   private _frameId = -1
 
   setPlayProps(props: PlayProps) {
     this._props = props
     this._frameRate = props?.frameRate || 30
     this._frames = (props?.duration || 0) * props.frameRate
-    this._frameMs = 1000 / this._frameRate
-  }
-
-  get frameRate() {
-    return this._frameRate
+    this._frameTime = +(1000 / this._frameRate).toFixed(4).slice(0, -1)
   }
 
   get frames() {
     return this._frames
   }
 
-  get frameMs() {
-    return this._frameMs
+  get frameRate() {
+    return this._frameRate
+  }
+
+  get frameTime() {
+    return this._frameTime
   }
 
   get width() {

@@ -73,7 +73,7 @@
                     {
                         "type": "Path",
                         "name": "形状 1",
-                        "blendMode": 1,
+                        "blendMode": 0,
                         "elements": {
                             "shapeInfo": {
                                 "points": [
@@ -108,7 +108,7 @@
                                 ]
                             },
                             "strokeInfo": {
-                                "blendMode": 1,
+                                "blendMode": 0,
                                 "color": [
                                     0.7058822332644,
                                     0,
@@ -501,7 +501,8 @@
                 "id": 220,
                 "type": "precomposition",
                 "name": "烟花_bmp",
-                "isAlpha": true,
+                "isAlpha": false,
+                "blendMode": 1,
                 "transform": {
                     "anchorPoint": [
                         {
@@ -761,7 +762,7 @@
                         {
                             "type": "Rect",
                             "name": "矩形 1",
-                            "blendMode": 1,
+                            "blendMode": 0,
                             "elements": {
                                 "rectInfo": {
                                     "direction": 1,
@@ -776,7 +777,7 @@
                                     "roundness": 0
                                 },
                                 "fillInfo": {
-                                    "blendMode": 1,
+                                    "blendMode": 0,
                                     "color": [
                                         1,
                                         1,
