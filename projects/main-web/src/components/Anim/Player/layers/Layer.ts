@@ -93,56 +93,6 @@ export default class Layer {
     this.drawer.destroy(gl)
   }
 
-  // private drawMask(
-  //   maskLayer: Layer,
-  //   gl: ThisWebGLContext,
-  //   state: {localMatrix: m4.Mat4; opacity: number},
-  //   frameInfo: FrameInfo,
-  //   parentMatrix: m4.Mat4,
-  // ) {
-  //   const {localMatrix, opacity} = state
-  //   const {width: parentWidth, height: parentHeight, framebuffer: parentFramebuffer} = frameInfo
-
-  //   const framebuffer = this._framebuffer || new Framebuffer(gl)
-  //   this._framebuffer = framebuffer
-  //   const maskFramebuffer = this._maskFramebuffer || new Framebuffer(gl)
-  //   this._maskFramebuffer = maskFramebuffer
-
-  //   // 绘制纹理
-  //   framebuffer.bind()
-  //   framebuffer.viewport(parentWidth, parentHeight)
-  //   let matrix = m4.perspectiveCamera(parentWidth, parentHeight)
-  //   matrix = m4.multiply(matrix, localMatrix)
-  //   this.drawer.draw(gl, matrix, {
-  //     ...frameInfo,
-  //     framebuffer: framebuffer,
-  //   })
-
-  //   // 遮罩纹理
-  //   maskFramebuffer.bind()
-  //   maskFramebuffer.viewport(parentWidth, parentHeight)
-  //   maskLayer.render(gl, parentMatrix, {
-  //     ...frameInfo,
-  //     framebuffer: maskFramebuffer,
-  //   })
-
-  //   // 合并纹理
-  //   parentFramebuffer.bind()
-  //   setMaskProgram(gl, this.drawer.trackMatteType)
-
-  //   gl.activeTexture(gl.TEXTURE0)
-  //   gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
-  //   gl.activeTexture(gl.TEXTURE1)
-  //   gl.bindTexture(gl.TEXTURE_2D, maskFramebuffer.texture)
-  //   gl.uniform1f(gl.uniforms.opacity, opacity)
-  //   gl.uniformMatrix4fv(gl.uniforms.matrix, false, parentMatrix)
-
-  //   drawTexture(gl, parentWidth, parentHeight, true)
-
-  //   // 释放
-  //   gl.bindTexture(gl.TEXTURE_2D, null)
-  // }
-
   private drawMaskBlend(
     gl: ThisWebGLContext,
     state: {localMatrix: m4.Mat4; opacity: number},
