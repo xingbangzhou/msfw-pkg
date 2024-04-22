@@ -11,6 +11,7 @@ void main(void) {
   vec4 maskColor = texture2D(u_maskTexture, v_texcoord);
 
   float brightness = maskColor.r * 0.3 + maskColor.g * 0.6 + maskColor.b * 0.1;
+  texColor.a = texColor.a * brightness;
 
   gl_FragColor = texColor * brightness;
 }

@@ -1,8 +1,6 @@
-import {NavLink} from 'react-router-dom'
 import PlayData from '../PlayData'
 import {drawSimpleTexture, drawTexture, Framebuffer, m4, ThisWebGLContext} from '../base'
 import {
-  BlendMode,
   FrameInfo,
   LayerImageProps,
   LayerProps,
@@ -20,7 +18,7 @@ import ShapeDrawer from './ShapeDrawer'
 import TextDrawer from './TextDrawer'
 import VectorDrawer from './VectorDrawer'
 import VideoDrawer from './VideoDrawer'
-import {setMaskProgram, setProgram} from './setPrograms'
+import {setBlendProgram, setMaskProgram, setProgram} from './setPrograms'
 
 export default class Layer {
   constructor(drawer: AbstractDrawer<LayerProps>) {
@@ -188,12 +186,12 @@ export default class Layer {
 
       // 遮罩着色器
       setMaskProgram(gl, this.drawer.trackMatteType)
-      const texutre0 = framebuffer.reset()
+      const texture0 = framebuffer.reset()
       framebuffer.bind()
       framebuffer.viewport(parentWidth, parentHeight)
 
       gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, texutre0)
+      gl.bindTexture(gl.TEXTURE_2D, texture0)
       gl.activeTexture(gl.TEXTURE1)
       gl.bindTexture(gl.TEXTURE_2D, maskFramebuffer.texture)
 
@@ -201,17 +199,33 @@ export default class Layer {
       gl.bindTexture(gl.TEXTURE_2D, null)
     }
 
-    // 绘制到父Framebuffer
-    setProgram(gl)
-    parentFramebuffer.bind()
+    // 混合模式
+    if (blendMode) {
+      setBlendProgram(gl, blendMode)
+      const dstTexture = parentFramebuffer.reset()
+      parentFramebuffer.bind()
+      parentFramebuffer.viewport(parentWidth, parentHeight)
 
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
-    gl.uniform1f(gl.uniforms.opacity, opacity)
-    gl.uniformMatrix4fv(gl.uniforms.matrix, false, parentMatrix)
+      gl.activeTexture(gl.TEXTURE0)
+      gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+      gl.activeTexture(gl.TEXTURE1)
+      gl.bindTexture(gl.TEXTURE_2D, dstTexture)
 
-    drawTexture(gl, parentWidth, parentHeight, true)
-    gl.bindTexture(gl.TEXTURE_2D, null)
+      drawSimpleTexture(gl)
+      gl.bindTexture(gl.TEXTURE_2D, null)
+    } else {
+      // 普通模式
+      setProgram(gl)
+      parentFramebuffer.bind()
+
+      gl.activeTexture(gl.TEXTURE0)
+      gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+      gl.uniform1f(gl.uniforms.opacity, opacity)
+      gl.uniformMatrix4fv(gl.uniforms.matrix, false, parentMatrix)
+
+      drawTexture(gl, parentWidth, parentHeight, true)
+      gl.bindTexture(gl.TEXTURE_2D, null)
+    }
 
     return true
   }

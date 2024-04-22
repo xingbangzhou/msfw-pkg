@@ -3,8 +3,8 @@ import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
 import PlayData from '../PlayData'
 import {Framebuffer, resizeCanvasToDisplaySize, ThisWebGLContext} from '../base/webgl'
-import {setProgram, setSimpleProgram} from '../layers/setPrograms'
-import {drawSimpleTexture, drawTexture} from '../base/primitives'
+import {setSimpleProgram} from '../layers/setPrograms'
+import {drawSimpleTexture} from '../base/primitives'
 
 export default class WebGLRender {
   protected playData?: PlayData
@@ -38,9 +38,9 @@ export default class WebGLRender {
       const canvas = (this._canvas = document.createElement('canvas'))
       canvas.width = width
       canvas.height = height
+      this.container?.appendChild(this._canvas)
 
       this._gl = canvas.getContext('webgl') as ThisWebGLContext
-      this.container?.appendChild(this._canvas)
     }
 
     if (!this._gl) {
@@ -57,8 +57,6 @@ export default class WebGLRender {
 
     return true
   }
-
-  showed = false
 
   async render() {
     const gl = this._gl
@@ -94,11 +92,7 @@ export default class WebGLRender {
       }
     }
 
-    // 上屏
-    // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
-    // gl.blendFunc(gl.SRC_ALPHA, gl.ZERO)
-    // gl.blendFuncSeparate(gl.SRC_COLOR, gl.ONE_MINUS_SRC_COLOR, gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
+    // 绘制到canvas
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
     gl.clear(gl.COLOR_BUFFER_BIT)

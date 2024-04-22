@@ -45,6 +45,9 @@ export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     if (!this.textureInfo) return
 
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, this.textureInfo.texture)
 
@@ -55,6 +58,9 @@ export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
     drawTexture(gl, width, height)
 
     gl.bindTexture(gl.TEXTURE_2D, null)
+
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true)
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {

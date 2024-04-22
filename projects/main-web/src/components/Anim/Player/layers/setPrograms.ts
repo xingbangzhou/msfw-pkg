@@ -1,6 +1,6 @@
 import {shaderGlsls} from '../base/shader'
 import {Program, ThisWebGLContext} from '../base/webgl'
-import {TrackMatteType} from '../types'
+import {BlendMode, TrackMatteType} from '../types'
 
 const simpleVertexGlsl = `
 attribute vec2 a_position;  // 接受顶点坐标
@@ -30,6 +30,12 @@ void main(void) {
 `
 
 let curProgram: Program | null = null
+
+export const setSimpleProgram = (gl: ThisWebGLContext) => {
+  curProgram?.destroy()
+  curProgram = new Program(gl, {vertexShader: simpleVertexGlsl, fragmentShader: simpleFragmentGlsl})
+  curProgram.use()
+}
 
 export const setProgram = (gl: ThisWebGLContext) => {
   if (curProgram?.vertexGlsl !== shaderGlsls.vertexGlsl || curProgram?.fragmentGlsl !== shaderGlsls.fragmentGlsl) {
@@ -66,8 +72,29 @@ export const setMaskProgram = (gl: ThisWebGLContext, trackType: TrackMatteType) 
   gl.uniform1i(uMaskTextureLocation, 1)
 }
 
-export const setSimpleProgram = (gl: ThisWebGLContext) => {
+export const setBlendProgram = (gl: ThisWebGLContext, mode: BlendMode) => {
+  let fragmentGlsl = ''
+  switch (mode) {
+    case BlendMode.Add:
+      fragmentGlsl = shaderGlsls.blendAddGlsl
+      break
+    case BlendMode.Screen:
+      fragmentGlsl = shaderGlsls.blendScreenGlsl
+      break
+    case BlendMode.Overlay:
+      fragmentGlsl = shaderGlsls.blendOverlayGlsl
+      break
+    case BlendMode.SoftLight:
+      fragmentGlsl = shaderGlsls.blendSoftlightGlsl
+      break
+  }
+  if (!fragmentGlsl) return
+
   curProgram?.destroy()
-  curProgram = new Program(gl, {vertexShader: simpleVertexGlsl, fragmentShader: simpleFragmentGlsl})
+  curProgram = new Program(gl, {vertexShader: simpleVertexGlsl, fragmentShader: fragmentGlsl})
   curProgram.use()
+
+  const program = curProgram.program as WebGLProgram
+  const uMaskTextureLocation = gl.getUniformLocation(program, 'u_dstTexture')
+  gl.uniform1i(uMaskTextureLocation, 1)
 }
