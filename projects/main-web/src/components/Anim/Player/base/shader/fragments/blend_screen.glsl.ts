@@ -10,6 +10,8 @@ void main(void) {
   vec4 src = texture2D(u_texture, v_texcoord);
   vec4 dst = texture2D(u_dstTexture, v_texcoord);
 
-  gl_FragColor = vec4(dst.r + src.r, dst.g + src.g, dst.b + src.b, dst.a);
+  float noSrc = step(src.a, 0.001);
+
+  gl_FragColor = noSrc*dst + (1.0-noSrc)*(1.0-(1.0-dst)*(1.0-src));
 }
 `
