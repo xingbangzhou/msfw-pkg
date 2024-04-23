@@ -1,6 +1,7 @@
 import PlayData from '../PlayData'
 import {ThisWebGLContext, degToRad, m4} from '../base'
 import {Transform3D} from '../base/transforms'
+import AttribBuffer from '../base/webgl/AttribBuffer'
 import {BlendMode, FrameInfo, LayerProps, TrackMatteType} from '../types'
 
 export default abstract class AbstractDrawer<Props extends LayerProps> {
@@ -16,6 +17,8 @@ export default abstract class AbstractDrawer<Props extends LayerProps> {
 
   protected offXY = [0, 0]
   protected anchorOffXY = [0, 0]
+
+  private _attribBuffer?: AttribBuffer
 
   get type() {
     return this.props.type
@@ -99,9 +102,19 @@ export default abstract class AbstractDrawer<Props extends LayerProps> {
     return this.transform.getOpacity(frameId) * opacity
   }
 
+  getAttribBuffer(gl: ThisWebGLContext) {
+    if (!this._attribBuffer) {
+      this._attribBuffer = new AttribBuffer(gl)
+    }
+    return this._attribBuffer
+  }
+
   abstract init(gl: ThisWebGLContext): Promise<void>
 
   abstract draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo): void
 
-  abstract destroy(gl?: ThisWebGLContext): void
+  destroy(gl?: ThisWebGLContext) {
+    this._attribBuffer?.destroy()
+    this._attribBuffer = undefined
+  }
 }

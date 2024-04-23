@@ -1,5 +1,6 @@
-import {createTexture, drawTexture, m4, rgba, ThisWebGLContext} from '../base'
+import {drawTexture, m4, rgba, ThisWebGLContext} from '../base'
 import {Property} from '../base/transforms'
+import Texture from '../base/webgl/Texture'
 import {FrameInfo, LayerEllipseProps, LayerPathProps, LayerRectProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
@@ -9,13 +10,13 @@ const LineJoin: CanvasLineJoin[] = ['bevel', 'miter', 'round']
 export default abstract class ElementDrawer<
   Props extends LayerRectProps | LayerEllipseProps | LayerPathProps,
 > extends AbstractDrawer<Props> {
-  private _texture: WebGLTexture | null = null
+  private texture?: Texture
   private _ctx: CanvasRenderingContext2D | null = null
   private _lineDashOffset?: Property<number>
   private _lastDashOffset = 0
 
   async init(gl: ThisWebGLContext) {
-    this._texture = createTexture(gl)
+    this.texture = new Texture(gl)
 
     const strokeInfo = this.props.elements.strokeInfo
     if (strokeInfo?.dashesInfo) {
@@ -24,24 +25,24 @@ export default abstract class ElementDrawer<
   }
 
   draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
-    if (!this._texture) return
+    if (!this.texture) return
 
     this.drawShape(gl, frameInfo)
 
     gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, this._texture)
+    this.texture.bind()
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
     const width = this.width
     const height = this.height
-    drawTexture(gl, width, height)
+    drawTexture(this.getAttribBuffer(gl), width, height)
 
     gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   destroy(gl?: ThisWebGLContext | undefined): void {
-    gl?.deleteTexture(this._texture || null)
-    this._texture = null
+    super.destroy(gl)
+    this.texture?.destroy()
     this._ctx = null
   }
 
@@ -94,8 +95,7 @@ export default abstract class ElementDrawer<
         this._ctx.stroke(path)
       }
 
-      gl.bindTexture(gl.TEXTURE_2D, this._texture)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._ctx.canvas)
+      this.texture?.texImage2D(this._ctx.canvas)
     }
   }
 }

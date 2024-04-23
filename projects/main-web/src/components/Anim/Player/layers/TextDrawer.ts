@@ -1,4 +1,5 @@
-import {ThisWebGLContext, createTexture, drawTexture, m4, rgba} from '../base'
+import {ThisWebGLContext, drawTexture, m4, rgba} from '../base'
+import Texture from '../base/webgl/Texture'
 import {FrameInfo, LayerTextProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
@@ -53,7 +54,7 @@ function drawVertiText(ctx: CanvasRenderingContext2D, text: string, textDocAttr:
 }
 
 export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
-  private _texture: WebGLTexture | null = null
+  private texture?: Texture
 
   get text() {
     return this.props.textDocAttr.text || ''
@@ -97,9 +98,8 @@ export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
       this.props.width = canvas.width
       this.props.height = canvas.height
       // 生成纹理
-      this._texture = createTexture(gl)
-      gl.bindTexture(gl.TEXTURE_2D, this._texture)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas)
+      this.texture = new Texture(gl)
+      this.texture.texImage2D(canvas)
     }
     // 清理
     ctx = null
@@ -107,21 +107,22 @@ export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
   }
 
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
-    if (!this._texture) return
+    if (!this.texture) return
 
     gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, this._texture)
+    this.texture.bind()
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
     const width = this.width
     const height = this.height
-    drawTexture(gl, width, height)
+    drawTexture(this.getAttribBuffer(gl), width, height)
 
     gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {
-    gl?.deleteTexture(this._texture || null)
-    this._texture = null
+    super.destroy(gl)
+    this.texture?.destroy()
+    this.texture = undefined
   }
 }

@@ -1,4 +1,5 @@
-import {ThisWebGLContext, createTexture, drawTexture, m4} from '../base'
+import {ThisWebGLContext, drawTexture, m4} from '../base'
+import Texture from '../base/webgl/Texture'
 import {FrameInfo, LayerImageProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
@@ -18,11 +19,7 @@ function loadImage(url: string) {
 }
 
 export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
-  private textureInfo?: {
-    texture: WebGLTexture
-    width: number
-    height: number
-  }
+  private texture?: Texture
 
   get url() {
     return this.props.content || ''
@@ -30,32 +27,24 @@ export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
 
   async init(gl: ThisWebGLContext) {
     const image = await loadImage(this.url)
-    const texture = createTexture(gl)
-    if (texture) {
-      gl.bindTexture(gl.TEXTURE_2D, texture)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
-      this.textureInfo = {
-        texture,
-        width: image.width,
-        height: image.height,
-      }
-    }
+
+    this.texture = new Texture(gl)
+    this.texture.texImage2D(image)
   }
 
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
-    if (!this.textureInfo) return
+    if (!this.texture) return
 
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false)
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
     gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, this.textureInfo.texture)
-
+    this.texture.bind()
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
     const width = this.width
     const height = this.height
-    drawTexture(gl, width, height)
+    drawTexture(this.getAttribBuffer(gl), width, height)
 
     gl.bindTexture(gl.TEXTURE_2D, null)
 
@@ -64,7 +53,8 @@ export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {
-    gl?.deleteTexture(this.textureInfo?.texture || null)
-    this.textureInfo = undefined
+    super.destroy(gl)
+    this.texture?.destroy()
+    this.texture = undefined
   }
 }

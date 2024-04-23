@@ -1,16 +1,17 @@
-import {createTexture} from './utils'
+import Texture from './Texture'
+import {ThisWebGLContext} from './types'
 
 export default class Framebuffer {
-  constructor(gl: WebGLRenderingContext) {
+  constructor(gl: ThisWebGLContext) {
     this.gl = gl
     this.reset()
   }
 
-  gl: WebGLRenderingContext | null = null
+  gl?: ThisWebGLContext
   buffer: WebGLFramebuffer | null = null
-  texture: WebGLTexture | null = null
-  private texWidth?: number
-  private texHeight?: number
+  texture?: Texture
+  private w?: number
+  private h?: number
 
   bind() {
     const gl = this.gl
@@ -20,12 +21,10 @@ export default class Framebuffer {
   viewport(w: number, h: number, noClr?: boolean) {
     const gl = this.gl
 
-    if (w !== this.texWidth || h !== this.texHeight) {
-      this.texWidth = w
-      this.texHeight = h
-      gl?.bindTexture(gl.TEXTURE_2D, this.texture)
-      gl?.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
-      gl?.bindTexture(gl.TEXTURE_2D, null)
+    if (w !== this.w || h !== this.h) {
+      this.w = w
+      this.h = h
+      this.texture?.texImage2D(null, w, h)
     }
 
     gl?.viewport(0, 0, w, h)
@@ -42,14 +41,14 @@ export default class Framebuffer {
       this.buffer && gl.deleteFramebuffer(this.buffer)
 
       this.buffer = gl.createFramebuffer()
-      this.texture = createTexture(gl)
+      this.texture = new Texture(gl)
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.buffer)
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0)
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture.handle, 0)
       gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
-      this.texWidth = undefined
-      this.texHeight = undefined
+      this.w = undefined
+      this.h = undefined
     }
 
     return texture
@@ -57,9 +56,9 @@ export default class Framebuffer {
 
   destory() {
     this.gl?.deleteFramebuffer(this.buffer)
-    this.gl?.deleteTexture(this.texture)
-    this.gl = null
     this.buffer = null
-    this.texture = null
+    this.texture?.destroy()
+    this.texture = undefined
+    this.gl = undefined
   }
 }

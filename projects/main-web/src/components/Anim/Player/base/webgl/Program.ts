@@ -1,4 +1,4 @@
-import {ThisWebGLContext} from './utils'
+import {ThisWebGLContext} from './types'
 
 function createShader(gl: WebGLRenderingContext, type: number, src: string) {
   const shader = gl.createShader(type) as WebGLShader

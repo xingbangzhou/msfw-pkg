@@ -1,4 +1,4 @@
-import {Framebuffer, ThisWebGLContext, drawLineRectangle, drawTexture} from '../base'
+import {Framebuffer, ThisWebGLContext, drawTexture} from '../base'
 import {m4} from '../base'
 import {FrameInfo, LayerVectorProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
@@ -65,17 +65,18 @@ export default class VectorDrawer extends AbstractDrawer<LayerVectorProps> {
 
     setProgram(gl)
     gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+    framebuffer.texture?.bind()
     gl.uniform1f(gl.uniforms.opacity, opacity)
     gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
 
-    drawTexture(gl, width, height, true)
+    drawTexture(this.getAttribBuffer(gl), width, height, true)
 
     // 释放
     gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   destroy(gl?: ThisWebGLContext) {
+    super.destroy()
     this._viewFramebuffer?.destory()
     this._viewFramebuffer = null
 

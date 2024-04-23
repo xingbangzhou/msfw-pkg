@@ -106,6 +106,8 @@ export default class Layer {
     const {localMatrix, opacity} = state
     const {width: parentWidth, height: parentHeight, framebuffer: parentFramebuffer} = frameInfo
 
+    const attribBuffer = this.drawer.getAttribBuffer(gl)
+
     // 默认着色器
     setProgram(gl)
 
@@ -136,16 +138,18 @@ export default class Layer {
 
       // 遮罩着色器
       setMaskProgram(gl, this.drawer.trackMatteType)
-      const texture0 = framebuffer.reset()
+      const srcTexture = framebuffer.reset()
       framebuffer.bind()
       framebuffer.viewport(parentWidth, parentHeight)
 
       gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, texture0)
+      srcTexture?.bind()
       gl.activeTexture(gl.TEXTURE1)
-      gl.bindTexture(gl.TEXTURE_2D, maskFramebuffer.texture)
+      maskFramebuffer.texture?.bind()
 
-      drawSimpleTexture(gl)
+      drawSimpleTexture(attribBuffer)
+
+      srcTexture?.destroy()
       gl.bindTexture(gl.TEXTURE_2D, null)
     }
 
@@ -157,11 +161,13 @@ export default class Layer {
       parentFramebuffer.viewport(parentWidth, parentHeight)
 
       gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+      framebuffer.texture?.bind()
       gl.activeTexture(gl.TEXTURE1)
-      gl.bindTexture(gl.TEXTURE_2D, dstTexture)
+      dstTexture?.bind()
 
-      drawSimpleTexture(gl)
+      drawSimpleTexture(attribBuffer)
+
+      dstTexture?.destroy()
       gl.bindTexture(gl.TEXTURE_2D, null)
     } else {
       // 普通模式
@@ -169,11 +175,11 @@ export default class Layer {
       parentFramebuffer.bind()
 
       gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+      framebuffer.texture?.bind()
       gl.uniform1f(gl.uniforms.opacity, opacity)
       gl.uniformMatrix4fv(gl.uniforms.matrix, false, parentMatrix)
 
-      drawTexture(gl, parentWidth, parentHeight, true)
+      drawTexture(attribBuffer, parentWidth, parentHeight, true)
       gl.bindTexture(gl.TEXTURE_2D, null)
     }
 

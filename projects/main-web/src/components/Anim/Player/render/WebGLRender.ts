@@ -2,9 +2,22 @@ import {LayerProps} from '../types'
 import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
 import PlayData from '../PlayData'
-import {Framebuffer, resizeCanvasToDisplaySize, ThisWebGLContext} from '../base/webgl'
+import {Framebuffer, ThisWebGLContext} from '../base/webgl'
 import {setSimpleProgram} from '../layers/setPrograms'
 import {drawSimpleTexture} from '../base/primitives'
+import AttribBuffer from '../base/webgl/AttribBuffer'
+
+function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement, multiplier?: number) {
+  multiplier = multiplier || 1
+  const width = (canvas.clientWidth * multiplier) | 0
+  const height = (canvas.clientHeight * multiplier) | 0
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width
+    canvas.height = height
+    return true
+  }
+  return false
+}
 
 export default class WebGLRender {
   protected playData?: PlayData
@@ -13,6 +26,7 @@ export default class WebGLRender {
   private _canvas?: HTMLCanvasElement
   private _gl?: ThisWebGLContext
   private _framebuffer?: Framebuffer
+  private _attribBuffer?: AttribBuffer
 
   private _camera = m4.identity()
   private _rootLayers?: Layer[]
@@ -101,9 +115,12 @@ export default class WebGLRender {
     setSimpleProgram(gl)
 
     gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, framebuffer.texture)
+    framebuffer.texture?.bind()
 
-    drawSimpleTexture(gl)
+    const attribBuffer = this._attribBuffer || new AttribBuffer(gl)
+    this._attribBuffer = attribBuffer
+
+    drawSimpleTexture(attribBuffer)
 
     gl.bindTexture(gl.TEXTURE_2D, null)
   }
@@ -112,6 +129,8 @@ export default class WebGLRender {
     this.clearLayers()
     this._framebuffer?.destory()
     this._framebuffer = undefined
+    this._attribBuffer?.destroy()
+    this._attribBuffer = undefined
 
     this._canvas?.parentNode?.removeChild(this._canvas)
     this._canvas = undefined

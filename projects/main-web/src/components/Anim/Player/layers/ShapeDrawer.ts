@@ -48,6 +48,7 @@ export default class ShapeDrawer extends AbstractDrawer<LayerShapeProps> {
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {
+    super.destroy(gl)
     this._subLayers?.forEach(el => el.destroy(gl))
     this._subLayers = undefined
   }
