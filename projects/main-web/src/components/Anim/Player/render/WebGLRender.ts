@@ -54,7 +54,7 @@ export default class WebGLRender {
       canvas.height = height
       this.container?.appendChild(this._canvas)
 
-      this._gl = canvas.getContext('webgl') as ThisWebGLContext
+      this._gl = canvas.getContext('webgl2') as ThisWebGLContext
     }
 
     if (!this._gl) {

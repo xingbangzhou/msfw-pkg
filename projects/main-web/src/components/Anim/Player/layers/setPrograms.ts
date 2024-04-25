@@ -2,11 +2,12 @@ import {shaderGlsls} from '../base/shader'
 import {Program, ThisWebGLContext} from '../base/webgl'
 import {BlendMode, TrackMatteType} from '../types'
 
-const simpleVertexGlsl = `
-attribute vec2 a_position;  // 接受顶点坐标
-attribute vec2 a_texcoord;  // 接受纹理坐标
+const simpleVertexGlsl = `#version 300 es
 
-varying vec2 v_texcoord;
+in vec2 a_position;  // 接受顶点坐标
+in vec2 a_texcoord;  // 接受纹理坐标
+
+out vec2 v_texcoord;
 
 void main() {
   gl_Position = vec4(a_position, 0, 1.0);
@@ -15,17 +16,20 @@ void main() {
 }
 `
 
-const simpleFragmentGlsl = `
+const simpleFragmentGlsl = `#version 300 es
+
 precision mediump float;
 
-varying vec2 v_texcoord;
+in vec2 v_texcoord;
 
 uniform sampler2D u_texture;
 
-void main(void) {
-  vec4 texColor = texture2D(u_texture, v_texcoord);
+out vec4 fragColor;
 
-  gl_FragColor = texColor;
+void main(void) {
+  vec4 texColor = texture(u_texture, v_texcoord);
+
+  fragColor = texColor;
 }
 `
 

@@ -1,17 +1,20 @@
-export default `
+export default `#version 300 es
+
 precision mediump float;
 
-varying vec2 v_texcoord;
+in vec2 v_texcoord;
 
 uniform sampler2D u_texture;
 uniform sampler2D u_dstTexture;
 
+out vec4 fragColor;
+
 void main(void) {
-  vec4 src = texture2D(u_texture, v_texcoord);
-  vec4 dst = texture2D(u_dstTexture, v_texcoord);
+  vec4 src = texture(u_texture, v_texcoord);
+  vec4 dst = texture(u_dstTexture, v_texcoord);
 
   float noSrc = step(src.a, 0.001);
 
-  gl_FragColor = noSrc*dst + (1.0-noSrc)*(1.0-(1.0-dst)*(1.0-src));
+  fragColor = noSrc*dst + (1.0-noSrc)*(1.0-(1.0-dst)*(1.0-src));
 }
 `

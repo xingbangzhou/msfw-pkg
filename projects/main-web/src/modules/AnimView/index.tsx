@@ -9,7 +9,7 @@ const AnimView = memo(function AnimView() {
   const handlerRef = useRef<AnimHandler>(null)
 
   useEffect(() => {
-    import('./mock_build.json').then(data => {
+    import('./mock_ship.json').then(data => {
       handlerRef.current?.play(data.default as any)
     })
   }, [])
@@ -24,22 +24,6 @@ const AnimView = memo(function AnimView() {
         console.log(err)
       },
     )
-    // const reader = new FileReader()
-    // reader.onload = async ev => {
-    //   if (ev.target) {
-    //     const buffer = ev.target.result as ArrayBuffer
-    //     const ziper = new JSZip()
-    //     ziper.loadAsync(buffer).then(
-    //       data => {
-    //         console.log(data)
-    //       },
-    //       err => {
-    //         console.log(err)
-    //       },
-    //     )
-    //   }
-    // }
-    // reader.readAsArrayBuffer(fileObj)
   }, [])
 
   return (

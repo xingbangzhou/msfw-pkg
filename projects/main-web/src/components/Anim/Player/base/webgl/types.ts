@@ -1,4 +1,4 @@
-export type ThisWebGLContext = WebGLRenderingContext & {
+export type ThisWebGLContext = WebGL2RenderingContext & {
   attribs: {
     position: number
     texcoord: number
