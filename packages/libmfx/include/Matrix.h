@@ -45,18 +45,18 @@ namespace libdraw
         Matrix(const Matrix &m);
 
         // 默认矩阵
-        static Matrix identity();
+        static void identity(Matrix& m);
 
         // 透视矩阵
-        static Matrix perspective(float fieldOfViewInRadians, float aspect, float near, float far);
+        static void perspective(Matrix& m, float fieldOfViewInRadians, float aspect, float near, float far);
 
         // 平移矩阵
-        static Matrix translation(float tx, float ty, float tz);
+        static void translation(Matrix& m, float tx, float ty, float tz);
 
-        static Matrix lookAt(vec3f cameraPosition, vec3f target, vec3f up);
+        static void lookAt(Matrix& m, vec3f cameraPosition, vec3f target, vec3f up);
 
         // 摄像机透视矩阵
-        static Matrix perspectiveCamera(float width, float height, float fieldOfViewDeg);
+        static void perspectiveCamera(Matrix& m, float width, float height, float fieldOfViewDeg);
 
         void xRotate(float angleInRadians);
 
@@ -68,7 +68,7 @@ namespace libdraw
 
         void inverse();
 
-        Matrix multiply(Matrix m);
+        void Matrix::multiply(const Matrix& m, Matrix& dst);
 
         float get(int index) const
         {

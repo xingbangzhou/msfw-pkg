@@ -12,15 +12,13 @@ namespace libdraw
         memset(values, 0, sizeof(float));
     }
 
-    Matrix::Matrix(const Matrix &m)
+    Matrix::Matrix(const Matrix& m)
     {
         m.getValue(values);
     }
 
-    Matrix Matrix::identity()
+    void Matrix::identity(Matrix& m)
     {
-        Matrix m;
-
         m[0 * 4 + 0] = 1;
         m[0 * 4 + 1] = 0;
         m[0 * 4 + 2] = 0;
@@ -37,64 +35,53 @@ namespace libdraw
         m[3 * 4 + 1] = 0;
         m[3 * 4 + 2] = 0;
         m[3 * 4 + 3] = 1;
-
-        return m;
     }
 
-    Matrix Matrix::perspective(float fieldOfViewInRadians, float aspect, float near, float far)
+    void Matrix::perspective(Matrix& m, float fieldOfViewInRadians, float aspect, float near, float far)
     {
-        Matrix m;
-
         float f = std::tan(PI * 0.5 - 0.5 * fieldOfViewInRadians);
         float rangeInv = 1.0 / (near - far);
 
         m[0] = f / aspect;
-        // dst[1] = 0;
-        // dst[2] = 0;
-        // dst[3] = 0;
-        // dst[4] = 0;
+        m[1] = 0;
+        m[2] = 0;
+        m[3] = 0;
+        m[4] = 0;
         m[5] = f;
-        // dst[6] = 0;
-        // dst[7] = 0;
-        // dst[8] = 0;
-        // dst[9] = 0;
+        m[6] = 0;
+        m[7] = 0;
+        m[8] = 0;
+        m[9] = 0;
         m[10] = (near + far) * rangeInv;
         m[11] = -1;
-        // dst[12] = 0;
-        // dst[13] = 0;
+        m[12] = 0;
+        m[13] = 0;
         m[14] = near * far * rangeInv * 2;
-        // dst[15] = 0;
-
-        return m;
+        m[15] = 0;
     }
 
-    Matrix Matrix::translation(float tx, float ty, float tz)
+    void Matrix::translation(Matrix& m, float tx, float ty, float tz)
     {
-        Matrix m;
-
         m[0] = 1;
-        // m[1] = 0;
-        // m[2] = 0;
-        // m[3] = 0;
-        // m[4] = 0;
+        m[1] = 0;
+        m[2] = 0;
+        m[3] = 0;
+        m[4] = 0;
         m[5] = 1;
-        // m[6] = 0;
-        // m[7] = 0;
-        // m[8] = 0;
-        // m[9] = 0;
+        m[6] = 0;
+        m[7] = 0;
+        m[8] = 0;
+        m[9] = 0;
         m[10] = 1;
-        // m[11] = 0;
+        m[11] = 0;
         m[12] = tx;
         m[13] = ty;
         m[14] = tz;
         m[15] = 1;
-
-        return m;
     }
 
-    Matrix Matrix::lookAt(vec3f cameraPosition, vec3f target, vec3f up)
+    void Matrix::lookAt(Matrix& m, vec3f cameraPosition, vec3f target, vec3f up)
     {
-        Matrix m;
         float zAxis[3] = {0.0f};
         float xAxis[3] = {0.0f};
         float yAxis[3] = {0.0f};
@@ -109,43 +96,41 @@ namespace libdraw
         m[0] = xAxis[0];
         m[1] = xAxis[1];
         m[2] = xAxis[2];
-        // m[3] = 0;
+        m[3] = 0;
         m[4] = yAxis[0];
         m[5] = yAxis[1];
         m[6] = yAxis[2];
-        // m[7] = 0;
+        m[7] = 0;
         m[8] = zAxis[0];
         m[9] = zAxis[1];
         m[10] = zAxis[2];
-        // m[11] = 0;
+        m[11] = 0;
         m[12] = cameraPosition[0];
         m[13] = cameraPosition[1];
         m[14] = cameraPosition[2];
         m[15] = 1;
-
-        return m;
     }
 
-    Matrix Matrix::perspectiveCamera(float width, float height, float fieldOfViewDeg)
+    void Matrix::perspectiveCamera(Matrix& dst, float width, float height, float fieldOfViewDeg)
     {
         // 透视矩阵
         float fieldOfViewRadians = degToRad(fieldOfViewDeg);
         float aspect = width / height;
         float zNear = 1;
         float zFar = 20000;
-        Matrix projectionMatrix = Matrix::perspective(fieldOfViewRadians, aspect, zNear, zFar);
+        Matrix projectionMatrix;
+        Matrix::perspective(projectionMatrix, fieldOfViewRadians, aspect, zNear, zFar);
 
         // 相机坐标矩阵
         float zFlat = (height / tan(fieldOfViewRadians * 0.5)) * 0.5;
         float cameraPosition[3] = {width * 0.5, -height * 0.5, zFlat};
         float target[3] = {width * 0.5, -height * 0.5, 0};
         float up[3] = {0, 1, 0};
-        Matrix cameraMatrix = Matrix::lookAt(cameraPosition, target, up);
+        Matrix cameraMatrix;
+        Matrix::lookAt(cameraMatrix, cameraPosition, target, up);
         cameraMatrix.inverse();
 
-        Matrix viewProjectionMatrix = projectionMatrix.multiply(cameraMatrix);
-
-        return viewProjectionMatrix;
+        projectionMatrix.multiply(cameraMatrix, dst);
     }
 
     void Matrix::xRotate(float angleInRadians)
@@ -301,10 +286,8 @@ namespace libdraw
         values[15] = d * (tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12 - (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02));
     }
 
-    Matrix Matrix::multiply(Matrix m)
+    void Matrix::multiply(const Matrix& m, Matrix& dst)
     {
-        Matrix dst;
-
         float b00 = m[0 * 4 + 0];
         float b01 = m[0 * 4 + 1];
         float b02 = m[0 * 4 + 2];
@@ -353,8 +336,6 @@ namespace libdraw
         dst[13] = b30 * a01 + b31 * a11 + b32 * a21 + b33 * a31;
         dst[14] = b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32;
         dst[15] = b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33;
-
-        return dst;
     }
 
     Matrix &Matrix::operator=(const Matrix &m)

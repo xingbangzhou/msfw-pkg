@@ -117,8 +117,8 @@ export default class Layer {
 
     framebuffer.bind()
     framebuffer.viewport(parentWidth, parentHeight)
-    let matrix = m4.perspectiveCamera(parentWidth, parentHeight)
-    matrix = m4.multiply(matrix, localMatrix)
+    const parentCamera = m4.perspectiveCamera(parentWidth, parentHeight)
+    const matrix = m4.multiply(parentCamera, localMatrix)
     this.drawer.draw(gl, matrix, {
       ...frameInfo,
       framebuffer: framebuffer,
@@ -131,7 +131,7 @@ export default class Layer {
 
       maskFramebuffer.bind()
       maskFramebuffer.viewport(parentWidth, parentHeight)
-      maskLayer.render(gl, parentMatrix, {
+      maskLayer.render(gl, parentCamera, {
         ...frameInfo,
         framebuffer: maskFramebuffer,
       })
