@@ -1,7 +1,9 @@
 import {Framebuffer} from './base/webgl'
 
-export const PreComposition = 'precomposition'
 export enum LayerType {
+  // 应用其他图层
+  PreComposition = 'precomposition',
+  // 图层
   Image = 'image',
   Video = 'video',
   Text = 'text',

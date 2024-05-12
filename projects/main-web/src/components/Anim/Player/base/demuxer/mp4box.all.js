@@ -889,8 +889,8 @@ if (typeof exports !== 'undefined') {
   */
 DataStream.prototype.save = function(filename) {
   var blob = new Blob([this.buffer]);
-  if (window.URL && URL.createObjectURL) {
-      var url = window.URL.createObjectURL(blob);
+  if (URL.createObjectURL) {
+      var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       // Required in Firefox:
       document.body.appendChild(a);
@@ -899,7 +899,7 @@ DataStream.prototype.save = function(filename) {
       // Required in Firefox:
       a.setAttribute('target', '_self');
       a.click();
-      window.URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url);
   } else {
       throw("DataStream.save: Can't create object URL.");
   }

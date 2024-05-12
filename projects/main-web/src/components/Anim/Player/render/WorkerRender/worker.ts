@@ -1,28 +1,18 @@
-import {LayerProps, PlayProps, PlayState} from '../types'
-import * as m4 from '../base/m4'
-import Layer, {createLayer} from '../layers/Layer'
-import PlayData from '../PlayData'
-import {Framebuffer, ThisWebGLContext} from '../base/webgl'
-import {setSimpleProgram} from '../layers/setPrograms'
-import {drawSimpleTexture} from '../base/primitives'
-import AttribBuffer from '../base/webgl/AttribBuffer'
+import {drawSimpleTexture, Framebuffer, m4} from '../../base'
+import AttribBuffer from '../../base/webgl/AttribBuffer'
+import {ThisWebGLContext} from '../../base/webgl/types'
+import Layer, {createLayer} from '../../layers/Layer'
+import {setSimpleProgram} from '../../layers/setPrograms'
+import PlayData from '../../PlayData'
+import {LayerProps, LayerType, PlayProps, PlayState} from '../../types'
+import {WorkerFunctionMap} from './types'
 
-function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement, multiplier?: number) {
-  multiplier = multiplier || 1
-  const width = (canvas.clientWidth * multiplier) | 0
-  const height = (canvas.clientHeight * multiplier) | 0
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width
-    canvas.height = height
-    return true
-  }
-  return false
-}
+class WorkerRender_ {
+  static helpCanvas: OffscreenCanvas
 
-export default class WebGLRender {
-  constructor(container: HTMLElement) {
-    const canvas = (this._canvas = document.createElement('canvas'))
-    container?.appendChild(this._canvas)
+  constructor(id: number, canvas: OffscreenCanvas) {
+    this.id = id
+    this._canvas = canvas
     this._gl = canvas.getContext('webgl2') as ThisWebGLContext
     if (!this._gl) {
       console.error(`WebGLRender, getContext('webgl') is null`)
@@ -30,7 +20,8 @@ export default class WebGLRender {
     this._playData = new PlayData()
   }
 
-  private _canvas?: HTMLCanvasElement
+  readonly id: number
+  private _canvas: OffscreenCanvas
   private _gl?: ThisWebGLContext
 
   private _playState = PlayState.None
@@ -43,28 +34,24 @@ export default class WebGLRender {
   private _attribBuffer?: AttribBuffer
   private _rootLayers?: Layer[]
 
-  async load(props: PlayProps) {
-    const canvas = this._canvas
-    const gl = this._gl
-    if (!canvas || !gl) return
-
+  load(props: PlayProps) {
     const playData = this._playData
     playData.setProps(props)
 
     const width = playData.width
     const height = playData.height
 
-    canvas.width = width
-    canvas.height = height
-
-    resizeCanvasToDisplaySize(canvas)
-
     this._camera = m4.perspectiveCamera(width, height)
 
     const layerPropsList = playData.rootLayers
-    this.resetLayers(gl, playData, layerPropsList || [])
+    this.resetLayers(this._gl as ThisWebGLContext, playData, layerPropsList || [])
 
     this.requestAnim = this.requestAnimFunc()
+  }
+
+  resize(width: number, height: number) {
+    this._canvas.width = width
+    this._canvas.height = height
   }
 
   play() {
@@ -84,6 +71,17 @@ export default class WebGLRender {
     this._playState = PlayState.None
   }
 
+  destroy() {
+    this.cancelRequestAnimation()
+    this._playState = PlayState.None
+
+    this.clearLayers()
+    this._framebuffer?.destory()
+    this._framebuffer = undefined
+    this._attribBuffer?.destroy()
+    this._attribBuffer = undefined
+  }
+
   protected render = () => {
     if (this._playData.frameId === -1) {
       this._playData.frameId = 0
@@ -99,12 +97,11 @@ export default class WebGLRender {
     this.frameAnimId = this.requestAnim?.(this.render)
   }
 
-  private async render0() {
+  private render0() {
     const gl = this._gl
     if (!gl) return
-    const playData = this._playData
 
-    const {frames, frameId, width, height} = playData
+    const {frames, frameId, width, height} = this._playData
 
     const framebuffer = this._framebuffer || new Framebuffer(gl)
     this._framebuffer = framebuffer
@@ -153,22 +150,8 @@ export default class WebGLRender {
     gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
-  destroy() {
-    this.cancelRequestAnimation()
-    this._playState = PlayState.None
-
-    this.clearLayers()
-    this._framebuffer?.destory()
-    this._framebuffer = undefined
-    this._attribBuffer?.destroy()
-    this._attribBuffer = undefined
-
-    this._canvas?.parentNode?.removeChild(this._canvas)
-    this._canvas = undefined
-  }
-
   private async resetLayers(gl: ThisWebGLContext, playData: PlayData, layerPropsList: LayerProps[]) {
-    this._rootLayers?.forEach(layer => layer.destroy(gl))
+    this.clearLayers()
     this._rootLayers = []
 
     for (let i = layerPropsList.length - 1; i >= 0; i--) {
@@ -202,3 +185,52 @@ export default class WebGLRender {
     this.frameAnimId = null
   }
 }
+
+// 全局对象管理
+const renderInstances: Record<number, WorkerRender_> = {}
+
+const workerFnHandlers: Record<keyof WorkerFunctionMap, (params: any) => void> = {
+  instance: ({id, canvas}: {id: number; canvas: OffscreenCanvas}) => {
+    renderInstances[id] = new WorkerRender_(id, canvas)
+  },
+
+  load: ({id, props}: {id: number; props: PlayProps}) => {
+    const renderInst = renderInstances[id]
+    renderInst?.load(props)
+  },
+
+  resize: ({id, width, height}: {id: number; width: number; height: number}) => {
+    const renderInst = renderInstances[id]
+    renderInst?.resize(width, height)
+  },
+
+  play: ({id}: {id: number}) => {
+    const renderInst = renderInstances[id]
+    renderInst?.play()
+  },
+
+  replay: ({id}: {id: number}) => {
+    const renderInst = renderInstances[id]
+    renderInst?.replay()
+  },
+
+  stop: ({id}: {id: number}) => {
+    const renderInst = renderInstances[id]
+    renderInst?.stop()
+  },
+
+  destroy: ({id}: {id: number}) => {
+    const renderInst = renderInstances[id]
+    renderInst?.destroy()
+  },
+}
+
+function onFunctionMessage<F extends keyof WorkerFunctionMap>(
+  event: MessageEvent<{fn: F; params: WorkerFunctionMap[F]}>,
+) {
+  console.log('[Worker]onFunctionMessage', event)
+
+  workerFnHandlers[event.data.fn]?.(event.data.params)
+}
+
+self.onmessage = onFunctionMessage

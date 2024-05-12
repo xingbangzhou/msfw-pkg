@@ -11,7 +11,8 @@ export default abstract class ElementDrawer<
   Props extends LayerRectProps | LayerEllipseProps | LayerPathProps,
 > extends AbstractDrawer<Props> {
   private texture?: Texture
-  private _ctx: CanvasRenderingContext2D | null = null
+  // private _ctx: CanvasRenderingContext2D | null = null
+  private _ctx: OffscreenCanvasRenderingContext2D | null = null
   private _lineDashOffset?: Property<number>
   private _lastDashOffset = 0
 
@@ -46,7 +47,7 @@ export default abstract class ElementDrawer<
     this._ctx = null
   }
 
-  protected abstract getDrawPath(ctx: CanvasRenderingContext2D): Path2D
+  protected abstract getDrawPath(ctx: OffscreenCanvasRenderingContext2D): Path2D
 
   private drawShape(gl: ThisWebGLContext, frameInfo: FrameInfo) {
     const width = this.width
@@ -54,9 +55,11 @@ export default abstract class ElementDrawer<
     let hasTexture = true
 
     if (!this._ctx) {
-      const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
+      // const canvas = document.createElement('canvas')
+      // canvas.width = width
+      // canvas.height = height
+      const canvas = new OffscreenCanvas(width, height)
+
       this._ctx = canvas.getContext('2d')
       hasTexture = false
     }

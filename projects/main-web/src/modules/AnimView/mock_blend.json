@@ -13,7 +13,7 @@
             {
                 "id": 2354,
                 "type": "image",
-                "content": "主楼.png",
+                "content": "http://localhost:5002/主楼.png",
                 "name": "主楼.png",
                 "fillMode": 0,
                 "transform": {
@@ -70,7 +70,7 @@
             {
                 "id": 2353,
                 "type": "image",
-                "content": "爱心.png",
+                "content": "http://localhost:5002/爱心.png",
                 "name": "爱心.png",
                 "fillMode": 0,
                 "transform": {
@@ -127,7 +127,7 @@
             {
                 "id": 2348,
                 "type": "image",
-                "content": "主楼.png",
+                "content": "http://localhost:5002/主楼.png",
                 "name": "主楼.png",
                 "fillMode": 0,
                 "transform": {
@@ -184,7 +184,7 @@
             {
                 "id": 2349,
                 "type": "image",
-                "content": "爱心.png",
+                "content": "http://localhost:5002/爱心.png",
                 "name": "爱心.png",
                 "fillMode": 0,
                 "transform": {
@@ -241,7 +241,7 @@
             {
                 "id": 2345,
                 "type": "image",
-                "content": "主楼.png",
+                "content": "http://localhost:5002/主楼.png",
                 "name": "主楼.png",
                 "fillMode": 0,
                 "transform": {
@@ -298,7 +298,7 @@
             {
                 "id": 2343,
                 "type": "image",
-                "content": "爱心.png",
+                "content": "http://localhost:5002/爱心.png",
                 "name": "爱心.png",
                 "fillMode": 0,
                 "transform": {
@@ -411,7 +411,7 @@
             {
                 "id": 2342,
                 "type": "image",
-                "content": "bg.png",
+                "content": "http://localhost:5002/bg.png",
                 "name": "bg.png",
                 "fillMode": 0,
                 "transform": {
@@ -471,7 +471,7 @@
         {
             "id": 2344,
             "type": "video",
-            "content": "烟花_bmp.mp4",
+            "content": "http://localhost:5002/烟花_bmp.mp4",
             "name": "烟花_bmp",
             "bgColor": [
                 0,

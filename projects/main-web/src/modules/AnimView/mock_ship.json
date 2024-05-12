@@ -539,7 +539,7 @@
         {
             "id": 172,
             "type": "video",
-            "content": "mask_bmp.mp4",
+            "content": "http://localhost:5002/mask_bmp.mp4",
             "name": "mask_bmp",
             "bgColor": [
                 0,
@@ -559,7 +559,7 @@
                 {
                     "id": 188,
                     "type": "video",
-                    "content": "temp_change_264_mid_1.mp4",
+                    "content": "http://localhost:5002/temp_change_264_mid_1.mp4",
                     "name": "temp_change_264_mid_1.mp4",
                     "transform": {
                         "anchorPoint": [
@@ -623,7 +623,7 @@
         {
             "id": 170,
             "type": "video",
-            "content": "ship_bmp.mp4",
+            "content": "http://localhost:5002/ship_bmp.mp4",
             "name": "ship_bmp",
             "bgColor": [
                 0,

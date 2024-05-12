@@ -17,7 +17,7 @@ export default class PathDrawer extends ElementDrawer<LayerPathProps> {
     this.points = this.props.elements.shapeInfo.points.map(el => [cx + el[0], cy + el[1]])
   }
 
-  protected getDrawPath(ctx: CanvasRenderingContext2D) {
+  protected getDrawPath(ctx: OffscreenCanvasRenderingContext2D) {
     const path = new Path2D()
     const actions = this.props.elements.shapeInfo.actions
     const al = actions.length

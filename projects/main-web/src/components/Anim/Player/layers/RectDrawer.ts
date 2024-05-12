@@ -23,7 +23,7 @@ export default class RectDrawer extends ElementDrawer<LayerRectProps> {
     this.setOffXY(offX, offY)
   }
 
-  protected getDrawPath(ctx: CanvasRenderingContext2D) {
+  protected getDrawPath(ctx: OffscreenCanvasRenderingContext2D) {
     const width = this.width
     const height = this.height
 

@@ -13,7 +13,7 @@
             {
                 "id": 18,
                 "type": "image",
-                "content": "前景.png",
+                "content": "http://localhost:5002/前景.png",
                 "name": "前景.png",
                 "fillMode": 0,
                 "transform": {
@@ -388,7 +388,7 @@
             {
                 "id": 17,
                 "type": "image",
-                "content": "主楼.png",
+                "content": "http://localhost:5002/主楼.png",
                 "name": "主楼.png",
                 "fillMode": 0,
                 "transform": {
@@ -444,7 +444,7 @@
             {
                 "id": 19,
                 "type": "image",
-                "content": "后景.png",
+                "content": "http://localhost:5002/后景.png",
                 "name": "后景.png",
                 "fillMode": 0,
                 "transform": {
@@ -556,7 +556,7 @@
             {
                 "id": 16,
                 "type": "image",
-                "content": "bg.png",
+                "content": "http://localhost:5002/bg.png",
                 "name": "bg.png",
                 "fillMode": 0,
                 "transform": {
@@ -619,7 +619,7 @@
                 {
                     "id": 149,
                     "type": "image",
-                    "content": "网格2.png",
+                    "content": "http://localhost:5002/网格2.png",
                     "name": "网格2.png",
                     "fillMode": 0,
                     "transform": {
@@ -684,7 +684,7 @@
         {
             "id": 253,
             "type": "video",
-            "content": "粒子_bmp.mp4",
+            "content": "http://localhost:5002/粒子_bmp.mp4",
             "name": "粒子_bmp",
             "bgColor": [
                 0,
@@ -884,7 +884,7 @@
                 {
                     "id": 88,
                     "type": "video",
-                    "content": "preview.mp4",
+                    "content": "http://localhost:5002/preview.mp4",
                     "name": "preview.mp4",
                     "transform": {
                         "anchorPoint": [
@@ -946,7 +946,7 @@
                 {
                     "id": 79,
                     "type": "video",
-                    "content": "temp_change_264_mid.mp4",
+                    "content": "http://localhost:5002/temp_change_264_mid.mp4",
                     "name": "temp_change_264_mid.mp4",
                     "transform": {
                         "anchorPoint": [
@@ -1222,7 +1222,7 @@
         {
             "id": 220,
             "type": "video",
-            "content": "烟花_bmp.mp4",
+            "content": "http://localhost:5002/烟花_bmp.mp4",
             "name": "烟花_bmp",
             "bgColor": [
                 0,

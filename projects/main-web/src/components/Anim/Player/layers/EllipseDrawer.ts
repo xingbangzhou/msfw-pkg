@@ -16,7 +16,7 @@ export default class EllipseDrawer extends ElementDrawer<LayerEllipseProps> {
     this.setOffXY(offX, offY)
   }
 
-  protected getDrawPath(ctx: CanvasRenderingContext2D): Path2D {
+  protected getDrawPath(ctx: OffscreenCanvasRenderingContext2D): Path2D {
     const width = this.width
     const height = this.height
 

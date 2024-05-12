@@ -10,10 +10,10 @@ export default class PlayData {
   private _frameTime = 0 // 毫秒单位
   private _frameId = -1
 
-  setPlayProps(props: PlayProps) {
-    this._props = props
-    this._frameRate = props?.frameRate || 30
-    this._frames = (props?.duration || 0) * props.frameRate
+  setProps(value: PlayProps) {
+    this._props = value
+    this._frameRate = value.frameRate || 30
+    this._frames = (value.duration || 0) * value.frameRate
     this._frameTime = +(1000 / this._frameRate).toFixed(4).slice(0, -1)
   }
 
@@ -53,7 +53,7 @@ export default class PlayData {
     return this._props?.targetComp.layers
   }
 
-  getLayerByComps(id: number) {
+  getCompLayer(id: number) {
     return this._props?.comps.find(el => el.id === id)
   }
 }

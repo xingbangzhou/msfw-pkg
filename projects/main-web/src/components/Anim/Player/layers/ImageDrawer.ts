@@ -3,18 +3,30 @@ import Texture from '../base/webgl/Texture'
 import {FrameInfo, LayerImageProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
-function loadImage(url: string) {
-  return new Promise<HTMLImageElement>(resolve => {
-    const image = new Image()
-    image.src = url
-    image.crossOrigin = 'Anonymous'
-    image.addEventListener(
-      'load',
-      () => {
-        resolve(image)
-      },
-      false,
-    )
+// function loadImage(url: string) {
+//   return new Promise<HTMLImageElement>(resolve => {
+//     const image = new Image()
+//     image.src = url
+//     image.crossOrigin = 'Anonymous'
+//     image.addEventListener(
+//       'load',
+//       () => {
+//         resolve(image)
+//       },
+//       false,
+//     )
+//   })
+// }
+
+const loadImageData = async (url: string) => {
+  return new Promise<any>(resolve => {
+    fetch(url)
+      .then(response => {
+        return response.blob()
+      })
+      .then(blob => {
+        resolve(blob)
+      })
   })
 }
 
@@ -26,10 +38,24 @@ export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
   }
 
   async init(gl: ThisWebGLContext) {
-    const image = await loadImage(this.url)
+    // const image = await loadImage(this.url)
 
-    this.texture = new Texture(gl)
-    this.texture.texImage2D(image)
+    // this.texture = new Texture(gl)
+    // this.texture.texImage2D(image)
+    const imageData = await loadImageData(this.url)
+    const width = this.width
+    const height = this.height
+    const canvas = new OffscreenCanvas(width, height)
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      createImageBitmap(imageData).then(imageBitmap => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(imageBitmap, 0, 0)
+
+        this.texture = new Texture(gl)
+        this.texture.texImage2D(canvas)
+      })
+    }
   }
 
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {

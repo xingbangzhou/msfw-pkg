@@ -5,7 +5,11 @@ import AbstractDrawer from './AbstractDrawer'
 
 const alignMap: CanvasTextAlign[] = ['left', 'center', 'right', 'left', 'left', 'left', 'left', 'left']
 
-function drawHorizText(ctx: CanvasRenderingContext2D, text: string, textDocAttr: LayerTextProps['textDocAttr']) {
+function drawHorizText(
+  ctx: OffscreenCanvasRenderingContext2D,
+  text: string,
+  textDocAttr: LayerTextProps['textDocAttr'],
+) {
   // 设置字体
   ctx.font = `${textDocAttr.fontSize || 24}px ${textDocAttr.fontFamily || 'Arial'}`
 
@@ -27,7 +31,11 @@ function drawHorizText(ctx: CanvasRenderingContext2D, text: string, textDocAttr:
   ctx.fillText(text, width * 0.5, height * 0.5)
 }
 
-function drawVertiText(ctx: CanvasRenderingContext2D, text: string, textDocAttr: LayerTextProps['textDocAttr']) {
+function drawVertiText(
+  ctx: OffscreenCanvasRenderingContext2D,
+  text: string,
+  textDocAttr: LayerTextProps['textDocAttr'],
+) {
   // 设置字体
   ctx.font = `${textDocAttr.fontSize || 24}px ${textDocAttr.fontFamily || 'Arial'}`
   const metrics = ctx.measureText('国')
@@ -61,7 +69,8 @@ export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
   }
 
   async init(gl: ThisWebGLContext) {
-    let canvas: HTMLCanvasElement | null = document.createElement('canvas')
+    // let canvas: HTMLCanvasElement | null = document.createElement('canvas')
+    const canvas = new OffscreenCanvas(0, 0)
     let ctx = canvas.getContext('2d')
     if (ctx && this.props.textDocAttr) {
       const textDocAttr = this.props.textDocAttr
@@ -103,7 +112,6 @@ export default class TextDrawer extends AbstractDrawer<LayerTextProps> {
     }
     // 清理
     ctx = null
-    canvas = null
   }
 
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {

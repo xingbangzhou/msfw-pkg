@@ -9,7 +9,6 @@ import {
   LayerType,
   LayerVectorProps,
   LayerVideoProps,
-  PreComposition,
   TrackMatteType,
 } from '../types'
 import AbstractDrawer from './AbstractDrawer'
@@ -189,8 +188,8 @@ export default class Layer {
 
 export function createLayer(props: LayerProps, playData: PlayData) {
   const {id, type, ...other} = props
-  if (type === PreComposition) {
-    const compProps = playData.getLayerByComps(id)
+  if (type === LayerType.PreComposition) {
+    const compProps = playData.getCompLayer(id)
     if (!compProps) return undefined
     props = {...compProps, ...other}
   }
