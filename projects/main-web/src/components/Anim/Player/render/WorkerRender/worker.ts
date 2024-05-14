@@ -4,12 +4,10 @@ import {ThisWebGLContext} from '../../base/webgl/types'
 import Layer, {createLayer} from '../../layers/Layer'
 import {setSimpleProgram} from '../../layers/setPrograms'
 import PlayData from '../../PlayData'
-import {LayerProps, LayerType, PlayProps, PlayState} from '../../types'
+import {LayerProps, PlayProps, PlayState} from '../../types'
 import {WorkerFunctionMap} from './types'
 
-class WorkerRender_ {
-  static helpCanvas: OffscreenCanvas
-
+class WorkerRenderProxy {
   constructor(id: number, canvas: OffscreenCanvas) {
     this.id = id
     this._canvas = canvas
@@ -49,11 +47,6 @@ class WorkerRender_ {
     this.requestAnim = this.requestAnimFunc()
   }
 
-  resize(width: number, height: number) {
-    this._canvas.width = width
-    this._canvas.height = height
-  }
-
   play() {
     if (this._playState === PlayState.None) {
       this._playState = PlayState.Play
@@ -80,6 +73,11 @@ class WorkerRender_ {
     this._framebuffer = undefined
     this._attribBuffer?.destroy()
     this._attribBuffer = undefined
+  }
+
+  resizeCanvasToDisplaySize(width: number, height: number, multiplier?: number) {
+    this._canvas.width = width
+    this._canvas.height = height
   }
 
   protected render = () => {
@@ -187,41 +185,52 @@ class WorkerRender_ {
 }
 
 // 全局对象管理
-const renderInstances: Record<number, WorkerRender_> = {}
+const mapRenderProxys: Record<number, WorkerRenderProxy> = {}
 
 const workerFnHandlers: Record<keyof WorkerFunctionMap, (params: any) => void> = {
   instance: ({id, canvas}: {id: number; canvas: OffscreenCanvas}) => {
-    renderInstances[id] = new WorkerRender_(id, canvas)
+    mapRenderProxys[id] = new WorkerRenderProxy(id, canvas)
   },
 
   load: ({id, props}: {id: number; props: PlayProps}) => {
-    const renderInst = renderInstances[id]
-    renderInst?.load(props)
+    const renderProxy = mapRenderProxys[id]
+    renderProxy?.load(props)
   },
 
-  resize: ({id, width, height}: {id: number; width: number; height: number}) => {
-    const renderInst = renderInstances[id]
-    renderInst?.resize(width, height)
+  resizeCanvasToDisplaySize: ({
+    id,
+    width,
+    height,
+    multiplier,
+  }: {
+    id: number
+    width: number
+    height: number
+    multiplier?: number
+  }) => {
+    const renderProxy = mapRenderProxys[id]
+    renderProxy?.resizeCanvasToDisplaySize(width, height, multiplier)
   },
 
   play: ({id}: {id: number}) => {
-    const renderInst = renderInstances[id]
-    renderInst?.play()
+    const renderProxy = mapRenderProxys[id]
+    renderProxy?.play()
   },
 
   replay: ({id}: {id: number}) => {
-    const renderInst = renderInstances[id]
-    renderInst?.replay()
+    const renderProxy = mapRenderProxys[id]
+    renderProxy?.replay()
   },
 
   stop: ({id}: {id: number}) => {
-    const renderInst = renderInstances[id]
-    renderInst?.stop()
+    const renderProxy = mapRenderProxys[id]
+    renderProxy?.stop()
   },
 
   destroy: ({id}: {id: number}) => {
-    const renderInst = renderInstances[id]
-    renderInst?.destroy()
+    const renderProxy = mapRenderProxys[id]
+    renderProxy?.destroy()
+    delete mapRenderProxys[id]
   },
 }
 

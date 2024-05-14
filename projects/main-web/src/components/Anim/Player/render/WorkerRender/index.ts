@@ -10,68 +10,66 @@ function invokeWorkerFn<F extends keyof WorkerFunctionMap>(
   worker.postMessage({fn: fn, params}, transfer || [])
 }
 
-let lastInstanceId = 0
+let lastObjId = 0
 
 export default class WorkerRender {
-  private static _worker?: Worker
-  protected static worker() {
-    if (!this._worker) {
-      this._worker = new Worker(new URL('./worker.ts', import.meta.url))
-    }
-    return this._worker
-  }
+  private static worker_?: Worker
 
   constructor(container: HTMLElement) {
-    this.worker = WorkerRender.worker()
-
-    lastInstanceId++
-    if (lastInstanceId >= 2100000000) {
-      lastInstanceId = 0
+    lastObjId++
+    if (lastObjId >= 2100000000) {
+      lastObjId = 0
     }
-    this._instanceId = lastInstanceId
-    console.log('create WorkerRender: ', this._instanceId)
+    this._id = lastObjId
 
     this._canvas = document.createElement('canvas')
     container.appendChild(this._canvas)
-
     const offscreenCanvas = this._canvas.transferControlToOffscreen()
 
-    invokeWorkerFn(this.worker, 'instance', {id: this._instanceId, canvas: offscreenCanvas}, [offscreenCanvas])
+    invokeWorkerFn(this.worker, 'instance', {id: this._id, canvas: offscreenCanvas}, [offscreenCanvas])
   }
 
-  protected worker: Worker
-  private _instanceId: number
+  private _id: number
   private _canvas?: HTMLCanvasElement
 
-  load(props: PlayProps) {
-    invokeWorkerFn(this.worker, 'load', {id: this._instanceId, props})
-
-    this.resize()
+  protected get worker() {
+    if (!WorkerRender.worker_) {
+      WorkerRender.worker_ = new Worker(new URL('./worker.ts', import.meta.url))
+    }
+    return WorkerRender.worker_
   }
 
-  resize() {
-    const canvas = this._canvas
-    if (!canvas) return
-    const width = canvas.clientWidth | 0
-    const height = canvas.clientHeight | 0
+  load(props: PlayProps) {
+    invokeWorkerFn(this.worker, 'load', {id: this._id, props})
 
-    invokeWorkerFn(this.worker, 'resize', {id: this._instanceId, width, height})
+    this.resizeCanvasToDisplaySize()
   }
 
   play() {
-    invokeWorkerFn(this.worker, 'play', {id: this._instanceId})
+    invokeWorkerFn(this.worker, 'play', {id: this._id})
   }
 
   replay() {
-    invokeWorkerFn(this.worker, 'replay', {id: this._instanceId})
+    invokeWorkerFn(this.worker, 'replay', {id: this._id})
   }
 
   stop() {
-    invokeWorkerFn(this.worker, 'stop', {id: this._instanceId})
+    invokeWorkerFn(this.worker, 'stop', {id: this._id})
+  }
+
+  resizeCanvasToDisplaySize(multiplier?: number) {
+    const canvas = this._canvas
+    if (!canvas) return
+
+    multiplier = multiplier || 1
+    const width = (canvas.clientWidth * multiplier) | 0
+    const height = (canvas.clientHeight * multiplier) | 0
+
+    invokeWorkerFn(this.worker, 'resizeCanvasToDisplaySize', {id: this._id, width, height})
   }
 
   destroy() {
-    invokeWorkerFn(this.worker, 'destroy', {id: this._instanceId})
+    invokeWorkerFn(this.worker, 'destroy', {id: this._id})
 
     this._canvas?.parentNode?.removeChild(this._canvas)
     this._canvas = undefined

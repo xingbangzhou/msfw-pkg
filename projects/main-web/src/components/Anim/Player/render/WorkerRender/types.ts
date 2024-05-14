@@ -4,9 +4,9 @@ import {PlayProps} from '../../types'
 export class WorkerFunctionMap {
   instance: {id: number; canvas: OffscreenCanvas} = null as any
   load: {id: number; props: PlayProps} = null as any
-  resize: {id: number; width: number; height: number} = null as any
   play: {id: number} = null as any
   replay: {id: number} = null as any
   stop: {id: number} = null as any
   destroy: {id: number} = null as any
+  resizeCanvasToDisplaySize: {id: number; width: number; height: number} = null as any
 }

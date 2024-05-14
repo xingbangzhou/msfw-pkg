@@ -7,18 +7,6 @@ import {setSimpleProgram} from '../layers/setPrograms'
 import {drawSimpleTexture} from '../base/primitives'
 import AttribBuffer from '../base/webgl/AttribBuffer'
 
-function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement, multiplier?: number) {
-  multiplier = multiplier || 1
-  const width = (canvas.clientWidth * multiplier) | 0
-  const height = (canvas.clientHeight * multiplier) | 0
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width
-    canvas.height = height
-    return true
-  }
-  return false
-}
-
 export default class WebGLRender {
   constructor(container: HTMLElement) {
     const canvas = (this._canvas = document.createElement('canvas'))
@@ -33,8 +21,8 @@ export default class WebGLRender {
   private _canvas?: HTMLCanvasElement
   private _gl?: ThisWebGLContext
 
-  private _playState = PlayState.None
   private _playData: PlayData
+  private _playState = PlayState.None
   protected frameAnimId: any
   protected requestAnim?: (cb: () => void) => any
 
@@ -57,7 +45,7 @@ export default class WebGLRender {
     canvas.width = width
     canvas.height = height
 
-    resizeCanvasToDisplaySize(canvas)
+    this.resizeCanvasToDisplaySize()
 
     this._camera = m4.perspectiveCamera(width, height)
 
@@ -82,6 +70,32 @@ export default class WebGLRender {
   stop() {
     this.cancelRequestAnimation()
     this._playState = PlayState.None
+  }
+
+  resizeCanvasToDisplaySize(multiplier?: number) {
+    const canvas = this._canvas
+    if (!canvas) return
+    multiplier = multiplier || 1
+    const width = (canvas.clientWidth * multiplier) | 0
+    const height = (canvas.clientHeight * multiplier) | 0
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width
+      canvas.height = height
+    }
+  }
+
+  destroy() {
+    this.cancelRequestAnimation()
+    this._playState = PlayState.None
+
+    this.clearLayers()
+    this._framebuffer?.destory()
+    this._framebuffer = undefined
+    this._attribBuffer?.destroy()
+    this._attribBuffer = undefined
+
+    this._canvas?.parentNode?.removeChild(this._canvas)
+    this._canvas = undefined
   }
 
   protected render = () => {
@@ -151,20 +165,6 @@ export default class WebGLRender {
     drawSimpleTexture(attribBuffer)
 
     gl.bindTexture(gl.TEXTURE_2D, null)
-  }
-
-  destroy() {
-    this.cancelRequestAnimation()
-    this._playState = PlayState.None
-
-    this.clearLayers()
-    this._framebuffer?.destory()
-    this._framebuffer = undefined
-    this._attribBuffer?.destroy()
-    this._attribBuffer = undefined
-
-    this._canvas?.parentNode?.removeChild(this._canvas)
-    this._canvas = undefined
   }
 
   private async resetLayers(gl: ThisWebGLContext, playData: PlayData, layerPropsList: LayerProps[]) {

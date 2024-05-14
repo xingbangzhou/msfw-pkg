@@ -43,17 +43,19 @@ export default class ImageDrawer extends AbstractDrawer<LayerImageProps> {
     // this.texture = new Texture(gl)
     // this.texture.texImage2D(image)
     const imageData = await loadImageData(this.url)
-    const width = this.width
-    const height = this.height
-    const canvas = new OffscreenCanvas(width, height)
-    const ctx = canvas.getContext('2d')
-    if (ctx) {
+    if (imageData) {
       createImageBitmap(imageData).then(imageBitmap => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(imageBitmap, 0, 0)
+        const width = this.width
+        const height = this.height
+        const canvas = new OffscreenCanvas(width, height)
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(imageBitmap, 0, 0)
 
-        this.texture = new Texture(gl)
-        this.texture.texImage2D(canvas)
+          this.texture = new Texture(gl)
+          this.texture.texImage2D(canvas)
+        }
       })
     }
   }
