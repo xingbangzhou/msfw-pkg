@@ -10,3 +10,5 @@ export class WorkerFunctionMap {
   destroy: {id: number} = null as any
   resizeCanvasToDisplaySize: {id: number; width: number; height: number} = null as any
 }
+
+export class WorkerMessageMap {}

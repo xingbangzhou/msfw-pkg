@@ -3,7 +3,7 @@ import AttribBuffer from '../../base/webgl/AttribBuffer'
 import {ThisWebGLContext} from '../../base/webgl/types'
 import Layer, {createLayer} from '../../layers/Layer'
 import {setSimpleProgram} from '../../layers/setPrograms'
-import PlayData from '../../PlayData'
+import PlayData from '../../PlayStore'
 import {LayerProps, PlayProps, PlayState} from '../../types'
 import {WorkerFunctionMap} from './types'
 
@@ -90,9 +90,8 @@ class WorkerRenderProxy {
       }
     }
 
-    this.render0()
-
     this.frameAnimId = this.requestAnim?.(this.render)
+    this.render0()
   }
 
   private render0() {

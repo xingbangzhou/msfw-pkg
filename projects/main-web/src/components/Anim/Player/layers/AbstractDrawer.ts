@@ -1,17 +1,17 @@
-import PlayData from '../PlayData'
+import PlayStore from '../PlayStore'
 import {ThisWebGLContext, degToRad, m4} from '../base'
 import {Transform3D} from '../base/transforms'
 import AttribBuffer from '../base/webgl/AttribBuffer'
 import {BlendMode, FrameInfo, LayerProps, TrackMatteType} from '../types'
 
 export default abstract class AbstractDrawer<Props extends LayerProps> {
-  constructor(props: Props, playData: PlayData) {
-    this.playData = playData
+  constructor(props: Props, playStore: PlayStore) {
+    this.playStore = playStore
     this.props = props
     this.transform = new Transform3D(props.transform)
   }
 
-  readonly playData: PlayData
+  readonly playStore: PlayStore
   readonly props: Props
   readonly transform: Transform3D
 

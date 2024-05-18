@@ -1,11 +1,17 @@
-import MP4Demuxer, {MP4DemuxConfig} from '../demuxer/MP4Demuxer'
-import {ThisWebGLContext} from '../webgl'
+import MP4Demuxer, {MP4DemuxConfig} from './MP4Demuxer'
+
+function compareNs(lhs: number, rhs: number) {
+  const diff = lhs - rhs
+  if (diff > 999) return 1
+  if (diff < -999) return -1
+  return 0
+}
 
 export default class MP4Decoder {
   constructor(uri: string) {
     this.decoder = new VideoDecoder({
       output: videoFrame => {
-        if (videoFrame.timestamp - this.currentTime >= 0) {
+        if (videoFrame.timestamp - this.seekTime >= 0) {
           this.videoFrames = this.videoFrames || []
           this.videoFrames.push(videoFrame)
         } else {
@@ -28,7 +34,7 @@ export default class MP4Decoder {
   private demuxer: MP4Demuxer
   private config?: MP4DemuxConfig
   private chunksList?: EncodedVideoChunk[][]
-  private currentTime = 0
+  private seekTime = 0
   private videoFrames?: VideoFrame[]
 
   // 获取当前视频帧
@@ -47,11 +53,11 @@ export default class MP4Decoder {
 
   // time: ms
   seek(time: number) {
-    const lastTime = this.currentTime
-    this.currentTime = time * 1000
-    if (this.currentTime >= lastTime) {
+    const lastTime = this.seekTime
+    this.seekTime = time * 1000
+    if (this.seekTime >= lastTime) {
       this.videoFrames = this.videoFrames?.filter(el => {
-        if (el.timestamp >= this.currentTime) return true
+        if (compareNs(el.timestamp, this.seekTime) === 1) return true
         el.close()
       })
     } else if (this.config) {
@@ -66,12 +72,12 @@ export default class MP4Decoder {
         const l = this.chunksList?.length
         for (; i < l; i++) {
           const chunks = this.chunksList[i]
-          if (chunks[0].timestamp - this.currentTime > 0) break
+          if (compareNs(chunks[0].timestamp, this.seekTime) === 1) break
         }
         if (i >= this.chunksList.length) {
           i = this.chunksList.length - 1
         }
-        if (this.chunksList[i][0].timestamp - this.currentTime >= 1000) {
+        if (compareNs(this.chunksList[i][0].timestamp, this.seekTime) === 1) {
           i = Math.max(i - 1, 0)
         }
         for (; i < l; i++) {

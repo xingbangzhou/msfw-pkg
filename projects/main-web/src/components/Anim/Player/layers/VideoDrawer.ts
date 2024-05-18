@@ -20,23 +20,25 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
   async draw(gl: ThisWebGLContext, matrix: m4.Mat4, frameInfo: FrameInfo) {
     if (!this.texture || !this.decoder) return
 
-    const time = (frameInfo.frameId - this.inFrame) * this.playData.frameTime
+    const time = (frameInfo.frameId - this.inFrame) * this.playStore.frameTime
     this.decoder.seek(time)
     const videoFrame = this.decoder.videoFrame
     if (videoFrame) {
       this.texture.texImage2D(videoFrame)
-      gl.activeTexture(gl.TEXTURE0)
-      this.texture.bind()
-      gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
-      gl.uniform1i(gl.uniforms.isAlpha, this.props.isAlpha ? 1 : 0)
-
-      const width = this.width
-      const height = this.height
-      drawVideo(this.getAttribBuffer(gl), width, height, this.props.isAlpha)
-
-      gl.bindTexture(gl.TEXTURE_2D, null)
-      gl.uniform1i(gl.uniforms.isAlpha, 0)
     }
+    this.decoder.next()
+
+    gl.activeTexture(gl.TEXTURE0)
+    this.texture.bind()
+    gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
+    gl.uniform1i(gl.uniforms.isAlpha, this.props.isAlpha ? 1 : 0)
+
+    const width = this.width
+    const height = this.height
+    drawVideo(this.getAttribBuffer(gl), width, height, this.props.isAlpha)
+
+    gl.bindTexture(gl.TEXTURE_2D, null)
+    gl.uniform1i(gl.uniforms.isAlpha, 0)
   }
 
   destroy(gl?: ThisWebGLContext | undefined) {

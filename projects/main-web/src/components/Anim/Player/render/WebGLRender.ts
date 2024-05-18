@@ -1,7 +1,7 @@
 import {LayerProps, PlayProps, PlayState} from '../types'
 import * as m4 from '../base/m4'
 import Layer, {createLayer} from '../layers/Layer'
-import PlayData from '../PlayData'
+import PlayStore from '../PlayStore'
 import {Framebuffer, ThisWebGLContext} from '../base/webgl'
 import {setSimpleProgram} from '../layers/setPrograms'
 import {drawSimpleTexture} from '../base/primitives'
@@ -15,13 +15,13 @@ export default class WebGLRender {
     if (!this._gl) {
       console.error(`WebGLRender, getContext('webgl') is null`)
     }
-    this._playData = new PlayData()
+    this._playStore = new PlayStore()
   }
 
   private _canvas?: HTMLCanvasElement
   private _gl?: ThisWebGLContext
 
-  private _playData: PlayData
+  private _playStore: PlayStore
   private _playState = PlayState.None
   protected frameAnimId: any
   protected requestAnim?: (cb: () => void) => any
@@ -36,11 +36,11 @@ export default class WebGLRender {
     const gl = this._gl
     if (!canvas || !gl) return
 
-    const playData = this._playData
-    playData.setProps(props)
+    const playStore = this._playStore
+    playStore.setProps(props)
 
-    const width = playData.width
-    const height = playData.height
+    const width = playStore.width
+    const height = playStore.height
 
     canvas.width = width
     canvas.height = height
@@ -49,8 +49,8 @@ export default class WebGLRender {
 
     this._camera = m4.perspectiveCamera(width, height)
 
-    const layerPropsList = playData.rootLayers
-    this.resetLayers(gl, playData, layerPropsList || [])
+    const layerPropsList = playStore.rootLayers
+    this.resetLayers(gl, playStore, layerPropsList || [])
 
     this.requestAnim = this.requestAnimFunc()
   }
@@ -99,12 +99,12 @@ export default class WebGLRender {
   }
 
   protected render = () => {
-    if (this._playData.frameId === -1) {
-      this._playData.frameId = 0
+    if (this._playStore.frameId === -1) {
+      this._playStore.frameId = 0
     } else {
-      this._playData.frameId = this._playData.frameId + 1
-      if (this._playData.frameId >= this._playData.frames) {
-        this._playData.frameId = 0
+      this._playStore.frameId = this._playStore.frameId + 1
+      if (this._playStore.frameId >= this._playStore.frames) {
+        this._playStore.frameId = 0
       }
     }
 
@@ -116,9 +116,9 @@ export default class WebGLRender {
   private async render0() {
     const gl = this._gl
     if (!gl) return
-    const playData = this._playData
+    const playStore = this._playStore
 
-    const {frames, frameId, width, height} = playData
+    const {frames, frameId, width, height} = playStore
 
     const framebuffer = this._framebuffer || new Framebuffer(gl)
     this._framebuffer = framebuffer
@@ -167,7 +167,7 @@ export default class WebGLRender {
     gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
-  private async resetLayers(gl: ThisWebGLContext, playData: PlayData, layerPropsList: LayerProps[]) {
+  private async resetLayers(gl: ThisWebGLContext, playStore: PlayStore, layerPropsList: LayerProps[]) {
     this._rootLayers?.forEach(layer => layer.destroy(gl))
     this._rootLayers = []
 
@@ -176,7 +176,7 @@ export default class WebGLRender {
       // 遮罩过滤
       if (props.isTrackMatte) continue
       // 创建图层
-      const layer = createLayer(props, playData)
+      const layer = createLayer(props, playStore)
       if (!layer) continue
       this._rootLayers.push(layer)
       await layer.init(gl, layerPropsList)
@@ -192,7 +192,7 @@ export default class WebGLRender {
 
   private requestAnimFunc = () => {
     return (cb: () => void) => {
-      return setTimeout(cb, this._playData.frameTime)
+      return setTimeout(cb, this._playStore.frameTime)
     }
   }
 

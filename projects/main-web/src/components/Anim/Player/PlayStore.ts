@@ -1,6 +1,6 @@
 import {PlayProps} from './types'
 
-export default class PlayData {
+export default class PlayStore {
   constructor() {}
 
   private _props?: PlayProps
@@ -14,7 +14,7 @@ export default class PlayData {
     this._props = value
     this._frameRate = value.frameRate || 30
     this._frames = (value.duration || 0) * value.frameRate
-    this._frameTime = +(1000 / this._frameRate).toFixed(4).slice(0, -1)
+    this._frameTime = +(1000 / this._frameRate).toFixed(3).slice(0, -1)
   }
 
   get frames() {

@@ -23,13 +23,13 @@ export default class ShapeDrawer extends AbstractDrawer<LayerShapeProps> {
         let layer: Layer | null = null
         const props = {...element, inFrame, outFrame}
         if (element.type === LayerType.Rect) {
-          layer = new Layer(new RectDrawer(props as LayerRectProps, this.playData))
+          layer = new Layer(new RectDrawer(props as LayerRectProps, this.playStore))
         } else if (element.type === LayerType.Ellipse) {
-          layer = new Layer(new EllipseDrawer(props as LayerEllipseProps, this.playData))
+          layer = new Layer(new EllipseDrawer(props as LayerEllipseProps, this.playStore))
         } else if (element.type === LayerType.Path) {
           props.width = width
           props.height = height
-          layer = new Layer(new PathDrawer(props as LayerPathProps, this.playData))
+          layer = new Layer(new PathDrawer(props as LayerPathProps, this.playStore))
         }
         if (layer) {
           await layer.init(gl)

@@ -1,4 +1,4 @@
-import PlayData from '../PlayData'
+import PlayStore from '../PlayStore'
 import {drawSimpleTexture, drawTexture, Framebuffer, m4, ThisWebGLContext} from '../base'
 import {
   FrameInfo,
@@ -62,7 +62,7 @@ export default class Layer {
     if (trackMatteType != TrackMatteType.None && trackId && parentLayers) {
       const trackProps = parentLayers.find(el => el.id == trackId)
       if (trackProps) {
-        this._maskLayer = createLayer(trackProps, this.drawer.playData)
+        this._maskLayer = createLayer(trackProps, this.drawer.playStore)
       }
     }
     // 初始化
@@ -186,10 +186,10 @@ export default class Layer {
   }
 }
 
-export function createLayer(props: LayerProps, playData: PlayData) {
+export function createLayer(props: LayerProps, playStore: PlayStore) {
   const {id, type, ...other} = props
   if (type === LayerType.PreComposition) {
-    const compProps = playData.getCompLayer(id)
+    const compProps = playStore.getCompLayer(id)
     if (!compProps) return undefined
     props = {...compProps, ...other}
   }
@@ -197,15 +197,15 @@ export function createLayer(props: LayerProps, playData: PlayData) {
   const curType = props.type
   switch (curType) {
     case LayerType.Image:
-      return new Layer(new ImageDrawer(props as LayerImageProps, playData))
+      return new Layer(new ImageDrawer(props as LayerImageProps, playStore))
     case LayerType.Video:
-      return new Layer(new VideoDrawer(props as LayerVideoProps, playData))
+      return new Layer(new VideoDrawer(props as LayerVideoProps, playStore))
     case LayerType.Text:
-      return new Layer(new TextDrawer(props as LayerTextProps, playData))
+      return new Layer(new TextDrawer(props as LayerTextProps, playStore))
     case LayerType.Vector:
-      return new Layer(new VectorDrawer(props as LayerVectorProps, playData))
+      return new Layer(new VectorDrawer(props as LayerVectorProps, playStore))
     case LayerType.ShapeLayer:
-      return new Layer(new ShapeDrawer(props as LayerShapeProps, playData))
+      return new Layer(new ShapeDrawer(props as LayerShapeProps, playStore))
   }
 
   return undefined

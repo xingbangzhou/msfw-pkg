@@ -1,4 +1,4 @@
-import PlayContext from '../PlayData'
+import PlayContext from '../PlayStore'
 import {ThisWebGLContext} from '../base'
 import {LayerRectProps} from '../types'
 import ElementDrawer from './ElementDrawer'
