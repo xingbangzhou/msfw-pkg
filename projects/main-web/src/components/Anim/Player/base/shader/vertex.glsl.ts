@@ -4,7 +4,6 @@ in vec4 a_position;  // 接受顶点坐标
 in vec2 a_texcoord;  // 接受纹理坐标
 
 uniform mat4 u_matrix;  // 顶点矩阵
-uniform mat4 u_texMatrix; // 纹理矩阵
 
 out vec2 v_texcoord;
 

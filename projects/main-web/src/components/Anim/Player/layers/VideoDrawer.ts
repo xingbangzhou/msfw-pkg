@@ -4,8 +4,45 @@ import Texture from '../base/webgl/Texture'
 import {FrameInfo, LayerVideoProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
+function getTexcoord(srcW: number, srcH: number, dstW: number, dstH: number, alPha?: boolean, fillMode?: number) {
+  let lx = 0
+  let ly = 0
+  let rx = alPha ? 0.5 : 1.0
+  let ry = 1.0
+  srcW = alPha ? srcW * 0.5 : srcW
+  // 长边对齐
+  if (fillMode === 1) {
+    const dr = srcH ? srcW / srcH : 0
+    const isLead = dstW / dstH < dr
+    const tw = isLead ? dstW : dstH * dr
+    const th = !isLead ? dstH : dstW / dr
+    lx = (dstW - tw) * 0.5
+    ly = (dstH - th) * 0.5
+    lx = -lx / tw
+    ly = -ly / th
+    rx = rx - lx
+    ry = ry - ly
+  } else if (fillMode === 2) {
+    // 短边对齐
+    const dr = srcW / srcH
+    const isLead = dstW / dstH < dr
+    const tw = !isLead ? dstW : dstH * dr
+    const th = isLead ? dstH : dstW / dr
+    lx = (dstW - tw) * 0.5
+    ly = (dstH - th) * 0.5
+    lx = -lx / tw
+    ly = -ly / th
+    rx = rx - lx
+    ry = ry - ly
+  }
+
+  return {lx, ly, rx, ry}
+}
+
 export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
   private texture?: Texture
+  private videoWidth = 0
+  private videoHeigt = 0
   private decoder?: MP4Decoder
 
   get url() {
@@ -25,6 +62,8 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
     const videoFrame = this.decoder.videoFrame
     if (videoFrame) {
       this.texture.texImage2D(videoFrame)
+      this.videoWidth = videoFrame.codedWidth
+      this.videoHeigt = videoFrame.codedHeight
     }
     this.decoder.next()
 
@@ -35,7 +74,18 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
 
     const width = this.width
     const height = this.height
-    drawVideo(this.getAttribBuffer(gl), width, height, this.props.isAlpha)
+    const texcoord = getTexcoord(
+      this.videoWidth,
+      this.videoHeigt,
+      width,
+      height,
+      this.props.isAlpha,
+      this.props.fillMode,
+    )
+    if (this.props.isAlpha) {
+      console.log('fffffff', texcoord, this.url, this.videoWidth, this.videoHeigt, this.props.fillMode)
+    }
+    drawVideo(this.getAttribBuffer(gl), width, height, texcoord)
 
     gl.bindTexture(gl.TEXTURE_2D, null)
     gl.uniform1i(gl.uniforms.isAlpha, 0)

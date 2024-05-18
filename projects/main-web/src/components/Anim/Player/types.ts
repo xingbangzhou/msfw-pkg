@@ -110,6 +110,7 @@ export type LayerImageProps = {
 export type LayerVideoProps = {
   content: string
   isAlpha?: boolean
+  fillMode?: number
 } & LayerBaseProps
 
 export type LayerTextProps = {

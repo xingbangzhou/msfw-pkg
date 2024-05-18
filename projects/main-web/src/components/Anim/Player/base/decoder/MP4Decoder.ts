@@ -62,7 +62,9 @@ export default class MP4Decoder {
       })
     } else if (this.config) {
       // 定位到之前
-      this.decoder.reset()
+      if (this.decoder.state !== 'closed' && this.decoder.state !== 'unconfigured') {
+        this.decoder.reset()
+      }
       this.decoder.configure(this.config)
       this.videoFrames = this.videoFrames?.filter(el => el.close())
       this.videoFrames = []

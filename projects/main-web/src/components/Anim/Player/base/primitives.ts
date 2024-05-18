@@ -36,15 +36,20 @@ export function drawTexture(attribBuffer: AttribBuffer, w: number, h: number, fl
 }
 
 // 绘制视频纹理
-export function drawVideo(attribBuffer: AttribBuffer, w: number, h: number, isAlpha?: boolean) {
+export function drawVideo(
+  attribBuffer: AttribBuffer,
+  w: number,
+  h: number,
+  texcoord: {lx: number; ly: number; rx: number; ry: number},
+) {
   setRectangle(attribBuffer, 0, 0, w, h)
 
   const gl = attribBuffer.gl as ThisWebGLContext
 
-  const tx1 = 0
-  const ty1 = 0
-  const tx2 = isAlpha ? 0.5 : 1
-  const ty2 = 1
+  const tx1 = texcoord.lx
+  const ty1 = texcoord.ly
+  const tx2 = texcoord.rx
+  const ty2 = texcoord.ry
   attribBuffer.setArribInfo(gl.attribs.texcoord, {
     data: [tx1, ty1, tx2, ty1, tx1, ty2, tx1, ty2, tx2, ty1, tx2, ty2],
   })

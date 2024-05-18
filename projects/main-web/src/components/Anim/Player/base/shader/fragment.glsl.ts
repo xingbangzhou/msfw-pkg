@@ -13,6 +13,9 @@ uniform int u_isAlpha;
 out vec4 fragColor;
 
 void main(void) {
+  if (v_texcoord.x < 0.0 || v_texcoord.x > 1.0 || v_texcoord.y < 0.0 || v_texcoord.y > 1.0) {
+    discard;
+  }
   vec4 texColor = texture(u_texture, v_texcoord);
   texColor.a = texColor.a * u_opacity;
 
