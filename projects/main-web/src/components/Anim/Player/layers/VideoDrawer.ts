@@ -4,12 +4,13 @@ import Texture from '../base/webgl/Texture'
 import {FrameInfo, LayerVideoProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
-function getTexcoord(srcW: number, srcH: number, dstW: number, dstH: number, alPha?: boolean, fillMode?: number) {
+function getTexcoord(texW: number, texH: number, dstW: number, dstH: number, alPha?: boolean, fillMode?: number) {
   let lx = 0
   let ly = 0
   let rx = alPha ? 0.5 : 1.0
   let ry = 1.0
-  srcW = alPha ? srcW * 0.5 : srcW
+  const srcW = alPha ? texW * 0.5 : texW
+  const srcH = texH
   // 长边对齐
   if (fillMode === 1) {
     const dr = srcH ? srcW / srcH : 0
@@ -18,7 +19,7 @@ function getTexcoord(srcW: number, srcH: number, dstW: number, dstH: number, alP
     const th = !isLead ? dstH : dstW / dr
     lx = (dstW - tw) * 0.5
     ly = (dstH - th) * 0.5
-    lx = -lx / tw
+    lx = -lx / texW
     ly = -ly / th
     rx = rx - lx
     ry = ry - ly
@@ -30,7 +31,7 @@ function getTexcoord(srcW: number, srcH: number, dstW: number, dstH: number, alP
     const th = isLead ? dstH : dstW / dr
     lx = (dstW - tw) * 0.5
     ly = (dstH - th) * 0.5
-    lx = -lx / tw
+    lx = -lx / texW
     ly = -ly / th
     rx = rx - lx
     ry = ry - ly
@@ -82,9 +83,6 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
       this.props.isAlpha,
       this.props.fillMode,
     )
-    if (this.props.isAlpha) {
-      console.log('fffffff', texcoord, this.url, this.videoWidth, this.videoHeigt, this.props.fillMode)
-    }
     drawVideo(this.getAttribBuffer(gl), width, height, texcoord)
 
     gl.bindTexture(gl.TEXTURE_2D, null)

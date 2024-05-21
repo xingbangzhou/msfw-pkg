@@ -9,12 +9,16 @@ uniform sampler2D u_dstTexture;
 
 out vec4 fragColor;
 
+vec3 screen(vec3 dst, vec3 src) {
+  return 1.0 - (1.0 - dst) * (1.0 - src);
+}
+
 void main(void) {
   vec4 src = texture(u_texture, v_texcoord);
   vec4 dst = texture(u_dstTexture, v_texcoord);
 
-  float noSrc = step(src.a, 0.001);
+  vec4 blendColor = vec4(screen(dst.rgb, src.rgb), dst.a);
 
-  fragColor = noSrc*dst + (1.0-noSrc)*(1.0-(1.0-dst)*(1.0-src));
+  fragColor = mix(dst, blendColor, step(0.001, src.a));
 }
 `

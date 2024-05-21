@@ -9,13 +9,20 @@ uniform sampler2D u_dstTexture;
 
 out vec4 fragColor;
 
+vec3 overlay(vec3 dst, vec3 src) {
+  return mix(
+      2.0 * dst * src,
+      1.0 - 2.0 * (1.0 - dst) * (1.0 - src),
+      step(0.5, dst)
+  );
+}
+
 void main(void) {
   vec4 src = texture(u_texture, v_texcoord);
   vec4 dst = texture(u_dstTexture, v_texcoord);
 
-  float noSrc = step(src.a, 0.001);
-  vec4 flag = step(dst, vec4(0.5, 0.5, 0.5, 0.5));
+  vec4 blendColor = vec4(overlay(dst.rgb, src.rgb), dst.a);
 
-  fragColor = noSrc*dst + (1.0-noSrc)*(flag*dst*src*2.0 + (1.0-flag)*(1.0-(1.0-dst)*(1.0-src)*2.0));
+  fragColor = mix(dst, blendColor, step(0.001, src.a));
 }
 `
