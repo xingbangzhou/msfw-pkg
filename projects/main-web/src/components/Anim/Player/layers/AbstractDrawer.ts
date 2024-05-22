@@ -65,8 +65,10 @@ export default abstract class AbstractDrawer<Props extends LayerProps> {
 
     if (!anchorPoint || !position) return null
 
+    // 位移
     const [x, y, z] = position
     let matrix = m4.translation(x, -y, -z)
+    // 朝向
     if (rotation[0]) {
       matrix = m4.xRotate(matrix, degToRad(rotation[0]))
     }
@@ -76,7 +78,6 @@ export default abstract class AbstractDrawer<Props extends LayerProps> {
     if (rotation[2]) {
       matrix = m4.zRotate(matrix, degToRad(360 - rotation[2]))
     }
-    // orientation
     if (orientation[0]) {
       matrix = m4.xRotate(matrix, degToRad(orientation[0]))
     }
@@ -86,7 +87,7 @@ export default abstract class AbstractDrawer<Props extends LayerProps> {
     if (orientation[2]) {
       matrix = m4.zRotate(matrix, degToRad(360 - orientation[2]))
     }
-    // scale
+    // 旋转
     if (scale) {
       matrix = m4.scale(matrix, (scale[0] || 100) * 0.01, (scale[1] || 100) * 0.01, (scale[2] || 100) * 0.01)
     }

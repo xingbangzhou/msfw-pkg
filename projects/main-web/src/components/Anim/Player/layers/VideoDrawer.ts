@@ -1,22 +1,25 @@
-import {ThisWebGLContext, drawVideo, m4} from '../base'
+import {ThisWebGLContext, drawLineRect, drawVideo, m4} from '../base'
 import MP4Decoder from '../base/decoder/MP4Decoder'
 import Texture from '../base/webgl/Texture'
 import {FrameInfo, LayerVideoProps} from '../types'
 import AbstractDrawer from './AbstractDrawer'
 
-function getTexcoord(texW: number, texH: number, dstW: number, dstH: number, alPha?: boolean, fillMode?: number) {
+function getFillCoord(texW: number, texH: number, dstW: number, dstH: number, alPha?: boolean, fillMode?: number) {
   let lx = 0
   let ly = 0
   let rx = alPha ? 0.5 : 1.0
   let ry = 1.0
+  let sw = 1.0
+  let sh = 1.0
+
   const srcW = alPha ? texW * 0.5 : texW
   const srcH = texH
-  // 长边对齐
   if (fillMode === 1) {
-    const dr = srcH ? srcW / srcH : 0
-    const isLead = dstW / dstH < dr
-    const tw = isLead ? dstW : dstH * dr
-    const th = !isLead ? dstH : dstW / dr
+    const srcWhr = srcW / srcH
+    const dstWhr = dstW / dstH
+    const isLead = dstWhr < srcWhr
+    const tw = isLead ? dstH * srcWhr : dstW
+    const th = isLead ? dstH : dstW / srcWhr
     lx = (dstW - tw) * 0.5
     ly = (dstH - th) * 0.5
     lx = -lx / texW
@@ -24,20 +27,18 @@ function getTexcoord(texW: number, texH: number, dstW: number, dstH: number, alP
     rx = rx - lx
     ry = ry - ly
   } else if (fillMode === 2) {
-    // 短边对齐
-    const dr = srcW / srcH
-    const isLead = dstW / dstH < dr
-    const tw = !isLead ? dstW : dstH * dr
-    const th = isLead ? dstH : dstW / dr
-    lx = (dstW - tw) * 0.5
-    ly = (dstH - th) * 0.5
-    lx = -lx / texW
-    ly = -ly / th
-    rx = rx - lx
-    ry = ry - ly
+    // 默认拉伸
+  } else {
+    const srcWhr = srcW / srcH
+    const dstWhr = dstW / dstH
+    const isLead = dstWhr < srcWhr
+    const tw = isLead ? dstW : dstH * srcWhr
+    const th = isLead ? dstW / srcWhr : dstH
+    sw = tw / dstW
+    sh = th / dstH
   }
 
-  return {lx, ly, rx, ry}
+  return {lx, ly, rx, ry, sw, sh}
 }
 
 export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
@@ -70,12 +71,10 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
 
     gl.activeTexture(gl.TEXTURE0)
     this.texture.bind()
-    gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
-    gl.uniform1i(gl.uniforms.isAlpha, this.props.isAlpha ? 1 : 0)
 
     const width = this.width
     const height = this.height
-    const texcoord = getTexcoord(
+    const {lx, ly, rx, ry, sw, sh} = getFillCoord(
       this.videoWidth,
       this.videoHeigt,
       width,
@@ -83,7 +82,13 @@ export default class VideoDrawer extends AbstractDrawer<LayerVideoProps> {
       this.props.isAlpha,
       this.props.fillMode,
     )
-    drawVideo(this.getAttribBuffer(gl), width, height, texcoord)
+
+    matrix = m4.translate(matrix, this.width * (1 - sw) * 0.5, -this.height * (1 - sh) * 0.5, 0)
+    matrix = m4.scale(matrix, sw, sh, 1.0)
+    gl.uniformMatrix4fv(gl.uniforms.matrix, false, matrix)
+    gl.uniform1i(gl.uniforms.isAlpha, this.props.isAlpha ? 1 : 0)
+
+    drawVideo(this.getAttribBuffer(gl), width, height, {lx, ly, rx, ry})
 
     gl.bindTexture(gl.TEXTURE_2D, null)
     gl.uniform1i(gl.uniforms.isAlpha, 0)

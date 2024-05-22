@@ -3,7 +3,7 @@ import AttribBuffer from '../../base/webgl/AttribBuffer'
 import {ThisWebGLContext} from '../../base/webgl/types'
 import Layer, {createLayer} from '../../layers/Layer'
 import {setSimpleProgram} from '../../layers/setPrograms'
-import PlayData from '../../PlayStore'
+import PlayStore from '../../PlayStore'
 import {LayerProps, PlayProps, PlayState} from '../../types'
 import {WorkerFunctionMap} from './types'
 
@@ -15,7 +15,7 @@ class WorkerRenderProxy {
     if (!this._gl) {
       console.error(`WebGLRender, getContext('webgl') is null`)
     }
-    this._playData = new PlayData()
+    this._playStore = new PlayStore()
   }
 
   readonly id: number
@@ -23,9 +23,8 @@ class WorkerRenderProxy {
   private _gl?: ThisWebGLContext
 
   private _playState = PlayState.None
-  private _playData: PlayData
-  protected frameAnimId: any
-  protected requestAnim?: (cb: () => void) => any
+  private _playStore: PlayStore
+  private _frameAnimId: any
 
   private _camera = m4.identity()
   private _framebuffer?: Framebuffer
@@ -33,18 +32,16 @@ class WorkerRenderProxy {
   private _rootLayers?: Layer[]
 
   load(props: PlayProps) {
-    const playData = this._playData
-    playData.setProps(props)
+    const playStore = this._playStore
+    playStore.setProps(props)
 
-    const width = playData.width
-    const height = playData.height
+    const width = playStore.width
+    const height = playStore.height
 
     this._camera = m4.perspectiveCamera(width, height)
 
-    const layerPropsList = playData.rootLayers
-    this.resetLayers(this._gl as ThisWebGLContext, playData, layerPropsList || [])
-
-    this.requestAnim = this.requestAnimFunc()
+    const layerPropsList = playStore.rootLayers
+    this.resetLayers(this._gl as ThisWebGLContext, playStore, layerPropsList || [])
   }
 
   play() {
@@ -60,13 +57,13 @@ class WorkerRenderProxy {
   }
 
   stop() {
-    this.cancelRequestAnimation()
+    clearInterval(this._frameAnimId)
+    this._frameAnimId = undefined
     this._playState = PlayState.None
   }
 
   destroy() {
-    this.cancelRequestAnimation()
-    this._playState = PlayState.None
+    this.stop()
 
     this.clearLayers()
     this._framebuffer?.destory()
@@ -81,24 +78,28 @@ class WorkerRenderProxy {
   }
 
   protected render = () => {
-    if (this._playData.frameId === -1) {
-      this._playData.frameId = 0
-    } else {
-      this._playData.frameId = this._playData.frameId + 1
-      if (this._playData.frameId >= this._playData.frames) {
-        this._playData.frameId = 0
-      }
+    if (this._frameAnimId) {
+      clearInterval(this._frameAnimId)
+      this._frameAnimId = undefined
     }
 
-    this.frameAnimId = this.requestAnim?.(this.render)
+    this._frameAnimId = setInterval(this.render0, this._playStore.frameTime)
+
     this.render0()
   }
 
-  private render0() {
+  private render0 = () => {
+    const {frames, width, height} = this._playStore
+    let frameId = this._playStore.frameId
+
+    frameId = frameId + 1
+    if (frameId >= frames) {
+      frameId = 0
+    }
+    this._playStore.frameId = frameId
+
     const gl = this._gl
     if (!gl) return
-
-    const {frames, frameId, width, height} = this._playData
 
     const framebuffer = this._framebuffer || new Framebuffer(gl)
     this._framebuffer = framebuffer
@@ -147,7 +148,7 @@ class WorkerRenderProxy {
     gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
-  private async resetLayers(gl: ThisWebGLContext, playData: PlayData, layerPropsList: LayerProps[]) {
+  private async resetLayers(gl: ThisWebGLContext, playStore: PlayStore, layerPropsList: LayerProps[]) {
     this.clearLayers()
     this._rootLayers = []
 
@@ -156,7 +157,7 @@ class WorkerRenderProxy {
       // 遮罩过滤
       if (props.isTrackMatte) continue
       // 创建图层
-      const layer = createLayer(props, playData)
+      const layer = createLayer(props, playStore)
       if (!layer) continue
       this._rootLayers.push(layer)
       await layer.init(gl, layerPropsList)
@@ -168,18 +169,6 @@ class WorkerRenderProxy {
 
     this._rootLayers?.forEach(layer => layer.destroy(_gl))
     this._rootLayers = undefined
-  }
-
-  private requestAnimFunc = () => {
-    return (cb: () => void) => {
-      return setTimeout(cb, this._playData.frameTime)
-    }
-  }
-
-  private cancelRequestAnimation() {
-    if (!this.frameAnimId) return
-    clearTimeout(this.frameAnimId)
-    this.frameAnimId = null
   }
 }
 

@@ -1,7 +1,7 @@
 import {Framebuffer} from './base/webgl'
 
 export enum LayerType {
-  // 应用其他图层
+  // 预合成组件
   PreComposition = 'precomposition',
   // 图层
   Image = 'image',
