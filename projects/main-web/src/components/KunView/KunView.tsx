@@ -1,10 +1,10 @@
-import {MxFramework, MxModule} from '@mfx-js/framework'
+import {MfxFramework, MfxModule} from '@mfx-js/framework'
 import {uniformUrl} from 'src/utils/urlFns'
 import {loadMicroApp, MicroApp} from 'qiankun'
 import {CSSProperties, memo, useEffect, useMemo, useRef} from 'react'
 
 interface KunViewProps {
-  mxFw: MxFramework
+  mxFw: MfxFramework
   name?: string
   url?: string
   className?: string
@@ -16,7 +16,7 @@ const KunView = memo(function KunView(props: KunViewProps) {
   const {mxFw, name, url, className, style, ...other} = props
   const rootRef = useRef<HTMLDivElement>(null)
   const microApp = useRef<MicroApp>()
-  const mxModule = useRef<MxModule>()
+  const mxModule = useRef<MfxModule>()
 
   const entry = useMemo(() => {
     if (!url) return undefined

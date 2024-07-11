@@ -1,13 +1,13 @@
 import {CSSProperties, memo, useCallback, useEffect, useMemo, useRef} from 'react'
 import {uniformUrl} from 'src/utils/urlFns'
-import {MxFramework, MxModuleContext} from '@mfx-js/framework'
+import {MfxFramework, MfxModuleContext} from '@mfx-js/framework'
 
 interface FrameViewProps {
-  mxFw: MxFramework
+  mxFw: MfxFramework
   url?: string
   className?: string
   style?: CSSProperties
-  onLoaded?: (ctx?: MxModuleContext) => void
+  onLoaded?: (ctx?: MfxModuleContext) => void
 }
 
 const FrameView = memo(function FrameView(props: FrameViewProps) {
