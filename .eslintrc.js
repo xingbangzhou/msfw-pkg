@@ -1,4 +1,4 @@
 module.exports = {
   root: true,
-  extends: ['@mfx-js/eslint-config-react'],
+  extends: ['@msfw/eslint-config'],
 }

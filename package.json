@@ -1,8 +1,8 @@
 {
-  "name": "mfx-apps",
+  "name": "msfw-chain",
   "version": "1.0.0",
-  "description": "MFX apps",
-  "repository": "https://github.com/xingbangzhou/mfx-apps.git",
+  "description": "MSFW Chain",
+  "repository": "https://github.com/xingbangzhou/msfw-chain.git",
   "author": "zhouxingbang <zhouxingbang92@163.com>",
   "license": "MIT",
   "private": true,
@@ -20,9 +20,23 @@
     "pnpm": ">=7"
   },
   "devDependencies": {
+    "@babel/cli": "^7.25.6",
+    "@babel/core": "^7.25.2",
+    "@babel/node": "^7.25.0",
+    "@babel/plugin-transform-runtime": "^7.25.4",
+    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-react": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
     "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "^18.4.3",
-    "@mfx-js/eslint-config-react": "^1.1.0",
-    "husky": "^8.0.3"
+    "@msfw/eslint-config": "^1.0.0",
+    "@types/node": "^22.5.1",
+    "cross-env": "^7.0.3",
+    "fast-glob": "^3.3.2",
+    "fs-extra": "^11.2.0",
+    "husky": "^9.1.5",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.2",
+    "yargs": "^17.7.2"
   }
 }
