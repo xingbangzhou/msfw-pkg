@@ -1,5 +1,5 @@
-import {RGB} from './Color'
 import * as MathUtils from './MathUtils'
+import Matrix4 from './Matrix4'
 
 export default class Vector3 {
   constructor(x = 0, y = 0, z = 0) {
@@ -342,16 +342,28 @@ export default class Vector3 {
     return Math.abs(this.x - v.x) + Math.abs(this.y - v.y) + Math.abs(this.z - v.z)
   }
 
-  setFromColor(c: RGB) {
-    this.x = c.r
-    this.y = c.g
-    this.z = c.b
-
-    return this
+  setFromMatrixColumn(m: Matrix4, index: number) {
+    return this.fromArray(m.elements, index * 4)
   }
 
   equals(v: Vector3) {
     return v.x === this.x && v.y === this.y && v.z === this.z
+  }
+
+  fromArray(array: number[], offset = 0) {
+    this.x = array[offset]
+    this.y = array[offset + 1]
+    this.z = array[offset + 2]
+
+    return this
+  }
+
+  toArray(array: number[] = [], offset = 0) {
+    array[offset] = this.x
+    array[offset + 1] = this.y
+    array[offset + 2] = this.z
+
+    return array
   }
 
   random() {
