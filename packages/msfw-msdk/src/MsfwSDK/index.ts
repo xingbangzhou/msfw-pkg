@@ -1,6 +1,6 @@
 import {MsfwContextFuncs} from '@msfw/utils/types'
 import MsfwExContext from 'src/ExContext'
-import MsfwIFrameContext from 'src/ExContext/IFrameContext'
+import MsfwIFrameContext from 'src/ExContext/FrameContext'
 
 export default class MsfwSDK {
   constructor() {}

@@ -1,6 +1,6 @@
-import MsfwContext from './'
+import MsfwContext from '.'
 
-export default class MsfwIFrameContext extends MsfwContext {
+export default class MsfwFrameContext extends MsfwContext {
   constructor() {
     super()
 
@@ -9,14 +9,14 @@ export default class MsfwIFrameContext extends MsfwContext {
     this.imReady()
   }
 
-  private static instance_?: MsfwIFrameContext
+  private static instance_?: MsfwFrameContext
 
   static instance() {
-    if (!this.instance_) {
-      MsfwIFrameContext.instance_ = new MsfwIFrameContext()
+    if (!MsfwFrameContext.instance_) {
+      MsfwFrameContext.instance_ = new MsfwFrameContext()
     }
 
-    return MsfwIFrameContext.instance_ as MsfwIFrameContext
+    return MsfwFrameContext.instance_
   }
 
   protected postMessage(cmd: string, ...args: any[]) {
@@ -34,7 +34,7 @@ export default class MsfwIFrameContext extends MsfwContext {
         this.onCommand(cmd, ...args)
       }
     } catch (error) {
-      console.error('MsfwIFrameContext', 'onMessage, error: ', error)
+      console.error('MsfwFrameContext', 'onMessage, error: ', error)
     }
   }
 }

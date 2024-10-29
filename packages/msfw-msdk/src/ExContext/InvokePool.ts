@@ -32,7 +32,7 @@ export default class InvokePool {
       if (!this.mapBlockProms) this.mapBlockProms = {}
       this.mapBlockProms[id] = {resolve, reject, time: new Date().getTime(), args}
       if (!this.overTimerId) {
-        this.overTimerId = window.setInterval(this.onTimeCheck, this.overMs)
+        this.overTimerId = window.setInterval(this.onIntervalCheck, this.overMs)
       }
     })
 
@@ -58,7 +58,7 @@ export default class InvokePool {
     return `${this.lastTime}#${this.lastIdx}`
   }
 
-  private onTimeCheck = () => {
+  private onIntervalCheck = () => {
     const curTime = new Date().getTime()
     let count = 0
     for (const id in this.mapBlockProms) {
