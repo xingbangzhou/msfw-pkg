@@ -1,4 +1,4 @@
-# @msfw/msdk
+# @msfw/sdk
 
 
 ## Installation

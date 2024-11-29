@@ -70,21 +70,7 @@ importers:
         version: 1.0.0
       '@msfw/utils':
         specifier: workspace:^
-        version: link:../msfw-utils/dist
-
-  packages/msfw-framework/dist:
-    dependencies:
-      '@msfw/utils':
-        specifier: '>=1.0.0'
-        version: link:../../msfw-utils/dist
-
-  packages/msfw-framework/dist/Framework: {}
-
-  packages/msfw-framework/dist/Module: {}
-
-  packages/msfw-framework/dist/types: {}
-
-  packages/msfw-framework/dist/utils: {}
+        version: link:../msfw-utils
 
   packages/msfw-lib3d:
     devDependencies:
@@ -92,46 +78,20 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
 
-  packages/msfw-msdk:
+  packages/msfw-sdk:
     devDependencies:
       '@msfw/tsconfig':
         specifier: ^1.0.0
         version: 1.0.0
       '@msfw/utils':
         specifier: workspace:^
-        version: link:../msfw-utils/dist
-
-  packages/msfw-msdk/dist:
-    dependencies:
-      '@msfw/utils':
-        specifier: '>=1.0.0'
-        version: link:../../msfw-utils/dist
-
-  packages/msfw-msdk/dist/ExContext: {}
-
-  packages/msfw-msdk/dist/MsfwSDK: {}
+        version: link:../msfw-utils
 
   packages/msfw-utils:
     devDependencies:
       '@msfw/tsconfig':
         specifier: ^1.0.0
         version: 1.0.0
-
-  packages/msfw-utils/dist: {}
-
-  packages/msfw-utils/dist/EventEmitter: {}
-
-  packages/msfw-utils/dist/EventService: {}
-
-  packages/msfw-utils/dist/Logger: {}
-
-  packages/msfw-utils/dist/codecs: {}
-
-  packages/msfw-utils/dist/constants: {}
-
-  packages/msfw-utils/dist/shims: {}
-
-  packages/msfw-utils/dist/types: {}
 
   projects/main:
     dependencies:
@@ -140,10 +100,10 @@ importers:
         version: 7.25.6
       '@msfw/framework':
         specifier: workspace:^
-        version: link:../../packages/msfw-framework/dist
+        version: link:../../packages/msfw-framework
       '@msfw/utils':
         specifier: workspace:^
-        version: link:../../packages/msfw-utils/dist
+        version: link:../../packages/msfw-utils
       react:
         specifier: ^18.3.1
         version: 18.3.1
